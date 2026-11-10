@@ -1,0 +1,51 @@
+name: Signal engineering measurements
+
+on:
+  pull_request:
+    paths:
+      - "api/**"
+      - "benchmarks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/engineering-measurements.yml"
+  push:
+    branches: [main]
+    paths:
+      - "api/**"
+      - "benchmarks/**"
+      - "package.json"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/engineering-measurements.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  runtime-dispatch-benchmark:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+          cache-dependency-path: pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build:library
+      - name: Measure runtime event dispatch
+        run: node benchmarks/runtime-dispatch.mjs --iterations 3000 --runs 3 --concurrency 1,16,64 --output benchmark-results/runtime-dispatch.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
+      - uses: actions/upload-artifact@v4
+        with:
+          name: signal-engineering-measurements-${{ github.sha }}
+          path: benchmark-results/runtime-dispatch.json
+          if-no-files-found: error
+          retention-days: 90

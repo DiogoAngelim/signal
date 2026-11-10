@@ -1,0 +1,56 @@
+# Signal engineering measurements
+
+This document defines the executable measurement inventory and the boundary
+between measurements that can run in CI and those that require a representative
+deployment or external operator-controlled infrastructure.
+
+## Automated in CI
+
+| Area | Measurement | Method | Evidence artifact |
+|---|---|---|---|
+| Runtime dispatch | p50/p95/p99 latency, throughput, CPU time, heap/RSS deltas | Three repeated runs across 256 B, 4 KiB, and 64 KiB payloads at concurrency 1/16/64 | `signal-engineering-measurements-<sha>` |
+| Correctness | Failed-handler retry, concurrent duplicate coalescing, successful dedupe | Dispatcher regression tests | Vitest results |
+| HTTP identity | Spoofed body claims rejected; trusted resolver identity reaches authorization hook | Fastify integration tests | Vitest results |
+| Architecture | Dependency-rule violations | `pnpm arch:check` | CI logs |
+| Build and type safety | Workspace package builds and TypeScript checks | Existing core workflow | CI logs |
+| Database resilience | Transaction, network fault, crash/recovery, fencing tests | Existing PostgreSQL-backed integration suite | CI logs |
+
+## Measurement interpretation
+
+The dispatch benchmark includes envelope creation and one in-process subscriber.
+It does not measure HTTP overhead, PostgreSQL contention, broker delivery,
+network latency, multiple replicas, or production resource limits. Compare
+results only across equivalent runner hardware, Node versions, build modes,
+and workload configurations. The CI runner is a repeatable regression
+environment, not a production capacity oracle.
+
+The benchmark reports every run independently. Use medians and tail percentiles
+from the raw report; do not infer stable performance from a single run. Heap
+and RSS deltas are end-to-end deltas for the run, not peak-memory measurements.
+
+## Required but not yet operationally measurable in repository CI
+
+These require a concrete deployment, representative traffic, or operator-owned
+infrastructure and must remain explicitly unvalidated until evidence exists:
+
+- HTTP request latency and throughput under realistic payloads and authentication middleware.
+- PostgreSQL query latency, lock waits, pool saturation, transaction duration,
+  and outbox throughput at production-like data volume.
+- Broker delivery lag, queue age, redelivery amplification, and backlog drain
+  across real broker deployments.
+- Multi-process and multi-region scaling, failover, and network partition cost.
+- Sustained memory/CPU behavior and leak trends over hours or days.
+- Cost per 1,000 successful operations on the target hosting and database plans.
+- Availability, SLO attainment, alert quality, restore time, and recovery point.
+- Independent developer time-to-first-proof and support burden.
+
+Do not substitute synthetic numbers for these measurements. The release owner
+must attach dated reports, workload descriptions, environment details, and
+raw outputs when the relevant infrastructure becomes available.
+
+## Baseline policy
+
+A missing artifact is **Not measured**, not zero and not a pass. CI benchmark
+results must be archived by commit SHA. Performance regressions should be
+reviewed against a rolling baseline on the same runner class; initial reports
+establish the baseline rather than imposing invented universal thresholds.
