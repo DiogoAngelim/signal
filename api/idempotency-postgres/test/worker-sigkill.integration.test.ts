@@ -89,6 +89,11 @@ integration("real worker process SIGKILL boundary", () => {
       events: [envelope],
     });
 
+    await admin.query(
+      "UPDATE signal_outbox SET available_at = now() - interval '100 years' WHERE message_id = $1",
+      [messageId],
+    );
+
     const childScript = `
       const { Pool } = require(process.env.SIGNAL_PG_MODULE_PATH);
       const { randomUUID } = require("node:crypto");
@@ -193,7 +198,7 @@ integration("real worker process SIGKILL boundary", () => {
     const recoveryWorkerId = `worker-recovered-${suffix}`;
     const recovered = await store.claimBatch({
       workerId: recoveryWorkerId,
-      limit: 100,
+      limit: 1,
       leaseMs: 30_000,
     });
     const recoveryEvent = recovered.find((item) => item.envelope.messageId === messageId);
