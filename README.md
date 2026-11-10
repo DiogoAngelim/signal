@@ -223,7 +223,7 @@ pnpm verify:exports
 - [Constitution](docs/constitution.md) — Signal's correctness rules and change principles
 - [Quality and Assurance Standard](docs/quality-assurance.md) — invariants, determinism, evidence, statistical claims, security, and release validation
 - [Engineering and Architecture Score](docs/engineering-score-system.md) — weighted engineering scorecard, evidence levels, benchmarks, score caps, and assessment governance
-- [Developer Documentation](docs/README.md) — full developer-oriented source of truth
+- [Developer Documentation](docs/README.md) — full developer-oriented source of truth\n- [Production SLO and Alerting](docs/operations/slo-and-alerting.md) — deployment SLIs, SLOs, alerting, and incident runbooks\n- [Audit Ledger Operations](docs/security/audit-ledger-operations.md) — append-only PostgreSQL audit storage and checkpoint trust boundaries\n- [Developer Adoption Validation](docs/developer-adoption-validation.md) — independent first-use measurement protocol
 
 ## Example App Links
 
