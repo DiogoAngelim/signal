@@ -508,18 +508,6 @@ export class SignalRuntime implements SignalBinding {
             normalizedRequest,
           );
 
-          this.emitObservation({
-            event: "event.emitted",
-            operationName: input.name,
-            operationKind: "event",
-            messageId: envelope.messageId,
-            correlationId: normalizedRequest.correlationId,
-            traceId: normalizedRequest.traceId,
-            durationMs: Date.now() - startedAt,
-            outcome: "completed",
-            isReplay: this.isReplay,
-          });
-
           return {
             ok: true,
             data: envelope as TData,
@@ -553,13 +541,6 @@ export class SignalRuntime implements SignalBinding {
                   "Event publish failed",
                 );
 
-          this.emitExecutionFailure(
-            input.name,
-            "event",
-            startedAt,
-            normalizedRequest,
-            failure.code,
-          );
           return toExecuteFailure(failure);
         }
       }
@@ -575,31 +556,82 @@ export class SignalRuntime implements SignalBinding {
     }
   }
 
-  publish<TPayload>(
+  async publish<TPayload>(
     name: string,
     payload: TPayload,
     request: Partial<SignalExecutionContext["request"]> = {},
   ): Promise<SignalEnvelope<TPayload>> {
-    return dispatchEvent(
-      this.registry,
-      this.eventPort,
-      name,
-      payload,
-      createDefaultContext({
+    const startedAt = Date.now();
+    this.emitObservation({
+      event: "execution.start",
+      operationName: name,
+      operationKind: "event",
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      isReplay: this.isReplay,
+    });
+
+    try {
+      const envelope = await dispatchEvent(
+        this.registry,
+        this.eventPort,
+        name,
+        payload,
+        createDefaultContext({
+          correlationId: request.correlationId,
+          causationId: request.causationId,
+          traceId: request.traceId,
+          trace: request.trace,
+          idempotencyKey: request.idempotencyKey,
+          deadlineAt: request.deadlineAt,
+          abortSignal: request.abortSignal,
+          delivery: request.delivery,
+          source: request.source,
+          auth: request.auth,
+          meta: request.meta,
+        }),
+        request.meta,
+      );
+      const durationMs = Math.max(0, Date.now() - startedAt);
+      this.emitObservation({
+        event: "execution.end",
+        operationName: name,
+        operationKind: "event",
+        messageId: envelope.messageId,
         correlationId: request.correlationId,
-        causationId: request.causationId,
         traceId: request.traceId,
-        trace: request.trace,
-        idempotencyKey: request.idempotencyKey,
-        deadlineAt: request.deadlineAt,
-        abortSignal: request.abortSignal,
-        delivery: request.delivery,
-        source: request.source,
-        auth: request.auth,
-        meta: request.meta,
-      }),
-      request.meta,
-    );
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
+      this.emitObservation({
+        event: "event.emitted",
+        operationName: name,
+        operationKind: "event",
+        messageId: envelope.messageId,
+        correlationId: request.correlationId,
+        traceId: request.traceId,
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
+      return envelope;
+    } catch (error) {
+      const failure =
+        error instanceof ZodError
+          ? toSignalFailure(
+              {
+                code: "VALIDATION_ERROR",
+                message: error.message,
+                details: { issues: error.issues },
+              },
+              "VALIDATION_ERROR",
+              "Event payload validation failed",
+            )
+          : toSignalFailure(error, "INTERNAL_ERROR", "Event publish failed");
+      this.emitExecutionFailure(name, "event", startedAt, request, failure.code);
+      throw error;
+    }
   }
 
   capabilities(): SignalCapabilities {
