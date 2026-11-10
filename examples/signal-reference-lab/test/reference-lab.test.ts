@@ -6,7 +6,7 @@ import { compareBenchmarks } from "../src/comparison.js";
 
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
-  assert.equal(report.results.length, 15);
+  assert.equal(report.results.length, 16);
   assert.ok(report.results.every((item) => item.status === "passed" || (item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL)), JSON.stringify(report.results));
   const postgres = report.results.find((item) => item.id === "postgres-integration");
   assert.equal(postgres?.status, process.env.DATABASE_URL ? "passed" : "blocked");
