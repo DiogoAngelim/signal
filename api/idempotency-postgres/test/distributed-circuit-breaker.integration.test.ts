@@ -4,7 +4,6 @@ import { join } from "node:path";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { createPostgresCircuitBreakerPort } from "../src/circuit-breaker";
-import { createDistributedCircuitBreakerController } from "../../runtime/src/distributed-resilience";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
 const integration = describe.skipIf(!connectionString);
@@ -29,57 +28,51 @@ integration("PostgreSQL distributed circuit breaker", () => {
 
   it("coordinates concurrent processes and grants exactly one half-open probe", async () => {
     const key = "distributed-" + randomUUID();
-    const first = createDistributedCircuitBreakerController(portA, key, config);
-    const second = createDistributedCircuitBreakerController(portB, key, config);
-
-    expect(await first.tryAcquire()).toBe(true);
-    expect(await second.tryAcquire()).toBe(true);
-    expect(await first.recordFailure()).toBe(true);
-    expect(await second.recordFailure()).toBe(true);
-    expect((await first.snapshot())?.state).toBe("open");
+    expect((await portA.tryAcquire(key, config)).allowed).toBe(true);
+    expect((await portB.tryAcquire(key, config)).allowed).toBe(true);
+    expect(await portA.recordFailure(key, config)).toBe(true);
+    expect(await portB.recordFailure(key, config)).toBe(true);
+    expect((await portA.snapshot(key))?.state).toBe("open");
 
     const eligibleAt = new Date(Date.now() + config.resetTimeoutMs + 25);
     const permits = await Promise.all([
-      first.tryAcquire(eligibleAt),
-      second.tryAcquire(eligibleAt),
-      createDistributedCircuitBreakerController(portA, key, config).tryAcquire(eligibleAt),
-      createDistributedCircuitBreakerController(portB, key, config).tryAcquire(eligibleAt),
+      portA.tryAcquire(key, config, eligibleAt),
+      portB.tryAcquire(key, config, eligibleAt),
+      portA.tryAcquire(key, config, eligibleAt),
+      portB.tryAcquire(key, config, eligibleAt),
     ]);
-    expect(permits.filter(Boolean)).toHaveLength(1);
-    expect((await first.snapshot())?.state).toBe("half-open");
+    expect(permits.filter((permit) => permit.allowed)).toHaveLength(1);
+    expect((await portA.snapshot(key))?.state).toBe("half-open");
   });
 
   it("reclaims expired probe leases and rejects stale probe completions", async () => {
     const key = "fenced-" + randomUUID();
-    const first = createDistributedCircuitBreakerController(portA, key, config);
-    const second = createDistributedCircuitBreakerController(portB, key, config);
-
-    await first.tryAcquire();
-    await first.recordFailure();
-    await first.tryAcquire();
-    await first.recordFailure();
+    await portA.tryAcquire(key, config);
+    await portA.recordFailure(key, config);
+    await portA.tryAcquire(key, config);
+    await portA.recordFailure(key, config);
 
     const eligibleAt = new Date(Date.now() + config.resetTimeoutMs + 25);
-    expect(await first.tryAcquire(eligibleAt)).toBe(true);
+    const firstProbe = await portA.tryAcquire(key, config, eligibleAt);
+    expect(firstProbe.allowed).toBe(true);
     await setupPool.query(
       "UPDATE signal_circuit_breakers SET probe_expires_at = now() - interval '1 second' WHERE breaker_key = $1",
       [key],
     );
 
-    expect(await second.tryAcquire()).toBe(true);
-    expect(await first.recordSuccess()).toBe(false);
-    expect(await second.recordSuccess()).toBe(true);
-    expect((await second.snapshot())?.state).toBe("closed");
+    const secondProbe = await portB.tryAcquire(key, config);
+    expect(secondProbe.allowed).toBe(true);
+    expect(await portA.recordSuccess(key, firstProbe.probeToken)).toBe(false);
+    expect(await portB.recordSuccess(key, secondProbe.probeToken)).toBe(true);
+    expect((await portB.snapshot(key))?.state).toBe("closed");
   });
 
   it("rejects configuration drift between runtime instances", async () => {
     const key = "config-" + randomUUID();
-    const first = createDistributedCircuitBreakerController(portA, key, config);
-    await first.tryAcquire();
-    const incompatible = createDistributedCircuitBreakerController(portB, key, {
+    await portA.tryAcquire(key, config);
+    await expect(portB.tryAcquire(key, {
       ...config,
       threshold: config.threshold + 1,
-    });
-    await expect(incompatible.tryAcquire()).rejects.toThrow(/configuration differs/);
+    })).rejects.toThrow(/configuration differs/);
   });
 });
