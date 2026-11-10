@@ -384,6 +384,9 @@ importers:
       '@signal/decision-memory':
         specifier: workspace:*
         version: link:../../packages/decision-memory
+      '@signal/idempotency-postgres':
+        specifier: workspace:*
+        version: link:../../api/idempotency-postgres
       '@signal/sdk-node':
         specifier: workspace:*
         version: link:../../api/sdk-node
