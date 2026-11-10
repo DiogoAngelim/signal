@@ -8,6 +8,7 @@ const requestInput = z.object({ tenantId: z.string().min(1), title: z.string().m
 const evidenceInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), description: z.string().min(3), source: z.string().min(1), confidence: z.number().min(0).max(1), verified: z.boolean() });
 const decisionInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), actor: z.string().min(1), approve: z.boolean(), rationale: z.string().min(8) });
 const actionInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), actor: z.string().min(1), kind: z.string().min(1).max(120) });
+const actionInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), actor: z.string().min(1), kind: z.string().min(1), description: z.string().min(8) });
 const outcomeInput = z.object({ requestId: z.string().min(1), tenantId: z.string().min(1), result: z.enum(["success", "failure", "partial", "unknown"]), notes: z.string().max(2000) });
 
 export function createReferenceLab(options: { now?: () => Date } = {}) {
@@ -90,6 +91,19 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
       return { action: result };
     }
   };
+  const executeAction = {
+    name: "lab.action.execute.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Execute an explicitly approved case action exactly once.",
+    inputSchema: actionInput, resultSchema: z.object({ action: z.any() }),
+    async handler(input: z.infer<typeof actionInput>) {
+      const request = requireTenant(requests, input.requestId, input.tenantId);
+      if (!request.decision || request.decision.result !== "approved") throw new Error("An approved decision is required before action execution.");
+      if (request.action) return { action: structuredClone(request.action) };
+      const action: Action = { id: `action-${hash(`${request.id}:${input.kind}:${input.description}`)}`, kind: input.kind, description: input.description, actor: input.actor, status: "executed", executedAt: now().toISOString() };
+      request.action = action; request.status = "executed";
+      await publish("lab.action.executed.v1", request, { actionId: action.id, kind: action.kind, actor: action.actor });
+      return { action };
+    }
+  };
   const outcome = {
     name: "lab.outcome.record.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Record the observed outcome for a completed decision.",
     inputSchema: outcomeInput, resultSchema: z.object({ outcome: z.any() }),
@@ -125,6 +139,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     async addEvidence(input: z.infer<typeof evidenceInput>) { const result = await runtime.mutation<z.infer<typeof evidenceInput>, { evidence: Evidence; assessment: Assessment }>("lab.evidence.add.v1", input, { ...context("lab-ui"), idempotencyKey: `evidence:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result as { evidence: Evidence; assessment: Assessment }; },
     async decide(input: z.infer<typeof decisionInput>) { const result = await runtime.mutation<z.infer<typeof decisionInput>, { decision: Decision }>("lab.decision.record.v1", input, { ...context("lab-ui"), idempotencyKey: `decision:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.decision as Decision; },
     async executeAction(input: z.infer<typeof actionInput>) { const result = await runtime.mutation<z.infer<typeof actionInput>, { action: CaseAction }>("lab.action.execute.v1", input, { ...context("lab-ui"), idempotencyKey: `action:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.action as CaseAction; },
+    async executeAction(input: z.infer<typeof actionInput>) { const result = await runtime.mutation<z.infer<typeof actionInput>, { action: Action }>("lab.action.execute.v1", input, { ...context("lab-ui"), idempotencyKey: `action:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.action as Action; },
     async recordOutcome(input: z.infer<typeof outcomeInput>) { const result = await runtime.mutation<z.infer<typeof outcomeInput>, { outcome: Outcome }>("lab.outcome.record.v1", input, { ...context("lab-ui"), idempotencyKey: `outcome:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.outcome as Outcome; },
     async getRequest(requestId: string, tenantId: string) { const result = await runtime.query<{ requestId: string; tenantId: string }, { request: CaseRequest | null }>("lab.request.get.v1", { requestId, tenantId }, context("lab-ui")); if (!result.ok) throw new Error(result.error.message); return result.result.request as CaseRequest | null; }
   };
