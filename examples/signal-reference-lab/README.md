@@ -42,7 +42,6 @@ From the repository root:
 pnpm install
 npm ci --prefix signal-cli
 npm run build --prefix signal-cli
-npm run verify --prefix signal-cli
 export SIGNAL_CLI_READY=1
 pnpm --filter @signal/reference-lab build
 pnpm --filter @signal/reference-lab evaluate
@@ -94,7 +93,7 @@ Persist an evaluation/scorecard with `pnpm evaluate -- --out evaluation.json`; p
 | Prometheus metrics exposition and cardinality bounds | Partial: counters/histograms render with bounded series; external scrape and trace export remain unverified |
 | Local throughput/latency/RSS benchmark | Exercised; production load, distributed metrics/tracing export and soak remain unverified |
 | Kernel plugin pipeline, orchestration and replay | Exercised with the public `@signal/kernel` package |
-| Signal CLI verify, replay, test/build wrappers and audit | Exercised in CI against its checked-in phase chain; build/test wrappers use explicit no-op commands to test verification boundaries without changing application source |
+| Signal CLI verify, replay, test/build wrappers and audit | Exercised in CI against its checked-in phase chain; test/build wrappers use explicit no-op commands inside a temporary workspace, so checked-in Signal CLI state is not mutated |
 
 A capability is not credited merely because a package exists. Each status must be backed by a scenario and observable evidence. In-process delivery is not proof of durable delivery or exactly-once external effects. The inventory deliberately distinguishes exercised, partial and unverified capabilities rather than presenting simulated adapters as production integrations.
 
