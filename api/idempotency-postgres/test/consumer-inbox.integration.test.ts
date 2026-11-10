@@ -11,6 +11,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   const admin = new Pool({ connectionString, max: 2 });
   let first: ReturnType<typeof createPostgresConsumerInbox>;
   let second: ReturnType<typeof createPostgresConsumerInbox>;
+  const tenantId = "tenant-inbox-" + randomUUID();
   const consumerName = "inbox-test-" + randomUUID();
 
   beforeAll(async () => {
@@ -38,7 +39,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   afterAll(async () => {
     if (first) await first.close();
     if (second) await second.close();
-    await admin.query("DELETE FROM signal_consumer_inbox WHERE consumer_name = $1", [consumerName]);
+    await admin.query("DELETE FROM signal_consumer_inbox WHERE tenant_id = $1 AND consumer_name = $2", [tenantId, consumerName]);
     await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", [consumerName + ":%"]);
     await admin.end();
   });
@@ -54,9 +55,9 @@ integration("PostgreSQL transactional consumer inbox", () => {
       return { persisted: true };
     });
 
-    await expect(first.processOnce({ consumerName, messageId }, handler))
+    await expect(first.processOnce({ tenantId, consumerName, messageId }, handler))
       .resolves.toEqual({ status: "processed", result: { persisted: true } });
-    await expect(second.processOnce({ consumerName, messageId }, handler))
+    await expect(second.processOnce({ tenantId, consumerName, messageId }, handler))
       .resolves.toEqual({ status: "duplicate" });
     expect(handler).toHaveBeenCalledOnce();
 
@@ -70,7 +71,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   it("rolls back the inbox claim when the consumer transaction fails", async () => {
     const messageId = "rollback-" + randomUUID();
     const effectKey = consumerName + ":" + messageId;
-    await expect(first.processOnce({ consumerName, messageId }, async (transaction) => {
+    await expect(first.processOnce({ tenantId, consumerName, messageId }, async (transaction) => {
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
         [effectKey],
@@ -78,7 +79,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
       throw new Error("consumer transaction failed");
     })).rejects.toThrow("consumer transaction failed");
 
-    const recovered = await second.processOnce({ consumerName, messageId }, async (transaction) => {
+    const recovered = await second.processOnce({ tenantId, consumerName, messageId }, async (transaction) => {
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
         [effectKey],
