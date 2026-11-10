@@ -300,6 +300,22 @@ every measurement.
 - Authorization-before-handler verification.
 - Schema and protocol compatibility results.
 
+### HTTP abuse resistance
+- Requests admitted and rejected at the configured per-route threshold.
+- False-admission and false-rejection counts across a defined request burst.
+- p50/p95/p99 latency for admitted and rejected requests.
+- Rate-limit state cardinality and memory overhead under high-cardinality client keys.
+- Correctness of retry-after and rate-limit response headers.
+- Shared-store consistency and failover behavior when a distributed store is configured.
+
+### Distributed circuit-breaker coordination
+- Half-open probe grants per eligible cooldown cycle; the required invariant is exactly one.
+- Stale probe-token completion rejection after lease expiry and takeover.
+- Probe lease renewal success and expired-lease reclamation.
+- p50/p95/p99 acquisition latency and probe-cycle throughput across concurrent adapter instances.
+- Database contention, lock waits, pool saturation, and resource use under representative concurrency.
+- Coordination-store failure behavior: protected operations must not proceed when permit acquisition cannot be established.
+
 ### Reliability
 - Successful completion rate under defined fault profiles.
 - Recovery time and recovery point where persistence is involved.
