@@ -90,7 +90,8 @@ Do not label Signal production-certified until the following evidence exists:
 
 ## Current completion boundary
 
-Signal now provides process-local and PostgreSQL-coordinated retry budgets, versioned replay-evidence records,
+Signal now provides process-local and PostgreSQL-coordinated retry budgets, a
+transactional PostgreSQL consumer inbox, versioned replay-evidence records,
 immutable PostgreSQL replay persistence, deterministic replay validation,
 append-only PostgreSQL audit storage, signed checkpoint primitives, a bounded
 observability exporter, and queue-health metrics. The core packages and
@@ -107,7 +108,11 @@ custody, and independently administered trust registries remain deployment
 requirements. Replay capture is explicit: each consuming application must
 capture all decision-relevant external reads and retain compatible historical
 handler artifacts. The runtime does not automatically capture arbitrary
-external I/O. PostgreSQL retry budgets can coordinate replicas sharing one database and budget key; the adapter fails closed when the coordination store is unavailable. Cross-region coordination latency and availability remain deployment-specific.
+external I/O. PostgreSQL retry budgets can coordinate replicas sharing one database and
+budget key; the adapter fails closed when the coordination store is
+unavailable. Cross-region coordination latency and availability remain
+deployment-specific. The consumer inbox protects transactional PostgreSQL
+side effects, not arbitrary third-party calls.
 
 The RabbitMQ benchmark uses the ephemeral broker management API; it is not an
 application AMQP client benchmark or production broker certification. The new
