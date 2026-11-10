@@ -150,7 +150,7 @@ integration("real worker process SIGKILL boundary", () => {
       child.stdout.setEncoding("utf8");
       child.stdout.on("data", (chunk: string) => {
         stdout += chunk;
-        const line = stdout.split("\\n").find((value) => value.startsWith("PUBLISHED:"));
+        const line = stdout.split("\n").find((value) => value.startsWith("PUBLISHED:"));
         if (line) {
           clearTimeout(timeout);
           resolve(line);
