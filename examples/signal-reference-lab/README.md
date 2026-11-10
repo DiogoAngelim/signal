@@ -61,7 +61,7 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
 | PostgreSQL transactions, outbox/inbox, locking and crash recovery | Not verified |
 | HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |
-| Runtime-level authorization | Exercised with required auth context and operation policy |
+| Runtime-level authorization | Exercised with `requireMutationAuthorization` and operation-level scope policy |
 | Retry budgets and local circuit breakers | Exercised deterministically; distributed coordination and real provider failure remain unverified |
 | Replay evidence integrity | Partial; content-addressed record creation and verification tested, full replay executor not integrated |
 | Audit chains/checkpoints and tamper detection | Exercised for hash-chain verification and signed checkpoint anchoring; durable external ledger not configured |
