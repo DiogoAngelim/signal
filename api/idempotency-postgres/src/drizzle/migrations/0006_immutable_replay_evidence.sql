@@ -1,15 +1,26 @@
 CREATE TABLE IF NOT EXISTS signal_replay_evidence (
-  execution_id text PRIMARY KEY CHECK (length(trim(execution_id)) > 0),
+  tenant_id text NOT NULL CHECK (length(trim(tenant_id)) > 0),
+  execution_id text NOT NULL CHECK (length(trim(execution_id)) > 0),
   operation_name text NOT NULL CHECK (length(trim(operation_name)) > 0),
   operation_version text NOT NULL CHECK (length(trim(operation_version)) > 0),
   handler_artifact_digest char(64) NOT NULL CHECK (handler_artifact_digest ~ '^[a-f0-9]{64}$'),
   policy_version text NOT NULL CHECK (length(trim(policy_version)) > 0),
   record jsonb NOT NULL,
-  captured_at timestamptz NOT NULL
+  captured_at timestamptz NOT NULL,
+  PRIMARY KEY (tenant_id, execution_id)
 );
 
 CREATE INDEX IF NOT EXISTS signal_replay_evidence_operation
-  ON signal_replay_evidence (operation_name, operation_version, captured_at DESC);
+  ON signal_replay_evidence (tenant_id, operation_name, operation_version, captured_at DESC);
+
+ALTER TABLE signal_replay_evidence ENABLE ROW LEVEL SECURITY;
+ALTER TABLE signal_replay_evidence FORCE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS signal_replay_evidence_tenant_isolation ON signal_replay_evidence;
+CREATE POLICY signal_replay_evidence_tenant_isolation
+  ON signal_replay_evidence
+  USING (tenant_id = current_setting('signal.tenant_id', true))
+  WITH CHECK (tenant_id = current_setting('signal.tenant_id', true));
 
 CREATE OR REPLACE FUNCTION signal_reject_replay_evidence_mutation()
 RETURNS trigger
