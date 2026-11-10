@@ -3,6 +3,7 @@ import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { createReplayEvidenceRecord } from "../../runtime/src/replay-evidence";
+import { fingerprint } from "../../runtime/src/hash";
 import { createPostgresReplayEvidenceStore } from "../src/replay-evidence-store";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
@@ -53,6 +54,7 @@ integration("PostgreSQL immutable replay evidence store", () => {
     const conflicting = {
       ...record,
       result: { accepted: false },
+      resultFingerprint: fingerprint({ accepted: false }),
     };
     await expect(store.save(conflicting)).rejects.toThrow("different content");
 
