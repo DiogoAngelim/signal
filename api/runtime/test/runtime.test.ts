@@ -1208,4 +1208,102 @@ describe("runtime", () => {
       ),
     ).toThrow("Signal registry is locked");
   });
+
+  it("emits completion and error observations for failed query, mutation, and event executions", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      operationKind?: string;
+      outcome?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "observed.query.failure.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => {
+          throw new Error("query failure");
+        },
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "observed.mutation.failure.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => {
+          throw new Error("mutation failure");
+        },
+      }),
+    );
+    runtime.registerEvent(
+      defineEvent({
+        name: "observed.event.failure.v1",
+        kind: "event",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => {
+          throw new Error("event failure");
+        },
+      }),
+    );
+
+    const query = await runtime.query("observed.query.failure.v1", {});
+    const mutation = await runtime.mutation(
+      "observed.mutation.failure.v1",
+      {},
+      { idempotencyKey: "observed-failure-1" },
+    );
+    const event = await runtime.execute({
+      kind: "event",
+      name: "observed.event.failure.v1",
+      payload: {},
+    });
+
+    expect(query.ok).toBe(false);
+    expect(mutation.ok).toBe(false);
+    expect(event.ok).toBe(false);
+
+    for (const [operationName, operationKind] of [
+      ["observed.query.failure.v1", "query"],
+      ["observed.mutation.failure.v1", "mutation"],
+      ["observed.event.failure.v1", "event"],
+    ]) {
+      const completion = observations.find(
+        (item) =>
+          item.event === "execution.end" &&
+          item.operationName === operationName,
+      );
+      const failure = observations.find(
+        (item) =>
+          item.event === "error.occurred" &&
+          item.operationName === operationName,
+      );
+
+      expect(completion).toMatchObject({
+        operationKind,
+        outcome: "failed",
+      });
+      expect(completion?.durationMs).toEqual(expect.any(Number));
+      expect(completion?.durationMs).toBeGreaterThanOrEqual(0);
+      expect(failure).toMatchObject({
+        operationKind,
+        outcome: "failed",
+        meta: { errorCode: expect.any(String) },
+      });
+    }
+  });
 });
