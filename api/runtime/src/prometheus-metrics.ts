@@ -97,11 +97,11 @@ const GAUGES: Record<string, { name: string; help: string }> = {
     help: "Telemetry observations awaiting export.",
   },
   "signal.telemetry.dropped": {
-    name: "signal_telemetry_dropped_total",
+    name: "signal_telemetry_dropped",
     help: "Telemetry observations dropped before durable export.",
   },
   "signal.telemetry.export_failures": {
-    name: "signal_telemetry_export_failures_total",
+    name: "signal_telemetry_export_failures",
     help: "Telemetry export batch failures.",
   },
 };
@@ -192,13 +192,13 @@ export function createPrometheusMetricsRecorder(
     }
     const existing = family.get(key);
     if (existing) return existing;
-    if (series >= maxSeries) {
+    if (series + seriesWeight > maxSeries) {
       dropped += 1;
       return undefined;
     }
     const created = factory();
     family.set(key, created);
-    series += 1;
+    series += seriesWeight;
     return created;
   };
 
@@ -239,7 +239,7 @@ export function createPrometheusMetricsRecorder(
         bucketCounts: buckets.map(() => 0),
         count: 0,
         sum: 0,
-      }));
+      }), buckets.length + 3);
       if (!sample) return;
       sample.count += 1;
       sample.sum += durationMs / 1_000;
