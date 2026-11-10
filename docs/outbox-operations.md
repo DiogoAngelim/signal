@@ -53,7 +53,7 @@ durable worker guarantee.
 The dispatcher:
 - Claims rows with PostgreSQL `FOR UPDATE SKIP LOCKED`.
 - Uses expiring worker leases so abandoned claims become eligible again.
-- Renews a live lease every third of its configured duration while a handler is running; renewal is fenced by worker ID, lease token, and the still-unexpired lease.
+- Renews every outstanding claim at one-third of its configured duration, including messages waiting behind a slow handler in the same sequential batch; renewals are issued concurrently and fenced by worker ID, lease token, and the still-unexpired lease.
 - Acknowledges or retries only while the worker still owns an unexpired lease.
 - Stops processing a record when lease renewal fails; it never treats an uncertain lease as owned.
 - Retries failures with capped exponential backoff.
