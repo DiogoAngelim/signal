@@ -77,7 +77,9 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   await run("concurrency", "Concurrent duplicate submissions do not create duplicate cases", async (a) => {
     const app = createReferenceLab(); const input = { tenantId: "tenant-a", title: "Review vendor onboarding", description: "Validate a new vendor onboarding request." };
     const attempts = await Promise.allSettled(Array.from({ length: 12 }, () => app.submitRequest(input)));
-    a(attempts.some((item) => item.status === "fulfilled"), "at least one concurrent request should complete");
+    a(attempts.every((item) => item.status === "fulfilled"), "all concurrent duplicate callers should receive a result");
+    const ids = attempts.flatMap((item) => item.status === "fulfilled" ? [item.value.id] : []);
+    a(new Set(ids).size === 1, "all concurrent callers should receive the same request identity");
     a(app.events.filter((event) => event.name === "lab.request.received.v1").length === 1, "concurrent duplicate should emit one received event");
   });
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
