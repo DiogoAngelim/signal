@@ -33,6 +33,18 @@ export function createInProcessDispatcher(): EventPort {
   };
 }
 
+/**
+ * Creates an at-least-once replay-safe subscriber.
+ *
+ * A message is recorded as consumed only after its handler succeeds. Failed
+ * handlers therefore remain eligible for redelivery. Concurrent deliveries
+ * of the same message in this process share one in-flight promise.
+ *
+ * The deduper is not a transaction coordinator: a process crash after the
+ * handler's side effect but before remember() can cause redelivery. Consumers
+ * with non-idempotent external effects must atomically persist their
+ * deduplication marker with that effect in the destination system.
+ */
 export function createReplaySafeSubscriber(
   handler: (envelope: SignalEnvelope) => void | Promise<void>,
   options: {
@@ -42,19 +54,37 @@ export function createReplaySafeSubscriber(
 ): (envelope: SignalEnvelope) => Promise<void> {
   const consumerId = options.consumerId ?? "signal-replay-safe-consumer";
   const deduper = options.deduper ?? createInMemoryConsumerDeduper();
+  const inFlight = new Map<string, Promise<void>>();
 
   return async (envelope: SignalEnvelope) => {
-    const accepted = await deduper.remember({
-      consumerId,
-      messageId: envelope.messageId,
-      envelope,
-    });
-
-    if (!accepted) {
-      return;
+    const key = `${consumerId}:${envelope.messageId}`;
+    const current = inFlight.get(key);
+    if (current) {
+      return current;
     }
 
-    await handler(envelope);
+    const processing = (async () => {
+      const accepted = await deduper.remember({
+        consumerId,
+        messageId: envelope.messageId,
+        envelope,
+      });
+
+      if (!accepted) {
+        return;
+      }
+
+      await handler(envelope);
+    })();
+
+    inFlight.set(key, processing);
+    try {
+      await processing;
+    } finally {
+      if (inFlight.get(key) === processing) {
+        inFlight.delete(key);
+      }
+    }
   };
 }
 

@@ -1,10 +1,19 @@
+import type { SignalAuth } from "@signal/protocol";
 import type { SignalRuntime } from "@signal/sdk-node";
-import fastify, { type FastifyInstance } from "fastify";
+import fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
 import { registerSignalHttpRoutes } from "./routes";
 
 export interface CreateSignalHttpServerOptions {
   logger?: boolean;
   basePath?: string;
+  /**
+   * Resolve identity only from verified server-side authentication middleware.
+   * Never derive this value from request.body, query parameters, or headers
+   * unless those headers have already been cryptographically/session verified.
+   */
+  resolveAuthContext?: (
+    request: FastifyRequest,
+  ) => SignalAuth | undefined | Promise<SignalAuth | undefined>;
 }
 
 export function createSignalHttpServer(
@@ -12,7 +21,10 @@ export function createSignalHttpServer(
   options: CreateSignalHttpServerOptions = {},
 ): FastifyInstance {
   const app = fastify({ logger: options.logger ?? false });
-  registerSignalHttpRoutes(app, runtime, { basePath: options.basePath });
+  registerSignalHttpRoutes(app, runtime, {
+    basePath: options.basePath,
+    resolveAuthContext: options.resolveAuthContext,
+  });
 
   app.get("/health", async () => ({ ok: true }));
 

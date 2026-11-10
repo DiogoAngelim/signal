@@ -66,7 +66,6 @@ describe("http binding", () => {
           correlationId: "corr-1",
           causationId: "cause-1",
           traceId: "trace-1",
-          auth: { actor: "tester" },
           source: {
             system: "browser",
             transport: "http",
@@ -100,7 +99,6 @@ describe("http binding", () => {
           correlationId: "corr-2",
           causationId: "cause-2",
           traceId: "trace-2",
-          auth: { actor: "tester" },
           source: {
             system: "browser",
             transport: "http",
@@ -139,6 +137,54 @@ describe("http binding", () => {
     expect(JSON.parse(replayResponse.body).error.code).toBe(
       "IDEMPOTENCY_CONFLICT",
     );
+  });
+
+  it("rejects client authentication claims and uses only trusted server context", async () => {
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    let authorizedActor: unknown;
+
+    runtime.registerMutation(
+      defineMutation({
+        name: "secure.update.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ ok: z.boolean() }),
+        authorize: (_input, context) => {
+          authorizedActor = context.request.auth?.actor;
+        },
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const app = createSignalHttpServer(runtime, {
+      resolveAuthContext: () => ({ actor: { id: "verified-user" } }),
+    });
+
+    const spoofed = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/secure.update.v1",
+      payload: {
+        payload: { value: "test" },
+        idempotencyKey: "secure-1",
+        context: { auth: { actor: { id: "attacker", roles: ["admin"] } } },
+      },
+    });
+    const valid = await app.inject({
+      method: "POST",
+      url: "/signal/mutation/secure.update.v1",
+      payload: {
+        payload: { value: "test" },
+        idempotencyKey: "secure-2",
+      },
+    });
+
+    expect(spoofed.statusCode).toBe(400);
+    expect(valid.statusCode).toBe(200);
+    expect(authorizedActor).toEqual({ id: "verified-user" });
   });
 
   it("returns structured failures for malformed request bodies", async () => {
