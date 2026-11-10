@@ -431,6 +431,7 @@ export class SignalRuntime implements SignalBinding {
     const kinds = this.findRegisteredKinds(name);
 
     if (kinds.length === 0) {
+      this.emitCommandFailure(name, "unknown", Date.now(), "OPERATION_NOT_FOUND");
       return createExecuteFailure(
         "OPERATION_NOT_FOUND",
         `Unknown operation: ${name}`,
@@ -441,6 +442,7 @@ export class SignalRuntime implements SignalBinding {
     }
 
     if (kinds.length > 1) {
+      this.emitCommandFailure(name, "ambiguous", Date.now(), "AMBIGUOUS_OPERATION_KIND");
       return createExecuteFailure(
         "AMBIGUOUS_OPERATION_KIND",
         `Operation kind is ambiguous for ${name}; pass options.kind to run it explicitly.`,
@@ -545,6 +547,12 @@ export class SignalRuntime implements SignalBinding {
         }
       }
       default:
+        this.emitCommandFailure(
+          input.name,
+          String(input.kind),
+          Date.now(),
+          "UNSUPPORTED_OPERATION_KIND",
+        );
         return createExecuteFailure(
           "UNSUPPORTED_OPERATION_KIND",
           `Unsupported operation kind: ${String(input.kind)}`,
@@ -649,6 +657,23 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private emitCommandFailure(
+    operationName: string,
+    operationKind: string,
+    startedAt: number,
+    errorCode: string,
+  ): void {
+    this.emitObservation({
+      event: "error.occurred",
+      operationName,
+      operationKind,
+      durationMs: Math.max(0, Date.now() - startedAt),
+      outcome: "failed",
+      isReplay: this.isReplay,
+      meta: { errorCode, source: "command-dispatch" },
+    });
   }
 
   private emitExecutionFailure(
