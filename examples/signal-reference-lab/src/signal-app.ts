@@ -29,7 +29,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     }
   };
   const submit = {
-    name: "lab.request.submit.v1", kind: "mutation" as const, description: "Create a case request exactly once for a supplied idempotency key.",
+    name: "lab.request.submit.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Create a case request exactly once for a supplied idempotency key.",
     inputSchema: requestInput, resultSchema: z.object({ request: z.any() }),
     async handler(input: z.infer<typeof requestInput>) {
       const id = `case-${hash(`${input.tenantId}:${input.title}:${input.description}`)}`;
@@ -42,7 +42,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     }
   };
   const addEvidence = {
-    name: "lab.evidence.add.v1", kind: "mutation" as const, description: "Attach sourced evidence to a request.",
+    name: "lab.evidence.add.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Attach sourced evidence to a request.",
     inputSchema: evidenceInput, resultSchema: z.object({ evidence: z.any(), assessment: z.any() }),
     async handler(input: z.infer<typeof evidenceInput>) {
       const request = requireTenant(requests, input.requestId, input.tenantId);
@@ -55,7 +55,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     }
   };
   const decide = {
-    name: "lab.decision.record.v1", kind: "mutation" as const, description: "Record an accountable decision after assessment.",
+    name: "lab.decision.record.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Record an accountable decision after assessment.",
     inputSchema: decisionInput, resultSchema: z.object({ decision: z.any() }),
     async handler(input: z.infer<typeof decisionInput>) {
       const request = requireTenant(requests, input.requestId, input.tenantId);
@@ -68,7 +68,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     }
   };
   const outcome = {
-    name: "lab.outcome.record.v1", kind: "mutation" as const, description: "Record the observed outcome for a completed decision.",
+    name: "lab.outcome.record.v1", kind: "mutation" as const, idempotency: "required" as const, description: "Record the observed outcome for a completed decision.",
     inputSchema: outcomeInput, resultSchema: z.object({ outcome: z.any() }),
     async handler(input: z.infer<typeof outcomeInput>) {
       const request = requireTenant(requests, input.requestId, input.tenantId);
