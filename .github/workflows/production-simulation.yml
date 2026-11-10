@@ -30,6 +30,7 @@ on:
       - "api/runtime/**"
       - "api/ports/**"
       - "docs/production-simulation.md"
+      - "benchmarks/rabbitmq-broker.mjs"
       - ".github/workflows/production-simulation.yml"
 
 permissions:
