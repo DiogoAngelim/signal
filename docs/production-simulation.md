@@ -51,7 +51,7 @@ The runtime now exposes `createDistributedCircuitBreakerController`, which deleg
 - Threshold and reset timeout are persisted with the row. Processes using the same key but different configuration fail closed with a configuration-drift error rather than silently fighting over policy.
 - Closed-state failures increment a shared counter atomically. Reaching the threshold opens the breaker and records the cooldown start.
 - Once the cooldown expires, a conditional database update grants a single half-open probe and assigns a fresh UUID token with a finite lease.
-- If the probe owner disappears, another process may reclaim the probe after lease expiry. Success/failure from the previous owner is rejected because its token is no longer current.
+- The probe owner can renew its finite lease while a health check is still running. If the owner disappears, another process may reclaim the probe after lease expiry. Success/failure from the previous owner is rejected because its token is no longer current.
 - A valid probe success closes and resets the breaker. A valid probe failure reopens it and starts a new cooldown.
 - The adapter does not silently fall back to process-local state if PostgreSQL is unavailable. Integrators must treat coordination-store errors as a failed acquisition and avoid issuing the protected request.
 
