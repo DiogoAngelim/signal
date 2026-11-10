@@ -78,7 +78,8 @@ Do not label Signal production-certified until the following evidence exists:
 
 6. **Operational observability and SLOs**
    - [x] Specify required service-level indicators, low-cardinality labels, alert classes, and incident-runbook contents in docs/operations/slo-and-alerting.md.
-   - [ ] Connect a durable exporter and validate bounded label cardinality, sampling, retention, and backpressure.
+   - [x] Provide a bounded Prometheus text recorder with metric/label allowlists, histogram exposition, series limits, and a reusable Grafana runtime dashboard.
+   - [ ] Connect and validate the deployed Prometheus scrape/remote-write backend, sampling, retention, alert routing, and backpressure.
    - [ ] Establish deployment-specific service-level objectives from measured baselines for availability, latency percentiles, error rate, queue age, replay rate, and delivery lag.
    - [ ] Configure live alerts, dashboards, ownership, escalation, and incident runbooks.
 
