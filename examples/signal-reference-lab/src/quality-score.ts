@@ -54,15 +54,6 @@ function scenarioStatus(results: ScenarioResult[], ids: string[]): EvidenceStatu
   return "unverified";
 }
 
-function capabilityStatus(inventory: Capability[], ids: string[]): EvidenceStatus {
-  const selected = ids.map((id) => inventory.find((item) => item.id === id)).filter((item): item is Capability => Boolean(item));
-  if (selected.length === 0) return "unverified";
-  if (selected.some((item) => item.status === "not-verified")) return selected.some((item) => item.status === "exercised" || item.status === "partial") ? "partial" : "unverified";
-  if (selected.every((item) => item.status === "exercised")) return "validated";
-  if (selected.some((item) => item.status === "exercised" || item.status === "partial")) return "partial";
-  return "unverified";
-}
-
 function combineStatus(a: EvidenceStatus, b: EvidenceStatus): EvidenceStatus {
   if (a === "failed" || b === "failed") return "failed";
   if (a === "validated" || b === "validated") return a === "unverified" || b === "unverified" ? "partial" : "validated";
