@@ -61,6 +61,8 @@ test("four-pillar scorecard withholds composite score until matched performance 
   assert.equal(report.qualityScore.pillars.find((item) => item.id === "performance")?.score, null);
   assert.equal(report.qualityScore.overall, null);
   assert.ok(report.qualityScore.pillars.every((item) => item.score === null || (item.score >= 0 && item.score <= 10)));
+  assert.ok(report.qualityScore.pillars.every((item) => item.criteria.reduce((sum, criterion) => sum + criterion.weight, 0) === 100));
+  assert.ok(report.qualityScore.pillars.find((item) => item.id === "security")?.criteria.some((item) => item.id === "security.key-custody" && item.status === "unverified"));
 });
 
 test("four-pillar scorecard scores performance only against a matched, integrity-checked baseline", () => {
