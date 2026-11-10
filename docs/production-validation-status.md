@@ -79,8 +79,8 @@ Do not label Signal production-certified until the following evidence exists:
    - Prove telemetry exporter failure cannot take down decision execution.
 
 7. **Load, chaos, and recovery validation**
-   - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, and PostgreSQL idempotency/outbox.
-   - [x] Exercise bounded concurrency, half-open races, PostgreSQL failure/recovery, Toxiproxy network faults, RabbitMQ delivery ambiguity, process termination, and database backup/restore in CI simulations.
+   - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, PostgreSQL idempotency/outbox, and RabbitMQ queue/recovery behavior.
+   - [x] Exercise bounded concurrency, half-open races, PostgreSQL failure/recovery, Toxiproxy network faults, RabbitMQ publish/backlog/redelivery metrics, worker process termination, and timed database backup/restore in CI simulations.
    - [ ] Measure sustained production load, long-duration memory trends, managed-database contention, and deployment-specific recovery objectives.
    - [ ] Set production budgets from measured service requirements rather than CI runner estimates.
 
