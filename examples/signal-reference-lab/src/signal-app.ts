@@ -1,5 +1,5 @@
 import { reviewDecisionOutcome } from "@signal/decision";
-import { createSignalRuntime, type SignalEventDefinition, type SignalMutationDefinition, type SignalQueryDefinition } from "@signal/sdk-node";
+import { createSignalRuntime, createDecisionRecord, createInMemoryDecisionMemoryStore, type SignalEventDefinition, type SignalMutationDefinition, type SignalQueryDefinition } from "@signal/sdk-node";
 import { z } from "zod";
 import { assess, type Assessment, type CaseRequest, type Decision, type Evidence, type LabEvent, type Outcome } from "./domain.js";
 
@@ -12,6 +12,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   const now = options.now ?? (() => new Date());
   const requests = new Map<string, CaseRequest>();
   const events: LabEvent[] = [];
+  const memory = createInMemoryDecisionMemoryStore();
   const seen = new Set<string>();
   const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab", bindings: { inProcess: true } });
   const publish = async (name: string, request: CaseRequest, payload: Record<string, unknown>) => {
@@ -64,6 +65,8 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
       if (request.assessment.recommendation === "investigate" && input.approve) throw new Error("Insufficient verified evidence: approval is blocked.");
       const decision: Decision = { id: `decision-${hash(`${request.id}:${input.actor}:${input.rationale}`)}`, result: input.approve ? "approved" : "rejected", rationale: input.rationale, actor: input.actor, decidedAt: now().toISOString() };
       request.decision = decision; request.status = input.approve ? "approved" : "rejected";
+      const record = createDecisionRecord({ decisionId: decision.id, source: "signal-reference-lab", appId: "signal-reference-lab", domain: "case-management", timestamp: decision.decidedAt, version: "v1", observation: { requestId: request.id, title: request.title, evidence: request.evidence }, assessment: request.assessment.signalAssessment, coherence: { score: Math.round(request.assessment.confidence * 100), status: request.assessment.risk > 0.55 ? "tension" : "stable", contradictions: [], consensusLevel: Math.round(request.assessment.confidence * 100), actionAllowed: true, actionScale: input.approve ? 1 : 0, trustAdjustment: 0, agencyAdjustment: 0, confidenceAdjustment: 0, explanation: [request.assessment.rationale] }, action: { result: decision.result, actor: decision.actor }, humanSummary: decision.rationale, retentionTier: "hot" });
+      await memory.saveDecisionRecord(record);
       await publish("lab.decision.recorded.v1", request, { decisionId: decision.id, result: decision.result, actor: decision.actor });
       return { decision };
     }
@@ -78,6 +81,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
       const learningReview = reviewDecisionOutcome({ decisionId: request.decision.id, reviewId: `review-${hash(`${request.id}:${input.result}:${input.notes}`)}`, reviewedAt: recordedAt, whatHappened: input.notes, why: `Outcome classified as ${input.result} after the recorded decision.`, lessons: [`Review future comparable requests against this observed outcome: ${input.result}.`] });
       const result: Outcome = { id: `outcome-${hash(`${request.id}:${input.result}:${input.notes}`)}`, result: input.result, notes: input.notes, recordedAt, learningReview };
       request.outcome = result; request.status = "reviewed";
+      await memory.saveDecisionReview({ reviewId: learningReview.reviewId, decisionId: request.decision.id, appId: "signal-reference-lab", domain: "case-management", timestamp: recordedAt, version: "v1", source: "signal-reference-lab", reviewedAt: recordedAt, classification: input.result === "success" ? "correct" : input.result === "failure" ? "wrong" : "inconclusive", whatWasRecommended: request.decision.result, whyRecommended: request.decision.rationale, whatHappened: input.notes, lesson: learningReview.whatShouldChange, confidenceAdjustment: 0, trustAdjustment: 0, metadata: { outcome: input.result } });
       await publish("lab.outcome.recorded.v1", request, { outcomeId: result.id, result: result.result });
       return { outcome: result };
     }
@@ -91,7 +95,9 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     runtime.subscribe(name, (envelope) => { if (!seen.has(envelope.messageId)) seen.add(envelope.messageId); }, { consumerId: "reference-lab-journal", replaySafe: true });
   }
   return {
-    runtime, events,
+    runtime, events, memory,
+    listDecisionRecords() { return memory.listDecisionRecords(); },
+    listDecisionReviews() { return memory.listDecisionReviews(); },
     listRequests(tenantId: string) { return [...requests.values()].filter((item) => item.tenantId === tenantId).map((item) => structuredClone(item)); },
     async submitRequest(input: z.infer<typeof requestInput>) { const result = await runtime.mutation<z.infer<typeof requestInput>, { request: CaseRequest }>("lab.request.submit.v1", input, { ...context("lab-ui"), idempotencyKey: `submit:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.request as CaseRequest; },
     async addEvidence(input: z.infer<typeof evidenceInput>) { const result = await runtime.mutation<z.infer<typeof evidenceInput>, { evidence: Evidence; assessment: Assessment }>("lab.evidence.add.v1", input, { ...context("lab-ui"), idempotencyKey: `evidence:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result as { evidence: Evidence; assessment: Assessment }; },
