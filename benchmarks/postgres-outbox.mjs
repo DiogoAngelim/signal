@@ -22,6 +22,7 @@ if(!Number.isSafeInteger(iterations)||iterations<100||!Number.isSafeInteger(runs
 function percentile(sorted,p){return sorted[Math.max(0,Math.ceil(p*sorted.length)-1)];}
 function stats(values){const s=[...values].sort((a,b)=>a-b);return {p50Ms:percentile(s,.5),p95Ms:percentile(s,.95),p99Ms:percentile(s,.99),minMs:s[0],maxMs:s.at(-1)};}
 async function readDatabaseStats(pool) {
+  await pool.query("SELECT pg_stat_clear_snapshot()");
   const result = await pool.query(`
     SELECT xact_commit, xact_rollback, blks_hit, blks_read, deadlocks
     FROM pg_stat_database
