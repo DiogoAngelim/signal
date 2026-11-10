@@ -39,7 +39,7 @@ Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pn
 | Event publication and in-process subscription | Exercised |
 | Mutation idempotency | Partial: keys are propagated; no durable multi-process guarantee is claimed |
 | Tenant boundary | Exercised at application repository boundary; not a full auth-provider security certification |
-| Evidence-based assessment and hard-stop | Exercised |
+| Evidence-based assessment and hard-stop | Exercised through `@signal/decision` (`assessDecisionEvidence`) |
 | Outcome capture | Exercised; no calibrated learning policy is claimed |
 | PostgreSQL transactions, outbox/inbox, locking, crash recovery | Not verified by this lab yet |
 | Retry budgets, circuit breakers, timeout recovery | Not verified by this lab yet |
