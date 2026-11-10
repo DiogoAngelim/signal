@@ -35,7 +35,7 @@ export type QualityScorecard = {
 };
 
 type BenchmarkEvidence = Pick<BenchmarkReport, "timing" | "integrity" | "environment" | "workload"> & {
-  baseline?: BenchmarkReport;
+  baseline?: Pick<BenchmarkReport, "timing" | "environment" | "workload" | "integrity">;
 };
 
 const PILLAR_WEIGHTS: Record<QualityPillarName, number> = {
