@@ -70,7 +70,13 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(first.id === second.id, "repeat submit should resolve to same request");
     a(app.events.filter((event) => event.name === "lab.request.received.v1").length === 1, "repeat submit should not duplicate the request event");
   });
-  await run("concurrency", "Concurrent duplicate submissions do not create duplicate cases", async (a) => {\n    const app = createReferenceLab(); const input = { tenantId: "tenant-a", title: "Review vendor onboarding", description: "Validate a new vendor onboarding request." };\n    const attempts = await Promise.allSettled(Array.from({ length: 12 }, () => app.submitRequest(input)));\n    a(attempts.some((item) => item.status === "fulfilled"), "at least one concurrent request should complete");\n    a(app.events.filter((event) => event.name === "lab.request.received.v1").length === 1, "concurrent duplicate should emit one received event");\n  });\n  await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
+  await run("concurrency", "Concurrent duplicate submissions do not create duplicate cases", async (a) => {
+    const app = createReferenceLab(); const input = { tenantId: "tenant-a", title: "Review vendor onboarding", description: "Validate a new vendor onboarding request." };
+    const attempts = await Promise.allSettled(Array.from({ length: 12 }, () => app.submitRequest(input)));
+    a(attempts.some((item) => item.status === "fulfilled"), "at least one concurrent request should complete");
+    a(app.events.filter((event) => event.name === "lab.request.received.v1").length === 1, "concurrent duplicate should emit one received event");
+  });
+  await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
     try { await app.submitRequest({ tenantId: "", title: "x", description: "short" }); } catch { rejected = true; }
     a(rejected, "invalid request should be rejected");
