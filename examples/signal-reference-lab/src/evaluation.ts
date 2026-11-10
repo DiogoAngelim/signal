@@ -69,6 +69,12 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(blocked, "approval must be blocked when assessment recommends investigation");
     let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
     a(actionBlocked, "action execution must be blocked without an approved decision");
+    const rejected = await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: false, rationale: "Reject pending independent evidence." });
+    a(rejected.result === "rejected", "operator rejection should be recordable");
+    let rejectedActionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { rejectedActionBlocked = true; }
+    a(rejectedActionBlocked, "a rejected decision must never authorize action execution");
+    let prematureOutcomeBlocked = false; try { await app.recordOutcome({ requestId: request.id, tenantId: "tenant-a", result: "success", notes: "Attempted to record an outcome before execution." }); } catch { prematureOutcomeBlocked = true; }
+    a(prematureOutcomeBlocked, "outcome capture must require an executed action");
   });
   await run("tenant-isolation", "Tenant boundary prevents cross-tenant reads and writes", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review data export", description: "Assess a requested export of customer data." });
