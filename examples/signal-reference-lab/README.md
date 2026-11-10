@@ -14,7 +14,7 @@ The workflow exercises:
 - `@signal/semantic-state`: generic-state lexicon interpretation;
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
 
-The evaluation harness runs ten deterministic scenarios: full lifecycle including approval-gated action execution, evidence hard-stop, tenant isolation, repeat submission, concurrent duplicate submission, and invalid input, and runtime authorization enforcement. It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
+The evaluation harness runs eleven deterministic scenarios: full lifecycle including approval-gated action execution, evidence hard-stop, tenant isolation, repeat submission, concurrent duplicate submission, and invalid input, HTTP binding, audit integrity, replay-evidence integrity, retry/circuit-breaker resilience, runtime authorization enforcement, and invalid input. It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
 
 ## Run
 
@@ -48,9 +48,9 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
 | PostgreSQL transactions, outbox/inbox, locking and crash recovery | Not verified |
-| HTTP binding package, runtime-level authorization and external auth | Not verified |
-| Retry budgets, circuit breakers, timeouts and provider recovery | Not verified |
-| Deterministic replay, audit chains/checkpoints and tamper detection | Not verified; the process-local event journal is not an audit log |
+| HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |\n| Runtime-level authorization | Exercised with required auth context and operation policy |
+| Retry budgets and local circuit breakers | Exercised deterministically; distributed coordination and real provider failure remain unverified |
+| Replay evidence integrity | Partial; content-addressed record creation and verification tested, full replay executor not integrated |\n| Audit chains/checkpoints and tamper detection | Exercised for hash-chain verification and signed checkpoint anchoring; durable external ledger not configured |
 | Metrics/tracing export, resource benchmarks, production load and soak | Not verified; the included benchmark is local-only |
 | Kernel legacy compatibility and Signal CLI certification surfaces | Not verified / not applicable to the current workflow |
 
