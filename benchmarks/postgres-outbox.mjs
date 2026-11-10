@@ -21,6 +21,31 @@ const output=arg("--output","benchmark-results/postgres-outbox.json");
 if(!Number.isSafeInteger(iterations)||iterations<100||!Number.isSafeInteger(runs)||runs<3) throw new Error("iterations must be >=100 and runs must be >=3");
 function percentile(sorted,p){return sorted[Math.max(0,Math.ceil(p*sorted.length)-1)];}
 function stats(values){const s=[...values].sort((a,b)=>a-b);return {p50Ms:percentile(s,.5),p95Ms:percentile(s,.95),p99Ms:percentile(s,.99),minMs:s[0],maxMs:s.at(-1)};}
+async function readDatabaseStats(pool) {
+  const result = await pool.query(`
+    SELECT xact_commit, xact_rollback, blks_hit, blks_read, deadlocks
+    FROM pg_stat_database
+    WHERE datname = current_database()
+  `);
+  return result.rows[0];
+}
+async function observeAdapterConnections(pool) {
+  const result = await pool.query(`
+    SELECT
+      count(*)::int AS connections,
+      count(*) FILTER (WHERE state = 'active')::int AS active_connections,
+      count(*) FILTER (WHERE wait_event_type = 'Lock')::int AS lock_waiting_connections,
+      coalesce(
+        max(extract(epoch FROM clock_timestamp() - query_start) * 1000)
+          FILTER (WHERE state = 'active'),
+        0
+      )::float8 AS max_active_query_duration_ms
+    FROM pg_stat_activity
+    WHERE application_name = 'signal-engineering-benchmark'
+  `);
+  return result.rows[0];
+}
+
 
 const store=createPostgresTransactionalStore({connectionString,maxConnections:10,applicationName:"signal-engineering-benchmark"});
 const cleanupPool=new Pool({connectionString,max:2,application_name:"signal-benchmark-cleanup"});
@@ -45,9 +70,21 @@ try {
 
         const latencies=[];
         let completed=0;
+        const dbStatsBefore=await readDatabaseStats(cleanupPool);
+        const pgObserved={maxConnections:0,maxActiveConnections:0,maxLockWaitingConnections:0,maxActiveQueryDurationMs:0,samples:0};
+        const samplePg=async()=>{
+          const sample=await observeAdapterConnections(cleanupPool);
+          pgObserved.maxConnections=Math.max(pgObserved.maxConnections,Number(sample.connections));
+          pgObserved.maxActiveConnections=Math.max(pgObserved.maxActiveConnections,Number(sample.active_connections));
+          pgObserved.maxLockWaitingConnections=Math.max(pgObserved.maxLockWaitingConnections,Number(sample.lock_waiting_connections));
+          pgObserved.maxActiveQueryDurationMs=Math.max(pgObserved.maxActiveQueryDurationMs,Number(sample.max_active_query_duration_ms));
+          pgObserved.samples+=1;
+        };
         const memoryBefore=process.memoryUsage();
         const cpuBefore=process.cpuUsage();
         const started=performance.now();
+        const transactionBatches=Math.ceil(iterations/concurrencyLevel);
+        const sampleEvery=Math.max(1,Math.floor(transactionBatches/20));
         for(let offset=0;offset<iterations;offset+=concurrencyLevel){
           const size=Math.min(concurrencyLevel,iterations-offset);
           await Promise.all(Array.from({length:size},async(_,j)=>{
@@ -66,7 +103,9 @@ try {
             latencies.push(performance.now()-opStarted);
             completed+=1;
           }));
+          if ((Math.floor(offset/concurrencyLevel)+1)%sampleEvery===0) await samplePg();
         }
+        await samplePg();
         const wallTimeMs=performance.now()-started;
         const cpu=process.cpuUsage(cpuBefore);
         const memoryAfter=process.memoryUsage();
@@ -89,8 +128,10 @@ try {
             if(!ok) throw new Error("Outbox acknowledgement lost its lease");
             acknowledged+=1;
           }));
+          await samplePg();
         }
         if(claimedTotal!==iterations+warmup||acknowledged!==claimedTotal) throw new Error(`Outbox mismatch: claimed=${claimedTotal}, acked=${acknowledged}`);
+        const dbStatsAfter=await readDatabaseStats(cleanupPool);
         const cpuMs=(cpu.user+cpu.system)/1000;
         results.push({
           run:run+1,payloadBytes,concurrency:concurrencyLevel,iterations,completed,
@@ -102,6 +143,14 @@ try {
           heapUsedDeltaBytes:memoryAfter.heapUsed-memoryBefore.heapUsed,
           rssBeforeBytes:memoryBefore.rss,rssAfterBytes:memoryAfter.rss,rssDeltaBytes:memoryAfter.rss-memoryBefore.rss,
           poolMaxConnections:10,
+          postgresObservation:pgObserved,
+          databaseStatsDelta:{
+            transactionsCommitted:Number(dbStatsAfter.xact_commit)-Number(dbStatsBefore.xact_commit),
+            transactionsRolledBack:Number(dbStatsAfter.xact_rollback)-Number(dbStatsBefore.xact_rollback),
+            sharedBufferHits:Number(dbStatsAfter.blks_hit)-Number(dbStatsBefore.blks_hit),
+            sharedBufferReads:Number(dbStatsAfter.blks_read)-Number(dbStatsBefore.blks_read),
+            deadlocks:Number(dbStatsAfter.deadlocks)-Number(dbStatsBefore.deadlocks),
+          },
         });
         await cleanupPool.query("DELETE FROM signal_outbox WHERE message_id LIKE $1",[keyLike(runPrefix)]);
         await cleanupPool.query("DELETE FROM signal_idempotency_records WHERE operation_name=$1 AND idempotency_key LIKE $2",[operationName,keyLike(runPrefix)]);
@@ -116,7 +165,7 @@ function keyLike(prefix){return `${prefix}%`;}
 
 const report={
   schemaVersion:1,benchmark:"signal-postgres-idempotency-transactional-outbox",
-  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement. CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
+  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement. Samples pg_stat_activity connection/active/lock-wait/query-duration observations and pg_stat_database commit/rollback/buffer/deadlock deltas. CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
   generatedAt:new Date().toISOString(),commit:process.env.GITHUB_SHA??process.env.SOURCE_COMMIT??"unrecorded-local-run",
   runtime:{node:process.version,platform:process.platform,arch:process.arch,cpuModel:os.cpus()[0]?.model??"unknown",logicalCpus:os.cpus().length},
   database:{engine:"PostgreSQL",version:"16",poolMaxConnections:10},
