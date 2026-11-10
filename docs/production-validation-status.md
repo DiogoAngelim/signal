@@ -55,18 +55,19 @@ Do not label Signal production-certified until the following evidence exists:
    - [ ] Execute retained historical handler artifacts across supported runtime/package upgrades and verify reproducible results.
 3. **Trusted audit checkpoints**
    - [x] Provide Ed25519 checkpoint signing and verification primitives binding sequence, chain-head hash, timestamp, and key ID.
-   - [ ] Persist audit entries append-only under restrictive database permissions.
+   - [x] Provide PostgreSQL append-only audit entry and checkpoint tables, contiguous append enforcement, row mutation/truncate rejection, and a least-privilege operations guide.
    - [ ] Anchor signed checkpoints outside the mutable audit store under independently controlled permissions.
-   - [ ] Define key custody, rotation, checkpoint retention, restore verification, and access audit.
-   - [ ] Test full-history rewrite and checkpoint substitution attacks against the deployed checkpoint store.
+   - [ ] Define managed key custody, rotation, checkpoint retention, restore verification, and access audit.
+   - [ ] Test full-history rewrite and checkpoint substitution attacks against the deployed external checkpoint store.
 
 4. **Distributed resilience**
    - [x] Implement permit-scoped in-memory circuit-breaker outcomes with stale-generation fencing and renewable half-open probe leases.
    - [x] Implement PostgreSQL-backed distributed breaker coordination with expiring probe tokens and fencing across independent adapters.
    - [x] Test single-probe admission, lease renewal/expiry, stale-owner rejection, and configuration consistency.
    - [ ] Validate multi-region database availability, coordination-store outages, and failover under deployment-specific conditions.
-   - [ ] Define retry budgets, total deadlines, cancellation behavior, and per-operation retryability.
-   - [ ] Verify that retries cannot repeat non-idempotent side effects.
+   - [x] Implement bounded retry attempts, absolute deadlines, caller cancellation, per-operation retryability, full jitter, and an injectable shared token-bucket retry budget.
+   - [ ] Deploy a cross-replica retry budget where aggregate fleet-wide retry amplification must be bounded.
+   - [ ] Verify destination idempotency for every retryable external side effect; generic runtime retry cannot undo a committed remote write.
 
 5. **Statistical and learning governance**
    - [x] Exclude missing and duplicate trace IDs from calibration/drift/learning cohorts and expose exclusion counts.
@@ -76,10 +77,10 @@ Do not label Signal production-certified until the following evidence exists:
    - [ ] Keep calibration adjustments advisory until the domain owner approves a validated policy.
 
 6. **Operational observability and SLOs**
-   - Connect a durable exporter and define bounded label cardinality, sampling, retention, and backpressure.
-   - Establish service-level indicators and objectives for availability, latency percentiles, error rate, queue age, replay rate, and delivery lag.
-   - Configure alerts, dashboards, ownership, escalation, and incident runbooks.
-   - Prove telemetry exporter failure cannot take down decision execution.
+   - [x] Specify required service-level indicators, low-cardinality labels, alert classes, and incident-runbook contents in docs/operations/slo-and-alerting.md.
+   - [ ] Connect a durable exporter and validate bounded label cardinality, sampling, retention, and backpressure.
+   - [ ] Establish deployment-specific service-level objectives from measured baselines for availability, latency percentiles, error rate, queue age, replay rate, and delivery lag.
+   - [ ] Configure live alerts, dashboards, ownership, escalation, and incident runbooks.
 
 7. **Load, chaos, and recovery validation**
    - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, PostgreSQL idempotency/outbox, RabbitMQ queue/recovery behavior, and sustained in-process runtime/memory trend measurement.
