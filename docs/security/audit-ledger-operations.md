@@ -11,8 +11,10 @@ The idempotency-postgres package exports createPostgresAuditLedger. Migration
 - default PUBLIC revocations for update, delete, and truncate.
 
 The adapter serializes appends with a transaction-scoped advisory lock,
-enforces contiguous sequence numbers and previous-hash linkage, and rejects
-checkpoints that do not match a persisted chain head.
+enforces contiguous sequence numbers and previous-hash linkage, verifies each
+persisted entry hash when reading, checks the persisted head before appending,
+and requires trusted entry and checkpoint verification callbacks. It verifies
+checkpoint signatures when loading the latest checkpoint.
 
 This protects against ordinary application-role mutation. It does not protect
 against a database owner, superuser, privileged migration role, storage
@@ -70,13 +72,20 @@ Append each AuditChainEntry in sequence. The first entry must have sequence
 zero and the genesis previous hash (64 zeroes). Later entries must use the
 persisted head hash and next sequence. Use readEntries for reconstruction.
 Use appendCheckpoint only after signing with a separately managed key.
-latestCheckpoint returns the latest stored checkpoint; verify its signature
-against a trusted public-key registry before relying on it. Close the adapter
-during graceful shutdown.
+latestCheckpoint verifies the stored signature through the configured
+trusted-key callback before returning a checkpoint. The caller must still
+verify the checkpoint against an independently retained chain head and trust
+anchor. Close the adapter during graceful shutdown.
 
-The adapter validates chain continuity and checkpoint-to-head binding. The same insert-only role may persist replay evidence through createPostgresReplayEvidenceStore after migration 0006; grant SELECT and INSERT on signal_replay_evidence and no mutation privileges. It does
-not independently recompute every entry hash or verify checkpoint signatures.
-Use Signal's verifyChain, verifyAuditCheckpoint, and
+The adapter verifies each returned entry's schema and content hash, sequence,
+and linkage to the preceding persisted entry (including the predecessor for
+paged reads). Before appending, it verifies the current persisted head. It also
+verifies checkpoint signatures through the configured trusted-key callback.
+The caller remains responsible for full-history verification from a trusted
+checkpoint and for comparison with an independently stored trust anchor. The
+same least-privilege role may persist replay evidence after migration 0006;
+grant only SELECT and INSERT on signal_replay_evidence and no mutation
+privileges. Use Signal's verifyChain, verifyAuditCheckpoint, and
 verifyCheckpointAgainstChain primitives during audit/recovery workflows.
 
 ## External checkpoint anchoring and key custody
