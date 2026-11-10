@@ -29,7 +29,8 @@ const capabilities: Capability[] = [
   { id: "commitment.constraints", area: "Commitment", capability: "Resource constraints, feasibility and allocation policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "@signal/commitment evaluateCommitment runs for each assessment with explicit capacity and hard evidence constraints" },
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/semantic-state resolveSemanticState interprets confidence, risk, stability and coherence" },
   { id: "kernel.compatibility", area: "Kernel", capability: "Kernel compatibility adapters and legacy orchestration", status: "not-verified", scenarios: [], evidence: "No legacy adapter is used by the reference workflow." },
-  { id: "observability.metrics", area: "Observability", capability: "Metrics, trace export, cardinality controls and telemetry overhead", status: "not-verified", scenarios: [], evidence: "Only local scenario wall-clock timing is collected." },
+  { id: "observability.lifecycle", area: "Observability", capability: "Structured runtime lifecycle event emission", status: "exercised", scenarios: ["lifecycle"], evidence: "Signal ObservabilityPort collector captures runtime lifecycle hooks." },
+  { id: "observability.export", area: "Observability", capability: "Metrics backend, trace export, cardinality controls and telemetry overhead", status: "not-verified", scenarios: [], evidence: "Collector is in-memory only; no external telemetry backend or overhead study." },
   { id: "cli.verification", area: "CLI", capability: "Repeatable local scenario and capability report commands", status: "exercised", scenarios: ["lifecycle"], evidence: "evaluate and coverage CLI commands emit JSON reports" }
 ];
 
@@ -58,6 +59,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(app.listDecisionRecords().length === 1, "Signal decision memory should persist a decision record");
     a(app.listDecisionReviews().length === 1, "Signal decision memory should persist an outcome review");
     a(app.listAgencyTraces().length === 2, "agency should record decision and outcome cycles");
+    a(app.listTelemetry().some((item) => (item as { event?: string }).event === "execution.end"), "Signal runtime lifecycle telemetry should be collected");
     a(app.events.length >= 5, "lifecycle should emit request, assessment, decision, action and outcome events");
   });
   await run("authorization", "Insufficient evidence blocks approval", async (a) => {
