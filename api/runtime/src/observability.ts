@@ -176,9 +176,19 @@ export function createSignalMetricsObservabilityPort(
           case "subscriber.coalesced":
             recorder.increment("signal.subscribers.coalesced", 1, labels);
             break;
-          case "error.occurred":
-            recorder.increment("signal.errors", 1, labels);
+          case "error.occurred": {
+            const source =
+              event.meta?.source === "command-dispatch" ||
+              event.meta?.source === "subscriber"
+                ? event.meta.source
+                : "runtime";
+            const errorLabels = { ...labels, source };
+            recorder.increment("signal.errors", 1, errorLabels);
+            if (typeof event.durationMs === "number" && Number.isFinite(event.durationMs)) {
+              recorder.timing("signal.errors.duration_ms", event.durationMs, errorLabels);
+            }
             break;
+          }
           default:
             break;
         }
