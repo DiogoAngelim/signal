@@ -17,6 +17,9 @@
   "dependencies": {
     "@signal/sdk-node": "workspace:*",
     "@signal/decision": "workspace:*",
+    "@signal/agency": "workspace:*",
+    "@signal/commitment": "workspace:*",
+    "@signal/semantic-state": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
