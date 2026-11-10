@@ -9,6 +9,7 @@
     "test": "pnpm run build && node --test dist/test/*.test.js",
     "lab": "pnpm run build && node dist/src/cli.js",
     "evaluate": "pnpm run build && node dist/src/cli.js evaluate",
+    "benchmark": "pnpm run build && node dist/src/cli.js benchmark",
     "coverage:verify": "pnpm run build && node dist/src/cli.js coverage",
     "start": "pnpm run build && node dist/src/web.js"
   },
