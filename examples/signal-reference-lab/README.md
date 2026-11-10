@@ -61,7 +61,7 @@ Without `DATABASE_URL`, the PostgreSQL scenario is explicitly reported as **bloc
 
 Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pnpm start`, `pnpm benchmark`. The local web UI listens on `127.0.0.1:4179` by default. Set `PORT` to change it.
 
-Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then compare it later with `pnpm compare -- baseline.json`. Comparison rejects mismatched workload or Node/OS/CPU-count metadata. The benchmark measures only local in-process query dispatch; it is not a production, PostgreSQL, HTTP or distributed benchmark.
+Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then compare it later with `pnpm compare -- baseline.json`. Reports include Signal/app commit identifiers, harness version, runtime and host metadata, raw per-operation samples, percentile aggregates and sample-integrity checks. Comparison rejects invalid sample sets and mismatched workload, Node/OS release, CPU model/count or architecture. The benchmark measures only local in-process query dispatch; it is not a production, PostgreSQL, HTTP or distributed benchmark.
 
 ## Capability truth
 
@@ -97,7 +97,7 @@ A capability is not credited merely because a package exists. Each status must b
 
 ## Score model
 
-The scorecard uses the engineering dimensions and weights established for Signal: functional correctness 18%, reliability/resilience 16%, performance/resources 12%, architecture 14%, security/integrity 12%, maintainability 10%, testing 8%, developer experience 6%, and operability 4%. Each dimension includes evidence and confidence. Unmeasured performance and operability receive neutral provisional scores with low confidence; missing measurements are not treated as proof of either zero cost or excellent performance.
+The scorecard uses the engineering dimensions and weights established for Signal: functional correctness 18%, reliability/resilience 16%, performance/resources 12%, architecture 14%, security/integrity 12%, maintainability 10%, testing 8%, developer experience 6%, and operability 4%. Each dimension includes evidence and confidence. Capability status contributes 1.0 for exercised, 0.5 for partial and 0 for unverified; blocked scenarios do not count as passes. Performance remains neutral until production-like measurement; operability is bounded by observed telemetry coverage. Missing measurements are not treated as proof of either zero cost or excellent performance.
 
 The score is for the reference integration and its harness, not a certification score for the Signal product. Application defects, harness defects, infrastructure constraints and Signal package defects must be attributed separately.
 
