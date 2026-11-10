@@ -27,6 +27,8 @@ export interface ReplayEvidenceRecord {
   readonly externalReads: readonly ReplayExternalReadSnapshot[];
   readonly result: ReplayJsonValue;
   readonly resultFingerprint: string;
+  /** Fingerprint of the complete immutable evidence envelope, excluding this field. */
+  readonly recordFingerprint: string;
   readonly capturedAt: string;
 }
 
