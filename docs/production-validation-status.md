@@ -66,7 +66,7 @@ Do not label Signal production-certified until the following evidence exists:
    - [x] Test single-probe admission, lease renewal/expiry, stale-owner rejection, and configuration consistency.
    - [ ] Validate multi-region database availability, coordination-store outages, and failover under deployment-specific conditions.
    - [x] Implement bounded retry attempts, absolute deadlines, caller cancellation, per-operation retryability, full jitter, and an injectable shared token-bucket retry budget.
-   - [ ] Deploy a cross-replica retry budget where aggregate fleet-wide retry amplification must be bounded.
+   - [x] Provide a PostgreSQL-coordinated cross-replica retry budget with atomic consumption; deployments must inject it into retry execution and configure the shared budget key.
    - [ ] Verify destination idempotency for every retryable external side effect; generic runtime retry cannot undo a committed remote write.
 
 5. **Statistical and learning governance**
