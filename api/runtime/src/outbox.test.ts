@@ -88,7 +88,10 @@ describe("durable outbox dispatcher", () => {
     try {
       const harness = createOutbox([record("event-slow"), record("event-waiting")]);
       let finish!: () => void;
-      const dispatch = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
+      let calls = 0;
+      const dispatch = vi.fn(() => ++calls === 1
+        ? new Promise<void>((resolve) => { finish = resolve; })
+        : Promise.resolve());
       const pending = dispatchOutboxBatch(
         harness.outbox,
         { dispatch, subscribe: () => () => undefined },
