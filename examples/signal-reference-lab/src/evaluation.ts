@@ -6,6 +6,7 @@ import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
 import { NeonPostgresAdapter } from "@signal/decision-memory";
+import { createAgencyPipeline } from "@signal/agency";
 import { SignalOrchestrator, ReplayEngine, StocksOptimizerPlugin } from "@signal/kernel";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
@@ -41,7 +42,7 @@ const capabilities: Capability[] = [
   { id: "decision.outcomes", area: "Outcomes", capability: "Outcome capture linked to a recorded decision", status: "exercised", scenarios: ["lifecycle"], evidence: "Outcome operation requires a prior decision", limitation: "The review is recorded, but statistically calibrated policy adaptation is not claimed." },
   { id: "workflow.action-execution", area: "Workflow", capability: "Human-approved action execution and outcome gating", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "Action execution rejects missing/rejected approvals; outcome capture requires an executed action." },
   { id: "agency.policy", area: "Agency", capability: "Policy gate, action authorization and outcome cycle", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/agency createAgencyPipeline executes decision and outcome cycles with approval gate" },
-  { id: "agency.calibration-learning", area: "Agency", capability: "Confidence calibration, trace learning and self-diagnosis", status: "partial", scenarios: ["lifecycle"], evidence: "Agency traces are retained and evaluated", limitation: "The sample is intentionally too small for calibrated confidence or statistically meaningful learning." },
+  { id: "agency.calibration-learning", area: "Agency", capability: "Confidence calibration, trace learning and self-diagnosis", status: "partial", scenarios: ["agency-learning"], evidence: "A deterministic 100-outcome fixture exercises calibration, learning patterns and self-diagnosis.", limitation: "Synthetic fixture results do not establish calibration on live production outcomes or drift over time." },
   { id: "memory.lifecycle", area: "Decision memory", capability: "Decision record and review persistence, retrieval, compaction and retention", status: "partial", scenarios: ["lifecycle", "postgres-integration"], evidence: "In-memory SDK store plus NeonPostgresAdapter persist and retrieve decision records and reviews.", limitation: "Compaction, retention scheduling and large-history retrieval are not benchmarked." },
   { id: "commitment.constraints", area: "Commitment", capability: "Resource constraints, feasibility and allocation policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "@signal/commitment evaluateCommitment runs for each assessment with explicit capacity and hard evidence constraints" },
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/semantic-state resolveSemanticState interprets confidence, risk, stability and coherence" },
@@ -333,6 +334,30 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   } else {
     results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", target: "signal", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
   }
+  await run("agency-learning", "Agency calibration, learning and self-diagnosis require adequate outcome evidence", async (a) => {
+    const pipeline = createAgencyPipeline({
+      clock: () => new Date("2026-01-01T00:00:00.000Z"),
+      idGenerator: (_input, sequence) => `agency-fixture-${sequence}`,
+      calibration: { minimumEvaluationSamples: 100, minimumBucketSamples: 10, bucketCount: 10, alignmentTolerance: 0.1 },
+      learning: { similarSuccessThreshold: 2 },
+    });
+    for (let index = 0; index < 100; index++) {
+      pipeline.runAgencyCycle({
+        perception: { source: "deterministic-fixture" },
+        intelligence: { classification: "stable" },
+        decision: { decisionId: `decision-${index}`, kind: "grant-access", confidence: 0.5, rationale: "Balanced fixture confidence." },
+        sizing: { size: 1 },
+        action: { actionId: `action-${index}`, kind: "grant-access" },
+        outcome: { success: index % 2 === 0 },
+        approvalGranted: true,
+      });
+    }
+    const evaluation = pipeline.evaluateAgencyState();
+    a(evaluation.traceCount === 100 && evaluation.calibration.sampleSize === 100, "agency should retain and evaluate all unique completed outcome traces");
+    a(evaluation.calibration.reliability === "aligned" && evaluation.calibration.metrics?.status === "calibrated", "balanced outcomes should produce a calibrated confidence assessment");
+    a(evaluation.learning.learnedPatterns.some((pattern) => pattern.includes("grant-access")), "agency should learn repeated successful decision patterns");
+    a(evaluation.selfDiagnosis.trust >= 0.7 && evaluation.selfDiagnosis.recommendation !== "requires_human_review", "self-diagnosis should use complete outcome history and calibration evidence");
+  });
   await run("kernel-pipeline", "Kernel plugin orchestration and replay reproduce the four-stage pipeline", async (a) => {
     const orchestrator = new SignalOrchestrator({ domain: "reference-lab", version: 1, maxConcurrentPipelines: 2 });
     const plugin = new StocksOptimizerPlugin();
