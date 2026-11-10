@@ -134,6 +134,23 @@ export function createPostgresCircuitBreakerPort(
         : { allowed: false };
     },
 
+    async renewProbe(key, probeToken, probeLeaseMs) {
+      validateKey(key);
+      if (!Number.isSafeInteger(probeLeaseMs) || probeLeaseMs < 1000 || probeLeaseMs > 86_400_000) {
+        throw new RangeError("Circuit breaker probe lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const renewed = await pool.query(
+        `UPDATE signal_circuit_breakers
+            SET probe_expires_at = now() + ($3::bigint * interval '1 millisecond'),
+                updated_at = now()
+          WHERE breaker_key = $1 AND state = 'half-open'
+            AND probe_token = $2::uuid AND probe_expires_at > now()
+          RETURNING breaker_key`,
+        [key, probeToken, probeLeaseMs],
+      );
+      return renewed.rowCount === 1;
+    },
+
     async recordSuccess(key, probeToken) {
       validateKey(key);
       const result = probeToken
