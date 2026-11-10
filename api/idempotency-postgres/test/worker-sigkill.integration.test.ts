@@ -174,7 +174,7 @@ integration("real worker process SIGKILL boundary", () => {
     expect(exitSignal).toBe("SIGKILL");
 
     const afterCrash = await admin.query(
-      "SELECT status, locked_by, lease_token FROM signal_outbox WHERE message_id = $1",
+      "SELECT id, status, locked_by, lease_token FROM signal_outbox WHERE message_id = $1",
       [messageId],
     );
     expect(afterCrash.rows[0]).toMatchObject({
@@ -211,33 +211,28 @@ integration("real worker process SIGKILL boundary", () => {
     });
     expect(duplicates.length).toBeGreaterThanOrEqual(2);
 
-    const client = await admin.connect();
-    try {
-      await client.query("BEGIN");
-      const inserted = await client.query(
-        "INSERT INTO signal_simulation_consumer_inbox (message_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING message_id",
-        [messageId],
-      );
-      if (inserted.rowCount === 1) {
-        await client.query(
-          "INSERT INTO signal_simulation_side_effects (message_id, effect) VALUES ($1, $2::jsonb)",
-          [messageId, JSON.stringify(envelope.payload)],
+    for (const duplicate of duplicates) {
+      const parsed = JSON.parse(duplicate.payload) as { messageId: string; payload: unknown };
+      const client = await admin.connect();
+      try {
+        await client.query("BEGIN");
+        const inserted = await client.query(
+          "INSERT INTO signal_simulation_consumer_inbox (message_id) VALUES ($1) ON CONFLICT DO NOTHING RETURNING message_id",
+          [parsed.messageId],
         );
+        if (inserted.rowCount === 1) {
+          await client.query(
+            "INSERT INTO signal_simulation_side_effects (message_id, effect) VALUES ($1, $2::jsonb)",
+            [parsed.messageId, JSON.stringify(parsed.payload)],
+          );
+        }
+        await client.query("COMMIT");
+      } catch (error) {
+        await client.query("ROLLBACK");
+        throw error;
+      } finally {
+        client.release();
       }
-      await client.query("COMMIT");
-    } catch (error) {
-      await client.query("ROLLBACK");
-      throw error;
-    } finally {
-      client.release();
-    }
-
-    for (const duplicate of duplicates.slice(1)) {
-      const parsed = JSON.parse(duplicate.payload) as { messageId: string };
-      await admin.query(
-        "INSERT INTO signal_simulation_consumer_inbox (message_id) VALUES ($1) ON CONFLICT DO NOTHING",
-        [parsed.messageId],
-      );
     }
 
     expect((await admin.query(
@@ -245,7 +240,7 @@ integration("real worker process SIGKILL boundary", () => {
       [messageId],
     )).rows[0].count).toBe(1);
     expect(await store.acknowledge({
-      id: String(afterCrash.rows[0].id ?? recoveryEvent!.id),
+      id: String(afterCrash.rows[0].id),
       workerId,
       leaseToken: childLeaseToken,
     })).toBe(false);
