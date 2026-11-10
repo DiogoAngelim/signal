@@ -55,8 +55,8 @@ integration("PostgreSQL transactional consumer inbox", () => {
   afterAll(async () => {
     if (first) await first.close();
     if (second) await second.close();
-    await admin.query("DELETE FROM signal_consumer_inbox WHERE tenant_id = $1 AND consumer_name = $2", [tenantId, consumerName]);
-    await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", [tenantId + ":" + consumerName + ":%"]);
+    await admin.query("DELETE FROM signal_consumer_inbox WHERE consumer_name = $1", [consumerName]);
+    await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", ["%:" + consumerName + ":%"]);
     if (roleName) {
       await admin.query(`DROP OWNED BY "${roleName}"`);
       await admin.query(`DROP ROLE "${roleName}"`);
@@ -88,9 +88,36 @@ integration("PostgreSQL transactional consumer inbox", () => {
     expect(count.rows[0]?.count).toBe(1);
   });
 
+  it("isolates identical consumer/message identities across tenants", async () => {
+    const messageId = "same-message-" + randomUUID();
+    const otherTenantId = tenantId + "-other";
+    const firstEffect = tenantId + ":" + consumerName + ":" + messageId;
+    const secondEffect = otherTenantId + ":" + consumerName + ":" + messageId;
+    const firstResult = await first.processOnce(
+      { tenantId, consumerName, messageId },
+      async (transaction) => {
+        await transaction.query(
+          "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
+          [firstEffect],
+        );
+      },
+    );
+    const secondResult = await second.processOnce(
+      { tenantId: otherTenantId, consumerName, messageId },
+      async (transaction) => {
+        await transaction.query(
+          "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
+          [secondEffect],
+        );
+      },
+    );
+    expect(firstResult.status).toBe("processed");
+    expect(secondResult.status).toBe("processed");
+  });
+
   it("rolls back the inbox claim when the consumer transaction fails", async () => {
     const messageId = "rollback-" + randomUUID();
-    const effectKey = consumerName + ":" + messageId;
+    const effectKey = tenantId + ":" + consumerName + ":" + messageId;
     await expect(first.processOnce({ tenantId, consumerName, messageId }, async (transaction) => {
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
