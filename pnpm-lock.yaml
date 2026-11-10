@@ -369,6 +369,9 @@ importers:
 
   examples/signal-reference-lab:
     dependencies:
+      '@signal/decision':
+        specifier: workspace:*
+        version: link:../../packages/decision
       '@signal/sdk-node':
         specifier: workspace:*
         version: link:../../api/sdk-node
