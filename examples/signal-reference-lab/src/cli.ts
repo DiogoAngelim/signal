@@ -1,34 +1,74 @@
-import { readFile, writeFile } from "node:fs/promises";
+import { mkdir, readFile, writeFile } from "node:fs/promises";
+import { dirname, resolve } from "node:path";
 import { cpus, release } from "node:os";
 import { runEvaluation } from "./evaluation.js";
 import { runBenchmark, type BenchmarkReport } from "./benchmark.js";
 import { compareBenchmarks } from "./comparison.js";
+
+const provenance = () => ({
+  generatedAt: new Date().toISOString(),
+  signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected",
+  appCommit: process.env.APP_COMMIT ?? "not-injected",
+  harnessVersion: "0.1.0",
+  environment: {
+    node: process.version,
+    platform: process.platform,
+    osRelease: release(),
+    arch: process.arch,
+    cpuModel: cpus()[0]?.model ?? "unknown",
+    cpus: cpus().length,
+  },
+});
+
+async function emit(output: unknown): Promise<void> {
+  const serialized = JSON.stringify(output, null, 2);
+  const outIndex = process.argv.indexOf("--out");
+  const outputPath = outIndex >= 0 ? process.argv[outIndex + 1] : undefined;
+  if (outputPath) {
+    await mkdir(dirname(resolve(outputPath)), { recursive: true });
+    await writeFile(outputPath, serialized + "\n");
+  }
+  console.log(serialized);
+}
+
 async function main() {
   const command = process.argv[2] ?? "evaluate";
   if (command === "benchmark") {
-    const report = await runBenchmark({ iterations: Number(process.env.LAB_ITERATIONS ?? 250), concurrency: Number(process.env.LAB_CONCURRENCY ?? 16), warmup: Number(process.env.LAB_WARMUP ?? 20) });
-    const output = { generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", ...report };
-    const outIndex = process.argv.indexOf("--out");
-    if (outIndex >= 0 && process.argv[outIndex + 1]) await writeFile(process.argv[outIndex + 1], JSON.stringify(output, null, 2));
-    console.log(JSON.stringify(output, null, 2));
+    const report = await runBenchmark({
+      iterations: Number(process.env.LAB_ITERATIONS ?? 250),
+      concurrency: Number(process.env.LAB_CONCURRENCY ?? 16),
+      warmup: Number(process.env.LAB_WARMUP ?? 20),
+    });
+    await emit({ ...provenance(), ...report });
     return;
   }
+
   if (command === "compare") {
     const path = process.argv[3];
     if (!path) throw new Error("Usage: pnpm lab compare <baseline.json>");
     const baseline = JSON.parse(await readFile(path, "utf8")) as BenchmarkReport;
-    const current = await runBenchmark({ iterations: Number(process.env.LAB_ITERATIONS ?? baseline.workload.iterations), concurrency: Number(process.env.LAB_CONCURRENCY ?? baseline.workload.concurrency), warmup: Number(process.env.LAB_WARMUP ?? baseline.workload.warmup) });
-    console.log(JSON.stringify(compareBenchmarks(current, baseline), null, 2));
+    const current = await runBenchmark({
+      iterations: Number(process.env.LAB_ITERATIONS ?? baseline.workload.iterations),
+      concurrency: Number(process.env.LAB_CONCURRENCY ?? baseline.workload.concurrency),
+      warmup: Number(process.env.LAB_WARMUP ?? baseline.workload.warmup),
+    });
+    await emit({ ...provenance(), ...compareBenchmarks(current, baseline) });
     return;
   }
-  if (command === "coverage") {
-    const { capabilities } = await runEvaluation();
-    console.log(JSON.stringify({ total: capabilities.length, exercised: capabilities.filter((item) => item.status === "exercised").length, partial: capabilities.filter((item) => item.status === "partial").length, notVerified: capabilities.filter((item) => item.status === "not-verified").length, inventory: capabilities }, null, 2));
+
+  if (command === "coverage" || command === "evaluate") {
+    const report = await runEvaluation();
+    await emit({ ...provenance(), ...report });
+    if (report.results.some((item) => item.status === "failed" || item.status === "blocked")) {
+      process.exitCode = 1;
+    }
     return;
   }
-  if (command !== "evaluate") throw new Error(`Unknown command: ${command}. Use evaluate, benchmark, compare or coverage.`);
-  const report = await runEvaluation();
-  console.log(JSON.stringify({ generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", environment: { node: process.version, platform: process.platform, osRelease: release(), arch: process.arch, cpuModel: cpus()[0]?.model ?? "unknown", cpus: cpus().length }, ...report }, null, 2));
-  if (report.results.some((item) => item.status !== "passed")) process.exitCode = 1;
+
+  throw new Error(`Unknown command: ${command}. Use evaluate, benchmark, compare or coverage.`);
 }
-main().catch((error) => { console.error(error); process.exitCode = 1; });
+
+main().catch((error) => {
+  console.error(error);
+  process.exitCode = 1;
+});
