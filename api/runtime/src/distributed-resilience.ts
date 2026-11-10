@@ -33,11 +33,15 @@ export function createDistributedCircuitBreakerController(
   if (!Number.isSafeInteger(config.threshold) || config.threshold < 1) {
     throw new RangeError("Circuit breaker threshold must be a positive integer.");
   }
-  if (!Number.isFinite(config.resetTimeoutMs) || config.resetTimeoutMs <= 0) {
-    throw new RangeError("Circuit breaker reset timeout must be positive.");
+  if (!Number.isSafeInteger(config.resetTimeoutMs) || config.resetTimeoutMs < 0) {
+    throw new RangeError("Circuit breaker reset timeout must be a non-negative safe integer.");
   }
-  if (!Number.isFinite(config.probeLeaseMs) || config.probeLeaseMs <= 0) {
-    throw new RangeError("Circuit breaker probe lease must be positive.");
+  if (
+    !Number.isSafeInteger(config.probeLeaseMs) ||
+    config.probeLeaseMs < 1_000 ||
+    config.probeLeaseMs > 86_400_000
+  ) {
+    throw new RangeError("Circuit breaker probe lease must be between 1000 and 86400000 milliseconds.");
   }
 
   let probeToken: string | undefined;
