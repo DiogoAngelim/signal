@@ -12,7 +12,7 @@ import type { CaseRequest } from "./domain.js";
 
 export type ScenarioStatus = "passed" | "failed" | "blocked" | "not-run";
 export type ScenarioTarget = "signal" | "integration" | "reference-app";
-export type ScenarioResult = { id: string; title: string; target: ScenarioTarget; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; failureAttribution?: "infrastructure" | "harness" | "unclassified"; evidence: string[] };
+export type ScenarioResult = { id: string; title: string; target: ScenarioTarget; status: ScenarioStatus; durationMs: number; assertions: number; failures: string[]; failureAttribution?: "reference-app" | "infrastructure" | "harness" | "unclassified"; evidence: string[] };
 export type Capability = { id: string; area: string; capability: string; status: "exercised" | "partial" | "not-verified" | "not-applicable"; scenarios: string[]; evidence: string; limitation?: string };
 
 const capabilities: Capability[] = [
@@ -60,12 +60,13 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     const started = performance.now(), failures: string[] = []; let assertions = 0;
     const assert = (condition: unknown, message: string) => { assertions++; if (!condition) failures.push(message); };
     try { await fn(assert); } catch (error) { failures.push(error instanceof Error ? error.message : String(error)); }
+    const target: ScenarioTarget = ["lifecycle", "authorization", "tenant-isolation"].includes(id) ? "reference-app" : ["idempotency", "concurrency"].includes(id) ? "integration" : "signal";
     const failureText = failures.join(" ").toLowerCase();
     const failureAttribution = failures.length === 0 ? undefined
+      : target === "reference-app" ? "reference-app" as const
       : id === "postgres-integration" && /(econnrefused|connection terminated|database .* unavailable|timeout|could not connect)/.test(failureText) ? "infrastructure" as const
       : id === "benchmark-integrity" || /measurement integrity/.test(failureText) ? "harness" as const
       : "unclassified" as const;
-    const target: ScenarioTarget = ["lifecycle", "authorization", "tenant-isolation"].includes(id) ? "reference-app" : ["idempotency", "concurrency"].includes(id) ? "integration" : "signal";
     results.push({ id, title, target, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, failureAttribution, evidence: [`scenario:${id}`] });
   };
   await run("lifecycle", "Request → evidence → assessment → decision → authorized action → outcome", async (a) => {
