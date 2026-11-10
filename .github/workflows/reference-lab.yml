@@ -71,6 +71,8 @@ jobs:
         run: pnpm --filter @signal/reference-lab build
       - name: Semantic TypeScript typecheck
         run: pnpm --filter @signal/reference-lab typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=6144
       - name: Run Reference Lab tests
         run: node --test examples/signal-reference-lab/dist/test/*.test.js
       - name: Verify Reference Lab coverage
