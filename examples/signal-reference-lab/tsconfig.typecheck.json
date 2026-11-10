@@ -6,6 +6,6 @@
     "incremental": false,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts"],
-  "exclude": ["dist", "node_modules", "test"]
+  "include": ["src/domain.ts", "src/signal-app.ts"],
+  "exclude": ["dist", "node_modules", "test", "src/cli.ts", "src/evaluation.ts", "src/web.ts"]
 }
