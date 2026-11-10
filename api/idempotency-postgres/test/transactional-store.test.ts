@@ -139,6 +139,33 @@ describe("PostgreSQL transactional storage", () => {
     expect(mocks.poolQuery.mock.calls[0][0]).toContain("lease_token = $3");
   });
 
+  it("requires an unexpired lease for acknowledgement and retry", async () => {
+    mocks.poolQuery
+      .mockResolvedValueOnce({ rowCount: 1, rows: [] })
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] });
+    const store = createPostgresTransactionalStore({
+      connectionString: "postgres://example",
+    });
+
+    await expect(store.acknowledge({
+      id: "10",
+      workerId: "worker-1",
+      leaseToken: "lease-token-1",
+    })).resolves.toBe(true);
+    await expect(store.retry({
+      id: "10",
+      workerId: "worker-1",
+      leaseToken: "lease-token-1",
+      availableAt: new Date().toISOString(),
+      error: "expired lease",
+      maxAttempts: 5,
+    })).resolves.toBe("lease-lost");
+
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_until > now()");
+    expect(mocks.poolQuery.mock.calls[1][0]).toContain("locked_until > now()");
+    await store.close();
+  });
+
   it("reports bounded-cardinality outbox queue health", async () => {
     mocks.poolQuery.mockResolvedValueOnce({
       rowCount: 1,
