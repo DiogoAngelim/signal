@@ -108,16 +108,16 @@ const GAUGES: Record<string, { name: string; help: string }> = {
 
 const HISTOGRAMS: Record<string, { name: string; help: string }> = {
   "signal.execution.duration_ms": {
-    name: "signal_execution_duration_ms",
-    help: "Signal execution duration in milliseconds.",
+    name: "signal_execution_duration_seconds",
+    help: "Signal execution duration in seconds.",
   },
   "signal.subscribers.duration_ms": {
-    name: "signal_subscribers_duration_ms",
-    help: "Signal subscriber handler duration in milliseconds.",
+    name: "signal_subscribers_duration_seconds",
+    help: "Signal subscriber handler duration in seconds.",
   },
   "signal.errors.duration_ms": {
-    name: "signal_errors_duration_ms",
-    help: "Elapsed time before Signal runtime errors in milliseconds.",
+    name: "signal_errors_duration_seconds",
+    help: "Elapsed time before Signal runtime errors in seconds.",
   },
 };
 
@@ -242,7 +242,7 @@ export function createPrometheusMetricsRecorder(
       }));
       if (!sample) return;
       sample.count += 1;
-      sample.sum += durationMs;
+      sample.sum += durationMs / 1_000;
       for (let index = 0; index < buckets.length; index += 1) {
         if (durationMs <= buckets[index]!) sample.bucketCounts[index]! += 1;
       }
@@ -279,7 +279,7 @@ export function createPrometheusMetricsRecorder(
             cumulative += sample.bucketCounts[index]!;
             lines.push(
               definition.name + "_bucket" +
-              renderLabels(sample.labels, ["le", String(buckets[index])]) +
+              renderLabels(sample.labels, ["le", String(buckets[index]! / 1_000)]) +
               " " + cumulative,
             );
           }
