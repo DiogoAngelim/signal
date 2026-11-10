@@ -135,7 +135,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === "POST" && path === "/auth/login") {
       if (!sameOrigin(req)) return json(res, 403, { error: "Request origin rejected." });
       const body = await readBody(req);
-      const ip = String(req.headers["x-forwarded-for"] ?? "unknown").split(",")[0].trim();
+      const ip = String(req.headers["x-forwarded-for"] ?? "unknown").split(",").at(-1)?.trim() || "unknown";
       const ipHash = createHmac("sha256", process.env.SESSION_SECRET ?? "").update(ip).digest("hex");
       const attempts = await database().query(
         `INSERT INTO reference_lab_auth_attempts (ip_hash, window_started_at, attempts)
