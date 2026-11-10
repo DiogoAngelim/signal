@@ -64,7 +64,7 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 |---|---|
 | Protocol schemas, SDK operation definitions, runtime query/mutation dispatch | Exercised |
 | Event publication and in-process subscription | Exercised |
-| Mutation idempotency and concurrent duplicates | Partial: memory-backed runtime only; no distributed proof |
+| Mutation idempotency and concurrent duplicates | In-memory concurrency and PostgreSQL-backed replay are exercised; cross-process contention remains unverified |
 | Tenant boundary | Exercised at application repository boundary; not an external identity/authentication certification |
 | Decision evidence assessment, governance, stewardship and rationale | Exercised through `@signal/decision` |
 | Decision record and outcome review storage | Partial: in-memory and PostgreSQL adapters are exercised; compaction and retention scheduling remain unverified |
@@ -75,14 +75,15 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | PostgreSQL transactions and idempotency | Exercised against PostgreSQL 16 in CI; cross-process contention remains a separate validation gate |
 | Durable outbox | Partial: PostgreSQL-backed transactional enqueue and delivery are exercised; crash-after-claim recovery and stale-worker fencing are not injected in this harness |
 | Transactional consumer inbox | Exercised against PostgreSQL 16 with duplicate message suppression |
-| Shared retry budget and distributed circuit breaker | Exercised against PostgreSQL 16; multi-region behavior and real provider failure remain unverified |
-| Durable replay evidence and append-only audit ledger | Exercised against PostgreSQL 16; external key custody/anchor operations remain deployment responsibilities |
+| Shared retry budget and distributed circuit breaker | PostgreSQL coordination is exercised; multi-region behavior and real provider failure remain unverified |
+| Durable replay evidence and append-only audit ledger | PostgreSQL persistence, hash-chain verification and signed checkpoint anchoring are exercised; external key custody and independent anchoring remain deployment responsibilities |
 | HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |
 | Runtime-level authorization | Exercised with `requireMutationAuthorization` and operation-level scope policy |
-| Retry budgets and local circuit breakers | Exercised deterministically; distributed coordination and real provider failure remain unverified |
+| Local retry budgets and circuit breakers | Deterministic local transitions are exercised; PostgreSQL shared coordination is covered separately |
 | Replay evidence integrity | Partial; content-addressed record creation and verification tested, full replay executor not integrated |
-| Audit chains/checkpoints and tamper detection | Exercised for hash-chain verification and signed checkpoint anchoring; durable external ledger not configured |
+| Audit chains/checkpoints and tamper detection | In-memory verification and PostgreSQL append-only ledger/checkpoints are exercised |
 | Runtime lifecycle telemetry collection | Exercised through Signal `ObservabilityPort` in memory |
+| Prometheus metrics exposition and cardinality bounds | Partial: counters/histograms render with bounded series; external scrape and trace export remain unverified |
 | Local throughput/latency/RSS benchmark | Exercised; production load, distributed metrics/tracing export and soak remain unverified |
 | Kernel legacy compatibility and Signal CLI certification surfaces | Not verified / not applicable to the current workflow |
 
