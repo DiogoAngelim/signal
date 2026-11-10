@@ -311,6 +311,7 @@ architecture evidence, add a focused audit document and link it here.
 | [Governance](governance.md) | Protocol evolution, RFCs, schemas, fixtures, and contract management. |
 | [Multi-Domain Examples](multi-domain-examples.md) | How Signal's decision-processing model applies across domains. |
 | [Stewardship Evolution Audit](stewardship-evolution-audit.md) | Assessment of the decision stewardship ledger batch, remaining persistence/UI boundaries, and validation evidence. |
+| [Engineering and Architecture Score](engineering-score-system.md) | Weighted engineering scorecard, evidence maturity, benchmark protocol, score caps, and assessment governance. |
 
 ## Decision Quality
 
