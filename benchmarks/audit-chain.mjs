@@ -123,7 +123,11 @@ for (const size of sizes) {
   results.push({
     chainLength: size,
     runs,
-    appendLatency: stats(appendRuns.map((run) => run.appendLatency.p50Ms)),
+    appendLatency: {
+      p50Ms: stats(appendRuns.map((run) => run.appendLatency.p50Ms)).p50Ms,
+      p95Ms: stats(appendRuns.map((run) => run.appendLatency.p95Ms)).p50Ms,
+      p99Ms: stats(appendRuns.map((run) => run.appendLatency.p99Ms)).p50Ms,
+    },
     appendEntriesPerSecond: stats(appendRuns.map((run) => run.appendEntriesPerSecond)),
     fullChainVerification: stats(verifyRuns),
     signedCheckpointCreation: stats(signRuns),
