@@ -39,6 +39,8 @@ From the repository root:
 
 ```sh
 pnpm install
+npm ci --prefix signal-cli
+npm run build --prefix signal-cli
 pnpm --filter @signal/reference-lab build
 pnpm --filter @signal/reference-lab evaluate
 pnpm --filter @signal/reference-lab coverage:verify
