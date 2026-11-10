@@ -67,3 +67,7 @@ api/runtime/coverage
 api/runtime/coverage/**
 api/**/coverage
 api/**/coverage/**
+
+# Explicitly retain the Reference Lab static frontend
+!public
+!public/**
