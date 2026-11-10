@@ -249,7 +249,11 @@ export function createPrometheusMetricsRecorder(
     },
 
     render() {
-      const lines: string[] = [];
+      const lines: string[] = [
+        "# HELP signal_prometheus_recorder_dropped_series_total New metric label series rejected by the configured cardinality limit.",
+        "# TYPE signal_prometheus_recorder_dropped_series_total counter",
+        "signal_prometheus_recorder_dropped_series_total " + dropped,
+      ];
       for (const [source, definition] of Object.entries(COUNTERS)) {
         const samples = counters.get(source);
         if (!samples?.size) continue;
