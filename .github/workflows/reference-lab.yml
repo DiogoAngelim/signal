@@ -1,4 +1,9 @@
 name: Signal Reference Lab
+
+concurrency:
+  group: signal-reference-lab-${{ github.ref }}
+  cancel-in-progress: true
+
 on:
   pull_request:
     paths:
