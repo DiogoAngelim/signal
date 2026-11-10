@@ -44,7 +44,7 @@ appRuntime.registerQuery(sdk.defineQuery({
 const app = binding.createSignalHttpServer(appRuntime, {
   rateLimits: {
     query: {
-      max: iterations * runs + Math.max(100, Math.floor(iterations / 10)) * runs + 1000,
+      max: concurrency.length * (iterations * runs + Math.max(100, Math.floor(iterations / 10)) * runs) + 1000,
       timeWindow: 60_000,
     },
   },
