@@ -14,6 +14,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   const tenantId = "tenant-inbox-" + randomUUID();
   const consumerName = "inbox-test-" + randomUUID();
   let roleName: string;
+  let roleCreated = false;
   let scopedConnectionString: string;
 
   beforeAll(async () => {
@@ -32,6 +33,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
     roleName = "signal_inbox_test_" + suffix;
     const password = randomUUID().replaceAll("-", "");
     await admin.query(`CREATE ROLE "${roleName}" LOGIN PASSWORD '${password}'`);
+    roleCreated = true;
     const databaseName = decodeURIComponent(new URL(connectionString!).pathname.slice(1));
     const quotedDatabaseName = '"' + databaseName.replaceAll('"', '""') + '"';
     await admin.query(`GRANT CONNECT ON DATABASE ${quotedDatabaseName} TO "${roleName}"`);
@@ -57,7 +59,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
     if (second) await second.close();
     await admin.query("DELETE FROM signal_consumer_inbox WHERE consumer_name = $1", [consumerName]);
     await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", ["%:" + consumerName + ":%"]);
-    if (roleName) {
+    if (roleCreated) {
       await admin.query(`DROP OWNED BY "${roleName}"`);
       await admin.query(`DROP ROLE "${roleName}"`);
     }
