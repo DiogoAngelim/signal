@@ -229,6 +229,7 @@ pnpm verify:exports
 - [Developer Adoption Validation](docs/developer-adoption-validation.md) — independent first-use measurement protocol
 - [Application Integration Contract](docs/application-integration-contract.md) — mandatory application integration states, architecture, security, reliability, testing, and future assessment workflow
 - [Signal Reference Lab Case Study](docs/case-studies/signal-reference-lab.md) — reproducible CI evidence, measured results, limitations, and reproduction steps
+- [Workbench Application Integration Case Study](docs/case-studies/workbench-integration.md) — released-package consumption, domain boundaries, automated verification, and business-claim limitations
 - [Credibility Case-Study Selection](docs/credibility-case-study-selection.md) — evidence-led selection, current validation boundaries, and case-study claim policy
 
 ## Example App Links
