@@ -42,6 +42,36 @@ best-effort. It counts dropped events and export failures; it is not a durable
 queue. If telemetry must survive process loss, provide a durable collector or
 agent outside the process and monitor the collector independently.
 
+## Prometheus scrape integration
+
+Signal exports a bounded Prometheus text recorder through
+`createPrometheusMetricsRecorder` from `@signal/runtime`. Compose it with
+`createSignalMetricsObservabilityPort` and expose `recorder.render()` from an
+authenticated or network-restricted `/metrics` endpoint using
+`text/plain; version=0.0.4; charset=utf-8`. Configure Prometheus to scrape
+each replica and remote-write or retain samples in the operator-managed
+monitoring backend.
+
+The recorder uses a fixed metric-name and label-value allowlist, defaults to
+1,000 retained label series, counts dropped new series, and exports duration
+histograms in seconds. It deliberately rejects arbitrary metric names and
+unbounded labels. The recorder itself is process-local and is not a durable
+telemetry store; Prometheus scraping and backend retention provide the
+persistence boundary. Monitor scrape failures and target availability
+independently from Signal.
+
+Example wiring:
+
+    import {
+      createPrometheusMetricsRecorder,
+      createSignalMetricsObservabilityPort,
+    } from "@signal/runtime";
+
+    const metrics = createPrometheusMetricsRecorder({ maxSeries: 1000 });
+    const observability = createSignalMetricsObservabilityPort(metrics);
+    // Supply observability to the Signal runtime.
+    // Expose metrics.render() at a restricted /metrics endpoint.
+
 ## Define targets from measured baselines
 
 For each SLI, store:
