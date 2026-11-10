@@ -1,3 +1,4 @@
+import { createReferenceLab } from "../src/signal-app.js";
 import test from "node:test";
 import assert from "node:assert/strict";
 import { runEvaluation, scoreEngineering } from "../src/evaluation.js";
@@ -96,4 +97,22 @@ test("four-pillar scorecard rejects mismatched performance environments", () => 
   const report = scoreQuality([], benchmark);
   assert.equal(report.pillars.find((item) => item.id === "performance")?.score, null);
   assert.equal(report.overall, null);
+});
+
+test("reference lab restores durable request and event snapshots", async () => {
+  const original = createReferenceLab();
+  const request = await original.submitRequest({
+    tenantId: "tenant-a",
+    title: "Persisted request",
+    description: "A request that must survive a serverless invocation.",
+  });
+  const snapshot = original.exportState();
+  const restored = createReferenceLab({
+    initialRequests: snapshot.requests,
+    initialEvents: snapshot.events,
+  });
+  assert.deepEqual(restored.listRequests("tenant-a"), [request]);
+  assert.equal(restored.events.length, 1);
+  assert.equal(restored.events[0]?.requestId, request.id);
+  assert.deepEqual(restored.exportState(), snapshot);
 });
