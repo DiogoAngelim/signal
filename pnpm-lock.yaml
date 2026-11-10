@@ -369,6 +369,9 @@ importers:
 
   examples/signal-reference-lab:
     dependencies:
+      '@signal/binding-http':
+        specifier: workspace:*
+        version: link:../../api/binding-http
       '@signal/agency':
         specifier: workspace:*
         version: link:../../packages/agency
