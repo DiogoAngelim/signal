@@ -1,5 +1,6 @@
 import { generateKeyPairSync } from "node:crypto";
-import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry } from "@signal/sdk-node";
+import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime } from "@signal/sdk-node";
+import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
@@ -12,7 +13,7 @@ const capabilities: Capability[] = [
   { id: "protocol.envelopes-schemas", area: "Protocol", capability: "Envelope contracts, operation kinds, schema validation and normalized errors", status: "exercised", scenarios: ["invalid-input"], evidence: "SDK operation definitions validate request schemas at dispatch" },
   { id: "sdk.definitions", area: "SDK", capability: "Public query and mutation operation registration", status: "exercised", scenarios: ["lifecycle"], evidence: "createReferenceLab registers public SDK operation definitions" },
   { id: "runtime.dispatch-context", area: "Runtime", capability: "Query/mutation dispatch and execution context propagation", status: "exercised", scenarios: ["lifecycle"], evidence: "Public runtime.query and runtime.mutation calls with source context" },
-  { id: "runtime.authorization", area: "Runtime", capability: "Runtime-level mutation authorization policies", status: "not-verified", scenarios: [], evidence: "Business hard-stop is app-level; runtime authorization mode is not configured." },
+  { id: "runtime.authorization", area: "Runtime", capability: "Runtime-level mutation authorization policies", status: "exercised", scenarios: ["runtime-authorization"], evidence: "Runtime enforces authenticated context and operation-specific authorize policy." },
   { id: "runtime.idempotency", area: "Idempotency", capability: "Reservation, replay, payload conflict and concurrent duplicate handling", status: "partial", scenarios: ["idempotency"], evidence: "Stable mutation keys are passed to the default memory storage port", limitation: "No distributed storage adapter or cross-process test." },
   { id: "events.publish-subscribe", area: "Events", capability: "Event publication and in-process subscriber delivery", status: "exercised", scenarios: ["lifecycle"], evidence: "Four domain lifecycle events are published and subscribed" },
   { id: "binding.http", area: "HTTP binding", capability: "Signal HTTP query/mutation routes, validation and auth-claim rejection", status: "exercised", scenarios: ["http-binding"], evidence: "@signal/binding-http Fastify server is exercised through inject(); external verified identity middleware remains unconfigured." },
@@ -149,6 +150,26 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     const probe = breaker.acquire(1001); a(Boolean(probe), "breaker should admit one half-open probe after reset");
     if (probe) breaker.recordSuccess(probe, 1002);
     a(breaker.snapshot().state === "closed", "successful probe should close the breaker");
+  });
+  await run("runtime-authorization", "Runtime rejects unauthenticated and unauthorized mutations", async (a) => {
+    const runtime = createSignalRuntime({ runtimeName: "reference-lab-auth-test", requireMutationAuthorization: true });
+    runtime.registerMutation({
+      name: "lab.authorization.probe.v1", kind: "mutation", idempotency: "required",
+      inputSchema: z.object({ action: z.string() }), resultSchema: z.object({ accepted: z.boolean() }),
+      authorize(input, context) {
+        const actor = context.request.auth?.actor;
+        if (!actor || typeof actor === "string" || !actor.roles?.includes("lab:write") || input.action !== "write") {
+          throw new Error("The authenticated actor is not authorized for this operation.");
+        }
+      },
+      handler: () => ({ accepted: true })
+    });
+    const unauthenticated = await runtime.mutation<{ action: string }, { accepted: boolean }>("lab.authorization.probe.v1", { action: "write" }, { idempotencyKey: "no-auth" });
+    a(!unauthenticated.ok && unauthenticated.error.code === "UNAUTHORIZED", "runtime must reject missing authentication");
+    const unauthorized = await runtime.mutation<{ action: string }, { accepted: boolean }>("lab.authorization.probe.v1", { action: "write" }, { idempotencyKey: "wrong-role", auth: { actor: { id: "viewer", roles: ["lab:read"] } } });
+    a(!unauthorized.ok, "operation policy must reject insufficient roles");
+    const authorized = await runtime.mutation<{ action: string }, { accepted: boolean }>("lab.authorization.probe.v1", { action: "write" }, { idempotencyKey: "authorized", auth: { actor: { id: "operator", roles: ["lab:write"] } } });
+    a(authorized.ok && authorized.result.accepted, "authorized actor should execute mutation");
   });
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
