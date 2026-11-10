@@ -62,6 +62,10 @@ jobs:
         run: node benchmarks/runtime-dispatch.mjs --iterations 3000 --runs 3 --concurrency 1,16,64 --output benchmark-results/runtime-dispatch.json
         env:
           GITHUB_SHA: ${{ github.sha }}
+      - name: Measure calibration, uncertainty, drift, and learning primitives
+        run: node benchmarks/agency-statistics.mjs --runs 3 --sizes 1000,10000,50000 --bootstrap-iterations 1000 --output benchmark-results/agency-statistics.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
       - name: Measure in-memory circuit-breaker throughput and probe contention
         run: node benchmarks/in-memory-circuit-breaker.mjs --iterations 10000 --runs 3 --concurrency 1,16,64 --output benchmark-results/in-memory-circuit-breaker.json
         env:
