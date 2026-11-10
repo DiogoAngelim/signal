@@ -41,8 +41,30 @@ jobs:
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
+      - name: Apply patched dependency resolutions
+        id: remediation
+        continue-on-error: true
+        run: pnpm audit --fix=update
+      - name: Validate patched workspace
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm build:library
+          pnpm --filter @signal/runtime test
+          pnpm --filter @signal/binding-http test
+          pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false
+          pnpm --filter @signal/reference-server typecheck
       - name: Audit production dependency graph
         run: pnpm audit --prod --audit-level high
+      - name: Preserve dependency remediation output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-dependency-remediation-${{ github.sha }}
+          path: |
+            pnpm-lock.yaml
+            pnpm-workspace.yaml
+          if-no-files-found: error
+          retention-days: 30
 
   codeql:
     runs-on: ubuntu-latest
