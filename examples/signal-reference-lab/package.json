@@ -12,7 +12,8 @@
     "benchmark": "pnpm run build && node dist/src/cli.js benchmark",
     "compare": "pnpm run build && node dist/src/cli.js compare",
     "coverage:verify": "pnpm run build && node dist/src/cli.js coverage",
-    "start": "pnpm run build && node dist/src/web.js"
+    "start": "pnpm run build && node dist/src/web.js",
+    "db:migrate": "for migration in ../../api/idempotency-postgres/src/drizzle/migrations/*.sql; do psql \"$DATABASE_URL\" -v ON_ERROR_STOP=1 -f \"$migration\"; done"
   },
   "dependencies": {
     "@signal/sdk-node": "workspace:*",
