@@ -2,7 +2,7 @@ import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
-import { createAuditChainEntry, verifyAuditChainEntry } from "../../runtime/src/audit-chain";
+import { computeEntryHash, createAuditChainEntry, verifyAuditChainEntry } from "../../runtime/src/audit-chain";
 import { signAuditCheckpoint, verifyAuditCheckpoint } from "../../runtime/src/audit-checkpoint";
 import { createPostgresAuditLedger } from "../src/audit-ledger";
 
@@ -46,11 +46,18 @@ integration("PostgreSQL append-only audit ledger", () => {
     await ledger.appendEntry(entry);
     await expect(ledger.appendEntry({ ...entry, messageId: "duplicate-" + suffix }))
       .rejects.toThrow();
-    await expect(ledger.appendEntry({
-      ...entry,
+    const gapContent = {
       sequence: 2,
-      previousHash: entry.hash,
+      timestamp: entry.timestamp,
+      operationName: entry.operationName,
+      operationKind: entry.operationKind,
       messageId: "gap-" + suffix,
+      outcome: entry.outcome,
+      previousHash: entry.hash,
+    } as const;
+    await expect(ledger.appendEntry({
+      ...gapContent,
+      hash: computeEntryHash(gapContent),
     })).rejects.toThrow("next contiguous entry");
 
     const rows = await ledger.readEntries({ afterSequence: -1, limit: 10 });
