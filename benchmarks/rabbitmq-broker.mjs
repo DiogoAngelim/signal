@@ -142,13 +142,25 @@ try {
   }
   backlogDrainMs = performance.now() - drainStarted;
 
-  const queueAfterDrain = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
+  const queueDrainSettledStarted = performance.now();
+  let queueAfterDrain;
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    queueAfterDrain = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
+    if (
+      Number(queueAfterDrain.messages_ready ?? 0) === 0 &&
+      Number(queueAfterDrain.messages_unacknowledged ?? 0) === 0
+    ) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  const queueDrainSettledWaitMs = performance.now() - queueDrainSettledStarted;
   const duplicates = consumed - receivedSequences.size;
   if (consumed !== messages || receivedSequences.size !== messages || duplicates !== 0) {
     throw new Error(`Broker drain mismatch: consumed=${consumed}, unique=${receivedSequences.size}, expected=${messages}`);
   }
   if (Number(queueAfterDrain.messages_ready ?? 0) !== 0 || Number(queueAfterDrain.messages_unacknowledged ?? 0) !== 0) {
-    throw new Error("RabbitMQ queue retained ready or unacknowledged messages after the drain");
+    throw new Error(
+      `RabbitMQ queue did not settle: ready=${queueAfterDrain.messages_ready}, unacknowledged=${queueAfterDrain.messages_unacknowledged}, total=${queueAfterDrain.messages}`,
+    );
   }
 
   const cpu = process.cpuUsage(cpuBefore);
@@ -181,6 +193,7 @@ try {
       backlogDrainMessagesPerSecond: consumed / (backlogDrainMs / 1000),
       drainBatchLatency: stats(drainBatchLatencies),
       duplicateDeliveries: duplicates,
+      queueDrainSettledWaitMs,
       readyMessagesAfterDrain: Number(queueAfterDrain.messages_ready ?? 0),
       unacknowledgedMessagesAfterDrain: Number(queueAfterDrain.messages_unacknowledged ?? 0),
       cpuUserMs: cpu.user / 1000,
