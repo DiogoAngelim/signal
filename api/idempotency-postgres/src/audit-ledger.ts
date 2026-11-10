@@ -24,6 +24,10 @@ export interface SignalSignedAuditCheckpoint {
 
 export interface CreatePostgresAuditLedgerOptions {
   readonly connectionString: string;
+  /** Verify each entry's schema and content hash using the Signal audit-chain verifier. */
+  readonly verifyEntry: (entry: SignalAuditLedgerEntry) => boolean;
+  /** Verify checkpoint signatures against the deployment's trusted public-key registry. */
+  readonly verifyCheckpoint: (checkpoint: SignalSignedAuditCheckpoint) => boolean;
   readonly maxConnections?: number;
   readonly applicationName?: string;
 }
@@ -52,6 +56,9 @@ async function rollback(client: PoolClient): Promise<void> {
 export function createPostgresAuditLedger(
   options: CreatePostgresAuditLedgerOptions,
 ): PostgresAuditLedger {
+  if (typeof options.verifyEntry !== "function" || typeof options.verifyCheckpoint !== "function") {
+    throw new Error("Audit entry and checkpoint verification callbacks are required.");
+  }
   const pool = new Pool({
     connectionString: options.connectionString,
     max: options.maxConnections ?? 5,
@@ -65,7 +72,8 @@ export function createPostgresAuditLedger(
         !HASH_PATTERN.test(entry.hash) || !HASH_PATTERN.test(entry.previousHash) ||
         !Number.isFinite(Date.parse(entry.timestamp)) ||
         !entry.operationName || !entry.operationKind || !entry.messageId ||
-        !["completed", "replayed", "failed"].includes(entry.outcome)
+        !["completed", "replayed", "failed"].includes(entry.outcome) ||
+        !options.verifyEntry(entry)
       ) {
         throw new Error("Invalid Signal audit entry.");
       }
@@ -118,7 +126,8 @@ export function createPostgresAuditLedger(
         !Number.isSafeInteger(checkpoint.sequence) || checkpoint.sequence < -1 ||
         !HASH_PATTERN.test(checkpoint.chainHeadHash) ||
         !Number.isFinite(Date.parse(checkpoint.createdAt)) ||
-        !checkpoint.signature
+        !checkpoint.signature ||
+        !options.verifyCheckpoint(checkpoint)
       ) {
         throw new Error("Invalid signed audit checkpoint.");
       }
