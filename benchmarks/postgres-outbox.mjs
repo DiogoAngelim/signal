@@ -54,6 +54,7 @@ async function captureOutboxClaimPlan(pool, workerId) {
       RETURNING outbox.id
     `, [1000, workerId, 30_000]);
     const plan = result.rows[0]?.["QUERY PLAN"]?.[0] ?? null;
+    if (!plan) throw new Error("PostgreSQL did not return the outbox claim query plan");
     await client.query("ROLLBACK");
     return plan;
   } catch (error) {
