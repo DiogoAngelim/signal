@@ -182,7 +182,7 @@ try {
 const report = {
   schemaVersion: 1,
   benchmark: "signal-fastify-inject-query",
-  scope: "Fastify inject + HTTP binding validation + server-side auth resolver + Signal query execution and JSON serialization. Excludes TCP/TLS, reverse proxy, network, and production auth provider.",
+  scope: "Fastify inject + HTTP binding validation + server-side auth resolver + Signal query execution and JSON serialization; includes per-route rate-limit overhead and a controlled admission/rejection burst. Excludes TCP/TLS, reverse proxy, network, shared Redis storage, and production auth provider.",
   generatedAt: new Date().toISOString(),
   commit: process.env.GITHUB_SHA ?? process.env.SOURCE_COMMIT ?? "unrecorded-local-run",
   runtime: { node: process.version, platform: process.platform, arch: process.arch, cpuModel: os.cpus()[0]?.model ?? "unknown", logicalCpus: os.cpus().length },
