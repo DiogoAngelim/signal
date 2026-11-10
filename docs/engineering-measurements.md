@@ -19,7 +19,7 @@ deployment or external operator-controlled infrastructure.
 
 ## Measurement interpretation
 
-The dispatch benchmark includes envelope creation and one in-process subscriber. The HTTP benchmark uses Fastify injection rather than a TCP socket and exercises server-side auth resolution and query authorization. The PostgreSQL benchmark applies the adapter SQL migrations and runs against an ephemeral PostgreSQL 16 service, exercising the actual idempotency/outbox adapter. Run `node benchmarks/prepare-postgres.mjs` before `node benchmarks/postgres-outbox.mjs` when measuring locally. These are controlled CI measurements; they do not measure managed-database network latency, real broker delivery, multi-replica contention, or production resource limits. Compare
+The dispatch benchmark includes envelope creation and one in-process subscriber. The HTTP benchmark uses Fastify injection rather than a TCP socket and exercises server-side auth resolution, query authorization, and per-route rate limiting. A separate controlled burst verifies exact admission and rejection counts plus retry headers. The distributed circuit-breaker benchmark uses two separate PostgreSQL adapter pools against the same database row, deliberately races concurrent half-open acquisitions, and fails if more or fewer than one permit is granted per cycle. The PostgreSQL benchmark applies the adapter SQL migrations and runs against an ephemeral PostgreSQL 16 service, exercising the actual idempotency/outbox adapter. Run `node benchmarks/prepare-postgres.mjs` before `node benchmarks/postgres-outbox.mjs` when measuring locally. These are controlled CI measurements; they do not measure managed-database network latency, real broker delivery, multi-replica contention, or production resource limits. Compare
 results only across equivalent runner hardware, Node versions, build modes,
 and workload configurations. The CI runner is a repeatable regression
 environment, not a production capacity oracle.
@@ -37,7 +37,7 @@ infrastructure and must remain explicitly unvalidated until evidence exists:
 - PostgreSQL lock waits, pool saturation, query plans, and transaction duration at production-like data volume and contention.
 - Broker delivery lag, queue age, redelivery amplification, and backlog drain
   across real broker deployments.
-- Multi-process and multi-region scaling, failover, and network partition cost.
+- Multi-process and multi-region scaling, failover, and network partition cost beyond the two-adapter, single-database contention scenario measured in CI.
 - Sustained memory/CPU behavior and leak trends over hours or days.
 - Cost per 1,000 successful operations on the target hosting and database plans.
 - Availability, SLO attainment, alert quality, restore time, and recovery point.
