@@ -62,7 +62,7 @@ Without `DATABASE_URL`, the PostgreSQL scenario is explicitly reported as **bloc
 
 Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pnpm start`, `pnpm benchmark`. The local web UI listens on `127.0.0.1:4179` by default. Set `PORT` to change it.
 
-Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then compare it later with `pnpm compare -- baseline.json`. Reports include Signal/app commit identifiers, harness version, runtime and host metadata, raw per-operation samples, percentile aggregates and sample-integrity checks. Comparison rejects invalid sample sets and mismatched workload, Node/OS release, CPU model/count or architecture. The benchmark measures only local in-process query dispatch; it is not a production, PostgreSQL, HTTP or distributed benchmark.
+Persist an evaluation/scorecard with `pnpm evaluate -- --out evaluation.json`; persist a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then compare it later with `pnpm compare -- baseline.json`. Reports include Signal/app commit identifiers, harness version, runtime and host metadata, raw per-operation samples, percentile aggregates and sample-integrity checks. Comparison rejects invalid sample sets and mismatched workload, Node/OS release, CPU model/count or architecture. The benchmark measures only local in-process query dispatch; it is not a production, PostgreSQL, HTTP or distributed benchmark.
 
 ## Capability truth
 
