@@ -1,9 +1,17 @@
-import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { createHmac, randomBytes, timingSafeEqual, createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 import { createReferenceLab } from "../examples/signal-reference-lab/dist/src/signal-app.js";
 import { runEvaluation } from "../examples/signal-reference-lab/dist/src/evaluation.js";
 
+type VercelRequest = AsyncIterable<Buffer | string> & {
+  method?: string;
+  headers: Record<string, string | string[] | undefined>;
+  query: Record<string, string | string[] | undefined>;
+};
+type VercelResponse = {
+  setHeader(name: string, value: string | string[]): void;
+  status(code: number): { json(body: unknown): void };
+};
 const SESSION_COOKIE = "__Host-signal_reference_lab";
 const SESSION_SECONDS = 8 * 60 * 60;
 const TENANT_ID = "reference-lab";
@@ -47,7 +55,8 @@ function sessionCookie(value: string, maxAge: number) {
 }
 
 function authenticated(req: VercelRequest): boolean {
-  const raw = req.headers.cookie?.split(";").map((part) => part.trim()).find((part) => part.startsWith(SESSION_COOKIE + "="))?.slice(SESSION_COOKIE.length + 1);
+  const cookieHeader = req.headers.cookie;
+  const raw = (typeof cookieHeader === "string" ? cookieHeader : "").split(";").map((part) => part.trim()).find((part) => part.startsWith(SESSION_COOKIE + "="))?.slice(SESSION_COOKIE.length + 1);
   if (!raw) return false;
   const [expiryText, nonce, signature] = raw.split(".");
   if (!expiryText || !nonce || !signature) return false;
