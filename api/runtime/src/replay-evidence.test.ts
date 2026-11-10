@@ -8,6 +8,7 @@ import {
 } from "./replay-evidence";
 
 const identity = {
+  tenantId: "tenant-1",
   operationName: "decision.assess.v1",
   operationVersion: "1",
   handlerArtifactDigest: "a".repeat(64),
