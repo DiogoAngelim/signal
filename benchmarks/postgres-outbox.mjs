@@ -183,7 +183,8 @@ try {
         results.push({
           run:run+1,payloadBytes,concurrency:concurrencyLevel,iterations,completed,
           wallTimeMs,throughputOpsPerSecond:iterations/(wallTimeMs/1000),latency:stats(latencies),
-          claimBatchLatency:stats(claimLatencies),acknowledgementLatency:stats(ackLatencies),\n          queueAgeLatency:stats(queueAgeLatencies),backlogDrainMs,backlogDrainRowsPerSecond:claimedTotal/(backlogDrainMs/1000),
+          claimBatchLatency:stats(claimLatencies),acknowledgementLatency:stats(ackLatencies),
+          queueAgeLatency:stats(queueAgeLatencies),backlogDrainMs,backlogDrainRowsPerSecond:claimedTotal/(backlogDrainMs/1000),
           claimedOutboxRows:claimedTotal,acknowledgedOutboxRows:acknowledged,
           cpuUserMs:cpu.user/1000,cpuSystemMs:cpu.system/1000,cpuUtilizationPercent:cpuMs/wallTimeMs*100,
           heapUsedBeforeBytes:memoryBefore.heapUsed,heapUsedAfterBytes:memoryAfter.heapUsed,
@@ -284,4 +285,5 @@ const report={
 await mkdir(output.split("/").slice(0,-1).join("/")||".",{recursive:true});
 await writeFile(output,JSON.stringify(report,null,2));
 for(const r of results) process.stdout.write(`payload=${r.payloadBytes} concurrency=${r.concurrency} run=${r.run} commitThroughput=${r.throughputOpsPerSecond.toFixed(0)} ops/s p50=${r.latency.p50Ms.toFixed(3)}ms p95=${r.latency.p95Ms.toFixed(3)}ms p99=${r.latency.p99Ms.toFixed(3)}ms claimP95=${r.claimBatchLatency.p95Ms.toFixed(3)}ms ackP95=${r.acknowledgementLatency.p95Ms.toFixed(3)}ms queueAgeP95=${r.queueAgeLatency.p95Ms.toFixed(3)}ms backlogDrain=${r.backlogDrainRowsPerSecond.toFixed(0)} rows/s\n`);
-process.stdout.write(`deadLetter retryP95=${deadLetterTransition.retryTransitionLatencyMs.toFixed(3)}ms status=${deadLetterTransition.persistedStatus}\n`);\nprocess.stdout.write(`Wrote ${output}\n`);
+process.stdout.write(`deadLetter retryP95=${deadLetterTransition.retryTransitionLatencyMs.toFixed(3)}ms status=${deadLetterTransition.persistedStatus}\n`);
+process.stdout.write(`Wrote ${output}\n`);
