@@ -14,7 +14,7 @@ The workflow exercises:
 - `@signal/semantic-state`: generic-state lexicon interpretation;
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
 
-The evaluation harness runs twelve deterministic scenarios:
+The evaluation harness runs thirteen deterministic scenarios:
 - end-to-end request, evidence, assessment, decision, approved action and outcome;
 - evidence hard-stop and action authorization;
 - tenant isolation;
@@ -23,6 +23,7 @@ The evaluation harness runs twelve deterministic scenarios:
 - audit-chain integrity and signed checkpoint verification;
 - replay-evidence integrity;
 - retry-budget and circuit-breaker recovery;
+- PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger.
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
 
@@ -40,6 +41,17 @@ pnpm --filter @signal/reference-lab coverage:verify
 pnpm --filter @signal/reference-lab start
 pnpm --filter @signal/reference-lab benchmark
 ```
+
+For the full PostgreSQL integration profile, start the isolated local database and apply Signal's actual migrations:
+
+```sh
+docker compose -f examples/signal-reference-lab/infrastructure/docker-compose.yml up -d
+export DATABASE_URL=postgresql://signal:signal@localhost:54329/signal_reference_lab
+pnpm --filter @signal/reference-lab db:migrate
+pnpm --filter @signal/reference-lab evaluate
+```
+
+Without `DATABASE_URL`, the PostgreSQL scenario is explicitly reported as **blocked**, not passed. CI provisions PostgreSQL 16, applies the same migrations, and requires that scenario to pass.
 
 Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pnpm start`, `pnpm benchmark`. The local web UI listens on `127.0.0.1:4179` by default. Set `PORT` to change it.
 
@@ -59,7 +71,10 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Commitment constraints and resource allocation | Exercised through `@signal/commitment` |
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
-| PostgreSQL transactions, outbox/inbox, locking and crash recovery | Not verified |
+| PostgreSQL transactions, idempotency and durable outbox | Exercised against PostgreSQL 16 in CI; at-least-once delivery is not exactly-once external effects |
+| Transactional consumer inbox | Exercised against PostgreSQL 16 with duplicate message suppression |
+| Shared retry budget and distributed circuit breaker | Exercised against PostgreSQL 16; multi-region behavior and real provider failure remain unverified |
+| Durable replay evidence and append-only audit ledger | Exercised against PostgreSQL 16; external key custody/anchor operations remain deployment responsibilities |
 | HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |
 | Runtime-level authorization | Exercised with `requireMutationAuthorization` and operation-level scope policy |
 | Retry budgets and local circuit breakers | Exercised deterministically; distributed coordination and real provider failure remain unverified |
