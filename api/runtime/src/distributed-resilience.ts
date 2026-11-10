@@ -88,6 +88,25 @@ export class DistributedCircuitBreakerOpenError extends Error {
   }
 }
 
+export class DistributedCircuitBreakerOutcomeNotRecordedError extends Error {
+  readonly code = "CIRCUIT_BREAKER_OUTCOME_NOT_RECORDED";
+  constructor(outcome: "success" | "failure") {
+    super(`The distributed circuit breaker did not record the dependency ${outcome} outcome; its permit may have expired or the breaker generation may have changed.`);
+    this.name = "DistributedCircuitBreakerOutcomeNotRecordedError";
+  }
+}
+
+function reportCoordinationError(
+  callback: ((error: unknown) => void) | undefined,
+  error: unknown,
+): void {
+  try {
+    callback?.(error);
+  } catch {
+    // Telemetry callbacks must never replace the dependency's actual result.
+  }
+}
+
 /**
  * Executes a real dependency call through the shared breaker controller.
  * Applications should use this wrapper at outbound dependency boundaries;
@@ -104,7 +123,7 @@ export async function executeWithDistributedCircuitBreaker<T>(
   try {
     allowed = await controller.tryAcquire();
   } catch (error) {
-    options.onCoordinationError?.(error);
+    reportCoordinationError(options.onCoordinationError, error);
     throw error;
   }
   if (!allowed) throw new DistributedCircuitBreakerOpenError();
@@ -112,16 +131,28 @@ export async function executeWithDistributedCircuitBreaker<T>(
   try {
     const result = await operation();
     try {
-      await controller.recordSuccess();
+      const recorded = await controller.recordSuccess();
+      if (!recorded) {
+        reportCoordinationError(
+          options.onCoordinationError,
+          new DistributedCircuitBreakerOutcomeNotRecordedError("success"),
+        );
+      }
     } catch (error) {
-      options.onCoordinationError?.(error);
+      reportCoordinationError(options.onCoordinationError, error);
     }
     return result;
   } catch (error) {
     try {
-      await controller.recordFailure();
+      const recorded = await controller.recordFailure();
+      if (!recorded) {
+        reportCoordinationError(
+          options.onCoordinationError,
+          new DistributedCircuitBreakerOutcomeNotRecordedError("failure"),
+        );
+      }
     } catch (coordinationError) {
-      options.onCoordinationError?.(coordinationError);
+      reportCoordinationError(options.onCoordinationError, coordinationError);
     }
     throw error;
   }
