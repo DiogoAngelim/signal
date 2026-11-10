@@ -71,6 +71,16 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
   });
 
+  it("creates a transactional consumer inbox with a stable deduplication key", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0008_transactional_consumer_inbox.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_consumer_inbox");
+    expect(sql).toContain("PRIMARY KEY (consumer_name, message_id)");
+    expect(sql).toContain("processed_at timestamptz");
+  });
+
   it("creates a shared cross-process retry token bucket", () => {
     const sql = readFileSync(
       join(__dirname, "../src/drizzle/migrations/0007_shared_retry_budgets.sql"),
