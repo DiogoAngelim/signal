@@ -3,6 +3,7 @@ import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditChe
 import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
+import { NeonPostgresAdapter } from "@signal/decision-memory";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
@@ -39,7 +40,7 @@ const capabilities: Capability[] = [
   { id: "workflow.action-execution", area: "Workflow", capability: "Human-approved action execution and outcome gating", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "Action execution rejects missing/rejected approvals; outcome capture requires an executed action." },
   { id: "agency.policy", area: "Agency", capability: "Policy gate, action authorization and outcome cycle", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/agency createAgencyPipeline executes decision and outcome cycles with approval gate" },
   { id: "agency.calibration-learning", area: "Agency", capability: "Confidence calibration, trace learning and self-diagnosis", status: "partial", scenarios: ["lifecycle"], evidence: "Agency traces are retained and evaluated", limitation: "The sample is intentionally too small for calibrated confidence or statistically meaningful learning." },
-  { id: "memory.lifecycle", area: "Decision memory", capability: "Decision record and review persistence, retrieval, compaction and retention", status: "partial", scenarios: ["lifecycle"], evidence: "Public SDK createInMemoryDecisionMemoryStore stores decision records and outcome reviews", limitation: "In-memory only; PostgreSQL persistence, scoped retrieval, compaction and retention jobs are not exercised." },
+  { id: "memory.lifecycle", area: "Decision memory", capability: "Decision record and review persistence, retrieval, compaction and retention", status: "partial", scenarios: ["lifecycle", "postgres-integration"], evidence: "In-memory SDK store plus NeonPostgresAdapter persist and retrieve decision records and reviews.", limitation: "Compaction, retention scheduling and large-history retrieval are not benchmarked." },
   { id: "commitment.constraints", area: "Commitment", capability: "Resource constraints, feasibility and allocation policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "@signal/commitment evaluateCommitment runs for each assessment with explicit capacity and hard evidence constraints" },
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/semantic-state resolveSemanticState interprets confidence, risk, stability and coherence" },
   { id: "kernel.compatibility", area: "Kernel", capability: "Kernel orchestration, plugin contracts, stores, execution controller and replay engine", status: "not-verified", scenarios: [], evidence: "@signal/kernel is a separate orchestration surface and is not integrated into this runtime-based workflow." },
@@ -199,6 +200,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       const breakerPort = createPostgresCircuitBreakerPort({ connectionString });
       const breaker = createDistributedCircuitBreakerController(breakerPort, `reference-lab:${suffix}`, { threshold: 1, resetTimeoutMs: 0, probeLeaseMs: 1000 });
       const replayStore = createPostgresReplayEvidenceStore({ connectionString, applicationName: "signal-reference-lab-replay" });
+      const decisionMemory = new NeonPostgresAdapter({ connectionString, source: `reference-lab:${suffix}` });
       const keys = generateKeyPairSync("ed25519");
       const privateKey = keys.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
       const publicKey = keys.publicKey.export({ type: "spki", format: "pem" }).toString();
@@ -247,6 +249,23 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         a(await breaker.recordSuccess(), "distributed breaker should record successful probe");
         a((await breaker.snapshot())?.state === "closed", "successful distributed probe should close breaker");
 
+        const sampleApp = createReferenceLab();
+        const sampleRequest = await sampleApp.submitRequest({ tenantId: `tenant-${suffix}`, title: "Persist decision memory", description: "Verify decision and outcome memory survives a PostgreSQL round trip." });
+        await sampleApp.addEvidence({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, description: "Contract validated", source: "contract-registry", confidence: 0.95, verified: true });
+        await sampleApp.addEvidence({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, description: "Security validated", source: "security-review", confidence: 0.93, verified: true });
+        await sampleApp.decide({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, actor: "operator-1", approve: true, rationale: "Evidence meets the approval threshold." });
+        await sampleApp.executeAction({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, actor: "operator-1", kind: "persist-memory-test" });
+        await sampleApp.recordOutcome({ requestId: sampleRequest.id, tenantId: sampleRequest.tenantId, result: "success", notes: "Memory persistence test completed." });
+        const decisionRecord = sampleApp.listDecisionRecords()[0];
+        const decisionReview = sampleApp.listDecisionReviews()[0];
+        a(Boolean(decisionRecord && decisionReview), "reference lifecycle should produce decision and review records");
+        if (decisionRecord && decisionReview) {
+          await decisionMemory.saveDecisionRecord(decisionRecord);
+          await decisionMemory.saveDecisionReview(decisionReview);
+          a(Boolean(await decisionMemory.getDecisionRecord(decisionRecord.decisionId)), "PostgreSQL decision memory should retrieve the persisted decision");
+          a((await decisionMemory.listDecisionReviews({ decisionId: decisionRecord.decisionId })).length === 1, "PostgreSQL decision memory should retrieve the persisted review");
+        }
+
         const replayRecord = createReplayEvidenceRecord({ tenantId: `tenant-${suffix}`, executionId: `execution-${suffix}`, operationName: "lab.postgres.commit.v1", operationVersion: "v1", handlerArtifactDigest: "a".repeat(64), policyVersion: "reference-policy-v1", canonicalInput: { token: suffix }, externalReads: [], result: { committed: true } });
         await replayStore.save(replayRecord);
         const replayLoaded = await replayStore.get({ tenantId: replayRecord.tenantId, executionId: replayRecord.executionId });
@@ -265,7 +284,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         a(verifyChain(persistedAudit), "persisted audit chain should verify");
         a(Boolean(persistedCheckpoint) && verifyCheckpointAgainstChain(persistedCheckpoint!, persistedAudit), "persisted signed checkpoint should anchor the audit chain");
       } finally {
-        await Promise.all([store.close(), inbox.close(), retryBudget.close(), breakerPort.close(), replayStore.close(), auditLedger.close()]);
+        await Promise.all([store.close(), inbox.close(), retryBudget.close(), breakerPort.close(), replayStore.close(), auditLedger.close(), decisionMemory.close()]);
       }
     });
   } else {
