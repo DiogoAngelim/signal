@@ -485,7 +485,7 @@ export async function runEvaluation(options: { benchmark?: BenchmarkReport & { b
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
-  const qualityScore = scoreQuality(results, capabilityResults, options.benchmark);
+  const qualityScore = scoreQuality(results, options.benchmark);
   const qualityGates = Object.fromEntries((["signal", "integration", "reference-app"] as const).map((target) => {
     const selected = results.filter((item) => item.target === target);
     return [target, { total: selected.length, passed: selected.filter((item) => item.status === "passed").length, failed: selected.filter((item) => item.status === "failed").length, blocked: selected.filter((item) => item.status === "blocked").length }];
