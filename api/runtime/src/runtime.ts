@@ -275,6 +275,14 @@ export class SignalRuntime implements SignalBinding {
         outcome: "completed",
         isReplay: this.isReplay,
       });
+    } else {
+      this.emitExecutionFailure(
+        name,
+        "query",
+        startedAt,
+        request,
+        result.error.code,
+      );
     }
 
     return result;
@@ -335,6 +343,14 @@ export class SignalRuntime implements SignalBinding {
         outcome: "completed",
         isReplay: this.isReplay,
       });
+    } else {
+      this.emitExecutionFailure(
+        name,
+        "mutation",
+        startedAt,
+        request,
+        result.error.code,
+      );
     }
 
     return result;
@@ -463,23 +479,31 @@ export class SignalRuntime implements SignalBinding {
             ),
           };
         } catch (error) {
-          if (error instanceof ZodError) {
-            return toExecuteFailure(
-              toSignalFailure(
-                {
-                  code: "VALIDATION_ERROR",
-                  message: error.message,
-                  details: { issues: error.issues },
-                },
-                "VALIDATION_ERROR",
-                "Event payload validation failed",
-              ),
-            );
-          }
+          const failure =
+            error instanceof ZodError
+              ? toSignalFailure(
+                  {
+                    code: "VALIDATION_ERROR",
+                    message: error.message,
+                    details: { issues: error.issues },
+                  },
+                  "VALIDATION_ERROR",
+                  "Event payload validation failed",
+                )
+              : toSignalFailure(
+                  error,
+                  "INTERNAL_ERROR",
+                  "Event publish failed",
+                );
 
-          return toExecuteFailure(
-            toSignalFailure(error, "INTERNAL_ERROR", "Event publish failed"),
+          this.emitExecutionFailure(
+            input.name,
+            "event",
+            startedAt,
+            normalizedRequest,
+            failure.code,
           );
+          return toExecuteFailure(failure);
         }
       }
       default:
@@ -536,6 +560,35 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private emitExecutionFailure(
+    operationName: string,
+    operationKind: string,
+    startedAt: number,
+    request: Partial<SignalExecutionContext["request"]>,
+    errorCode: string,
+  ): void {
+    const durationMs = Math.max(0, Date.now() - startedAt);
+    const context = {
+      operationName,
+      operationKind,
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      durationMs,
+      outcome: "failed",
+      isReplay: this.isReplay,
+    };
+
+    this.emitObservation({
+      event: "execution.end",
+      ...context,
+    });
+    this.emitObservation({
+      event: "error.occurred",
+      ...context,
+      meta: { errorCode },
+    });
   }
 
   private emitObservation(event: ObservabilityContext): void {
