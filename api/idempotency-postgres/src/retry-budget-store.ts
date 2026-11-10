@@ -59,7 +59,8 @@ export function createPostgresRetryBudget(
                * signal_retry_budgets.refill_rate_per_second
            )
          ),
-         last_refill_at = GREATEST(signal_retry_budgets.last_refill_at, clock_timestamp())
+         last_refill_at = GREATEST(signal_retry_budgets.last_refill_at, clock_timestamp()),
+         updated_at = clock_timestamp()
        WHERE signal_retry_budgets.capacity = EXCLUDED.capacity
          AND signal_retry_budgets.refill_rate_per_second = EXCLUDED.refill_rate_per_second
        RETURNING available::text`,
@@ -76,7 +77,7 @@ export function createPostgresRetryBudget(
       await refill();
       const result = await pool.query<{ available: string }>(
         `UPDATE signal_retry_budgets
-         SET available = available - 1
+         SET available = available - 1, updated_at = clock_timestamp()
          WHERE budget_key = $1 AND available >= 1
          RETURNING available::text`,
         [options.budgetKey],
