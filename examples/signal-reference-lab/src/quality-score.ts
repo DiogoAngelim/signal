@@ -76,9 +76,11 @@ function criterion(
 function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] {
   if (!benchmark) return [
     criterion("performance.baseline", "Comparable performance baseline", 10, "unverified", [], "No benchmark evidence was supplied to the scorecard."),
-    criterion("performance.latency", "Latency distribution and tail behavior", 40, "unverified", [], "Requires repeated, integrity-checked workload samples."),
-    criterion("performance.throughput", "Sustained throughput and concurrency", 30, "unverified", [], "Requires a representative workload and comparable host."),
-    criterion("performance.resources", "Memory and resource efficiency", 20, "unverified", [], "Requires comparable resource measurements and workload."),
+    criterion("performance.latency", "Latency distribution and tail behavior", 30, "unverified", [], "Requires repeated, integrity-checked workload samples."),
+    criterion("performance.throughput", "Sustained throughput and concurrency", 25, "unverified", [], "Requires a representative workload and comparable host."),
+    criterion("performance.resources", "Memory and resource efficiency", 15, "unverified", [], "Requires comparable resource measurements and workload."),
+    criterion("performance.system-profile", "HTTP, database and distributed workload profile", 10, "unverified", [], "Current benchmark covers local in-process query dispatch only."),
+    criterion("performance.sustained-load", "Sustained load, saturation and soak behavior", 10, "unverified", [], "No long-duration load or saturation profile is currently measured."),
   ];
 
   const valid = benchmark.integrity.valid &&
@@ -103,6 +105,8 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     criterion("performance.latency", "Latency distribution and tail behavior", 30, "unverified", valid ? [`Observed p95=${benchmark.timing.p95Ms}ms; p99=${benchmark.timing.p99Ms}ms`] : [], "A valid sample set without a matched baseline is descriptive, not a regression score."),
     criterion("performance.throughput", "Sustained throughput and concurrency", 20, "unverified", valid ? [`Observed ${benchmark.timing.throughputPerSecond} operations/second at concurrency ${benchmark.workload.concurrency}`] : [], "A single local run does not establish sustained or production throughput."),
     criterion("performance.resources", "Memory and resource efficiency", 15, "unverified", valid ? [`Observed RSS delta=${benchmark.environment.rssAfter - benchmark.environment.rssBefore} bytes`] : [], "RSS is process- and host-dependent; compare repeated matched runs."),
+    criterion("performance.system-profile", "HTTP, database and distributed workload profile", 10, "unverified", [], "Current benchmark covers local in-process query dispatch only."),
+    criterion("performance.sustained-load", "Sustained load, saturation and soak behavior", 10, "unverified", [], "No long-duration load or saturation profile is currently measured."),
   ];
   const regression = (current: number, prior: number, higherIsBetter: boolean) => {
     if (prior <= 0) return 0;
@@ -120,6 +124,8 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     criterion("performance.latency", "Latency distribution and tail behavior", 30, "validated", [scoreEvidence("p95 ms", benchmark.timing.p95Ms, baseline.timing.p95Ms), scoreEvidence("p99 ms", benchmark.timing.p99Ms, baseline.timing.p99Ms)]),
     criterion("performance.throughput", "Sustained throughput and concurrency", 20, "validated", [scoreEvidence("operations/second", benchmark.timing.throughputPerSecond, baseline.timing.throughputPerSecond)]),
     criterion("performance.resources", "Memory and resource efficiency", 15, "validated", [scoreEvidence("RSS delta bytes", currentRss, baselineRss)]),
+    criterion("performance.system-profile", "HTTP, database and distributed workload profile", 10, "unverified", [], "Current benchmark covers local in-process query dispatch only."),
+    criterion("performance.sustained-load", "Sustained load, saturation and soak behavior", 10, "unverified", [], "No long-duration load or saturation profile is currently measured."),
   ].map((item) => item.id === "performance.latency" ? { ...item, score: latencyScore, evidence: [...item.evidence, `derived score=${latencyScore.toFixed(2)}`] } : item.id === "performance.throughput" ? { ...item, score: throughputScore, evidence: [...item.evidence, `derived score=${throughputScore.toFixed(2)}`] } : item.id === "performance.resources" ? { ...item, score: resourceScore, evidence: [...item.evidence, `derived score=${resourceScore.toFixed(2)}`] } : item);
 }
 
@@ -154,28 +160,38 @@ export function scoreQuality(
 ): QualityScorecard {
   const s = (id: string) => scenarioStatus(results, [id]);
   const correctness = makePillar("correctness", "Correctness", [
-    criterion("correctness.contracts", "Input contracts and invalid-input handling", 15, s("invalid-input"), ["Signal rejects malformed operation input."], undefined, true),
-    criterion("correctness.lifecycle", "End-to-end operation and state transitions", 20, s("lifecycle"), ["Request, evidence, assessment, decision, action and outcome lifecycle."], undefined, true),
-    criterion("correctness.tenant", "Tenant-scoped data access", 15, s("tenant-isolation"), ["Cross-tenant reads and writes are rejected or isolated."], undefined, true),
-    criterion("correctness.idempotency", "Duplicate and concurrent request semantics", 15, combineStatus(s("idempotency"), s("concurrency")), ["Repeated and concurrent submissions preserve one logical result."], "Cross-host behavior requires a distributed contention test."),
-    criterion("correctness.replay", "Deterministic replay and evidence integrity", 15, combineStatus(s("replay-evidence"), s("kernel-pipeline")), ["Replay evidence digest and deterministic pipeline replay."], "Cross-version replay compatibility remains a separate gate."),
-    criterion("correctness.persistence", "Persistence and transactional semantics", 20, s("postgres-integration"), ["PostgreSQL transaction and persistence assertions."], "Blocked when DATABASE_URL is unavailable."),
+    criterion("correctness.contracts", "Input contracts and invalid-input handling", 12, s("invalid-input"), ["Signal rejects malformed operation input."], undefined, true),
+    criterion("correctness.lifecycle", "End-to-end operation and state transitions", 18, s("lifecycle"), ["Request, evidence, assessment, decision, action and outcome lifecycle."], undefined, true),
+    criterion("correctness.tenant", "Tenant-scoped data access", 12, s("tenant-isolation"), ["Cross-tenant reads and writes are rejected or isolated."], undefined, true),
+    criterion("correctness.idempotency", "Duplicate and concurrent request semantics", 14, combineStatus(s("idempotency"), s("concurrency")), ["Repeated and concurrent submissions preserve one logical result."], "Cross-host behavior requires a distributed contention test."),
+    criterion("correctness.replay", "Deterministic replay and evidence integrity", 14, combineStatus(s("replay-evidence"), s("kernel-pipeline")), ["Replay evidence digest and deterministic pipeline replay."], "Cross-version replay compatibility remains a separate gate."),
+    criterion("correctness.persistence", "Persistence and transactional semantics", 14, s("postgres-integration"), ["PostgreSQL transaction and persistence assertions."], "Blocked when DATABASE_URL is unavailable."),
+    criterion("correctness.compatibility", "Schema and cross-version compatibility", 8, "unverified", [], "Historical schema evolution and cross-version compatibility are not exercised by this suite."),
+    criterion("correctness.property-tests", "Property-based, fuzz and metamorphic verification", 8, "unverified", [], "Deterministic scenario tests do not replace fuzzing or property-based invariant exploration."),
   ]);
   const security = makePillar("security", "Security", [
-    criterion("security.authentication", "Runtime authentication enforcement", 20, combineStatus(s("runtime-authorization"), s("http-binding")), ["Unauthenticated and forged HTTP identity claims are rejected."], "External identity-provider integration is not certified.", true),
-    criterion("security.authorization", "Operation-level authorization and least privilege", 20, s("runtime-policy"), ["Actor roles and operation scope are checked."], undefined, true),
-    criterion("security.tenant", "Tenant isolation and cross-tenant access control", 15, s("tenant-isolation"), ["Tenant boundary scenario."], undefined, true),
-    criterion("security.audit", "Tamper-evident audit and signed checkpoints", 20, s("audit-integrity"), ["Hash-chain verification, checkpoint signatures and tamper detection."], "External key custody and independent anchoring are not tested.", true),
-    criterion("security.replay", "Replay evidence integrity and tenant scoping", 10, s("replay-evidence"), ["Content-addressed replay evidence verification."], "Full replay executor is not integrated."),
-    criterion("security.persistence", "Durable security controls and database isolation", 15, s("postgres-integration"), ["PostgreSQL inbox, tenant-scoped replay storage and append-only audit ledger."], "Blocked when DATABASE_URL is unavailable."),
+    criterion("security.authentication", "Runtime authentication enforcement", 12, combineStatus(s("runtime-authorization"), s("http-binding")), ["Unauthenticated and forged HTTP identity claims are rejected."], "External identity-provider integration is not certified.", true),
+    criterion("security.authorization", "Operation-level authorization and least privilege", 14, s("runtime-policy"), ["Actor roles and operation scope are checked."], undefined, true),
+    criterion("security.tenant", "Tenant isolation and cross-tenant access control", 14, s("tenant-isolation"), ["Tenant boundary scenario."], undefined, true),
+    criterion("security.audit", "Tamper-evident audit and signed checkpoints", 14, s("audit-integrity"), ["Hash-chain verification, checkpoint signatures and tamper detection."], "External key custody and independent anchoring are not tested.", true),
+    criterion("security.replay", "Replay evidence integrity and tenant scoping", 8, s("replay-evidence"), ["Content-addressed replay evidence verification."], "Full replay executor is not integrated."),
+    criterion("security.persistence", "Durable security controls and database isolation", 10, s("postgres-integration"), ["PostgreSQL inbox, tenant-scoped replay storage and append-only audit ledger."], "Blocked when DATABASE_URL is unavailable."),
+    criterion("security.external-identity", "External identity-provider integration", 8, "unverified", [], "The harness verifies trusted runtime context handling but does not integrate a production identity provider."),
+    criterion("security.key-custody", "Independent cryptographic key custody and rotation", 8, "unverified", [], "Test keys are generated locally; external key custody, rotation and independent checkpoint anchoring are not tested."),
+    criterion("security.supply-chain", "Dependency vulnerability and supply-chain assurance", 6, "unverified", [], "Repository security workflows are separate from this deterministic runtime evaluation and their artifacts are not ingested here."),
+    criterion("security.static-analysis", "Static security analysis and secret scanning", 6, "unverified", [], "SAST and secret-scanning evidence is not currently ingested by this scorecard."),
+    criterion("security.confidentiality", "Data confidentiality and encryption at rest/in transit", 4, "unverified", [], "The reference suite does not certify deployment-level encryption or data-loss controls."),
   ]);
   const reliability = makePillar("reliability", "Reliability", [
-    criterion("reliability.idempotency", "Idempotency under retries and duplicate delivery", 20, combineStatus(s("idempotency"), s("concurrency")), ["Duplicate and concurrent request scenarios."], "Cross-process and cross-host contention remain distinct validation gates."),
-    criterion("reliability.retry", "Bounded retries and retry-budget enforcement", 15, s("resilience"), ["Retry budget and bounded retry execution."], undefined, true),
-    criterion("reliability.breaker", "Circuit-breaker transitions and recovery", 15, s("resilience"), ["Open, half-open and successful recovery transitions."], undefined, true),
-    criterion("reliability.outbox", "Durable event delivery and consumer deduplication", 20, s("postgres-integration"), ["Transactional outbox/inbox integration assertions."], "Crash-after-claim recovery and stale-worker fencing are not injected."),
-    criterion("reliability.persistence", "Durable state and restart-safe recovery", 20, s("postgres-integration"), ["PostgreSQL persistence and adapter-peer replay assertions."], "Long-duration crash/restart and multi-process tests remain outstanding."),
+    criterion("reliability.idempotency", "Idempotency under retries and duplicate delivery", 15, combineStatus(s("idempotency"), s("concurrency")), ["Duplicate and concurrent request scenarios."], "Cross-process and cross-host contention remain distinct validation gates."),
+    criterion("reliability.retry", "Bounded retries and retry-budget enforcement", 10, s("resilience"), ["Retry budget and bounded retry execution."], undefined, true),
+    criterion("reliability.breaker", "Circuit-breaker transitions and recovery", 10, s("resilience"), ["Open, half-open and successful recovery transitions."], undefined, true),
+    criterion("reliability.outbox", "Durable event delivery and consumer deduplication", 15, s("postgres-integration"), ["Transactional outbox/inbox integration assertions."], "Crash-after-claim recovery and stale-worker fencing are not injected."),
+    criterion("reliability.persistence", "Durable state and adapter rehydration", 15, s("postgres-integration"), ["PostgreSQL persistence and adapter-peer replay assertions."], "Long-duration crash/restart and multi-process tests remain outstanding."),
     criterion("reliability.observability", "Operational telemetry and bounded metrics", 10, s("observability-metrics"), ["Prometheus counters, histogram exposition and cardinality bounds."], "External scrape, alerting and trace export are not tested."),
+    criterion("reliability.crash-recovery", "Crash recovery and stale-worker fencing", 10, "unverified", [], "Crash-after-claim recovery and stale-worker fencing are not injected."),
+    criterion("reliability.distributed-contention", "Multi-process and cross-host contention", 10, "unverified", [], "Adapter-peer tests do not establish real multi-process or cross-host contention behavior."),
+    criterion("reliability.soak", "Long-duration soak and fault-injection behavior", 5, "unverified", [], "No long-duration soak or systematic chaos/fault-injection profile is currently run."),
   ]);
   const performance = makePillar("performance", "Performance", performanceCriteria(benchmark));
   const pillars = [correctness, security, performance, reliability];
