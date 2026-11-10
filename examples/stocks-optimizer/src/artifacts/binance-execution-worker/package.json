@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "build": "node ./build.mjs",
-    "dev": "tsx src/index.ts",
-    "start": "node --enable-source-maps ./dist/index.mjs",
+    "build": "node init && node ./build.mjs",
+    "dev": "node init && tsx src/index.ts",
+    "start": "node init && node --enable-source-maps ./dist/index.mjs",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },
   "dependencies": {
