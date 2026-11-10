@@ -42,7 +42,7 @@ integration("PostgreSQL append-only audit ledger", () => {
     await expect(ledger.appendEntry({
       ...entry,
       sequence: 2,
-      previousHash: hash,
+      previousHash: entry.hash,
       messageId: "gap-" + suffix,
     })).rejects.toThrow("next contiguous entry");
 
@@ -53,7 +53,7 @@ integration("PostgreSQL append-only audit ledger", () => {
       version: 1 as const,
       keyId: "integration-key-" + suffix,
       sequence: 0,
-      chainHeadHash: hash,
+      chainHeadHash: entry.hash,
       createdAt: new Date().toISOString(),
       signature: "test-signature-not-for-production",
     };
