@@ -444,13 +444,18 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
-  return { results, capabilities: capabilityResults, score, summary: passed + "/" + results.length + " scenarios passed; " + results.filter((item) => item.status === "blocked").length + " blocked; " + results.filter((item) => item.status === "failed").length + " failed; " + capabilityResults.filter((item) => item.status === "exercised").length + "/" + capabilityResults.length + " capabilities directly exercised." };
+  const qualityGates = Object.fromEntries((["signal", "integration", "reference-app"] as const).map((target) => {
+    const selected = results.filter((item) => item.target === target);
+    return [target, { total: selected.length, passed: selected.filter((item) => item.status === "passed").length, failed: selected.filter((item) => item.status === "failed").length, blocked: selected.filter((item) => item.status === "blocked").length }];
+  })) as Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>;
+  return { results, capabilities: capabilityResults, score, qualityGates, summary: passed + "/" + results.length + " scenarios passed; " + results.filter((item) => item.status === "blocked").length + " blocked; " + results.filter((item) => item.status === "failed").length + " failed; " + capabilityResults.filter((item) => item.status === "exercised").length + "/" + capabilityResults.length + " capabilities directly exercised." };
 }
 
 export type Scorecard = { overall: number; dimensions: { name: string; weight: number; score: number; confidence: "high" | "medium" | "low"; evidence: string[] }[]; interpretation: string };
 const weights = [{ name: "Functional correctness/effectiveness", weight: 18 }, { name: "Reliability/resilience", weight: 16 }, { name: "Performance/resource efficiency", weight: 12 }, { name: "Architecture/design", weight: 14 }, { name: "Security/privacy/integrity", weight: 12 }, { name: "Maintainability/evolvability", weight: 10 }, { name: "Testing/verification", weight: 8 }, { name: "Developer experience/adoption", weight: 6 }, { name: "Operability/delivery", weight: 4 }];
 export function scoreEngineering(results: ScenarioResult[], inventory: Capability[]): Scorecard {
-  const passRate = results.length ? results.filter((item) => item.status === "passed").length / results.length : 0;
+  const signalResults = results.filter((item) => item.target === "signal");
+  const passRate = signalResults.length ? signalResults.filter((item) => item.status === "passed").length / signalResults.length : 0;
   const statusWeight = (status: Capability["status"]) => status === "exercised" ? 1 : status === "partial" ? 0.5 : 0;
   const coverage = inventory.length ? inventory.reduce((sum, item) => sum + statusWeight(item.status), 0) / inventory.length : 0;
   const areaCoverage = (areas: string[]) => {
@@ -481,7 +486,7 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     [`Weighted capability coverage across ${inventory.length} registered surfaces: ${(coverage * 100).toFixed(0)}%.`, "Public SDK operations; separate domain/evaluation modules; no private package imports."],
     [`Security/integrity capability coverage: ${(securityCoverage * 100).toFixed(0)}%.`, "No external identity provider or full adversarial security certification."],
     ["Maintainability score derives from demonstrated capability coverage and passing scenario ratio.", "Long-term migrations, multi-version compatibility and change-cost studies are not measured."],
-    [`${results.filter((item) => item.status === "passed").length}/${results.length} scenarios passed.`, "Scenario assertions and capability evidence are independently reported."],
+    [`${signalResults.filter((item) => item.status === "passed").length}/${signalResults.length} Signal-targeted scenarios passed.`, "Reference-app and cross-boundary integration gates are reported separately and are not automatically attributed to Signal."],
     ["Documented setup, local UI, CLI workflows and reproducible scenario commands.", "External developer adoption and first-run usability have not been independently evaluated."],
     [`Signal ObservabilityPort coverage: ${(observabilityCoverage * 100).toFixed(0)}%.`, "No deployed SLOs, on-call process or external telemetry backend is configured."]
   ];
