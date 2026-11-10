@@ -1,6 +1,7 @@
 import { describe, expect, it, vi } from "vitest";
 import {
   RetryDeadlineExceededError,
+  createCircuitBreakerController,
   executeWithRetry,
 } from "./resilience";
 
@@ -70,5 +71,81 @@ describe("executeWithRetry", () => {
       signal: controller.signal,
     })).rejects.toThrow("caller cancelled");
     expect(operation).not.toHaveBeenCalled();
+  });
+});
+
+
+describe("createCircuitBreakerController", () => {
+  it("grants one half-open probe and requires its permit to close the breaker", () => {
+    let now = 100;
+    const breaker = createCircuitBreakerController(1, 50, () => now, 1_000);
+    const closedPermit = breaker.acquire(now)!;
+
+    expect(closedPermit.kind).toBe("closed");
+    expect(breaker.recordFailure(closedPermit, now)).toBe(true);
+    expect(breaker.snapshot().state).toBe("open");
+
+    now = 149;
+    expect(breaker.acquire(now)).toBeNull();
+    now = 150;
+    const probePermit = breaker.acquire(now)!;
+    expect(probePermit.kind).toBe("probe");
+    expect(breaker.acquire(now)).toBeNull();
+    expect(breaker.recordSuccess(probePermit, now)).toBe(true);
+    expect(breaker.snapshot()).toMatchObject({
+      state: "closed",
+      failureCount: 0,
+      lastFailureAt: null,
+    });
+    expect(breaker.recordSuccess(probePermit, now)).toBe(false);
+  });
+
+  it("rejects late outcomes from closed-state operations after a generation transition", () => {
+    let now = 100;
+    const breaker = createCircuitBreakerController(1, 50, () => now, 1_000);
+    const openingPermit = breaker.acquire(now)!;
+    const stalePermit = breaker.acquire(now)!;
+
+    expect(breaker.recordFailure(openingPermit, now)).toBe(true);
+    expect(breaker.snapshot().state).toBe("open");
+
+    now = 150;
+    const probePermit = breaker.acquire(now)!;
+    expect(breaker.recordSuccess(probePermit, now)).toBe(true);
+    expect(breaker.recordFailure(stalePermit, now)).toBe(false);
+    expect(breaker.snapshot().state).toBe("closed");
+  });
+
+  it("expires and fences a half-open probe whose lease is not renewed", () => {
+    let now = 100;
+    const breaker = createCircuitBreakerController(1, 0, () => now, 1_000);
+    const closedPermit = breaker.acquire(now)!;
+    expect(breaker.recordFailure(closedPermit, now)).toBe(true);
+    const firstProbe = breaker.acquire(now)!;
+
+    now = 1_100;
+    expect(breaker.renewProbe(firstProbe, now)).toBe(false);
+    expect(breaker.snapshot().state).toBe("open");
+    const replacementProbe = breaker.acquire(now)!;
+    expect(replacementProbe.id).not.toBe(firstProbe.id);
+    expect(breaker.recordSuccess(firstProbe, now)).toBe(false);
+    expect(breaker.recordSuccess(replacementProbe, now)).toBe(true);
+    expect(breaker.snapshot().state).toBe("closed");
+  });
+
+  it("renews an active probe lease and validates the lease budget", () => {
+    let now = 100;
+    const breaker = createCircuitBreakerController(1, 0, () => now, 1_000);
+    const closedPermit = breaker.acquire(now)!;
+    breaker.recordFailure(closedPermit, now);
+    const probe = breaker.acquire(now)!;
+
+    now = 900;
+    expect(breaker.renewProbe(probe, now)).toBe(true);
+    now = 1_500;
+    expect(breaker.recordSuccess(probe, now)).toBe(true);
+    expect(() => createCircuitBreakerController(1, 0, () => now, 999)).toThrow(
+      "probeLeaseMs must be between 1000 and 86400000 milliseconds",
+    );
   });
 });
