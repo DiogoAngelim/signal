@@ -49,7 +49,7 @@ export function createPostgresRetryBudget(
     const result = await pool.query<{ available: string }>(
       `INSERT INTO signal_retry_budgets
         (budget_key, capacity, refill_rate_per_second, available, last_refill_at)
-       VALUES ($1, $2, $3, $2::numeric, clock_timestamp())
+       VALUES ($1, $2::integer, $3::numeric, $2::integer::numeric, clock_timestamp())
        ON CONFLICT (budget_key) DO UPDATE SET
          available = LEAST(
            signal_retry_budgets.capacity::numeric,
