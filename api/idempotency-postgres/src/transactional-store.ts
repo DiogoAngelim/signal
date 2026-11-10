@@ -319,6 +319,20 @@ export function createPostgresTransactionalStore(
       }
     },
 
+    async renewLease(input): Promise<boolean> {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Outbox lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const renewed = await pool.query(
+        `UPDATE signal_outbox
+         SET locked_until = now() + ($4 * interval '1 millisecond')
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2
+           AND lease_token = $3 AND locked_until > now()`,
+        [input.id, input.workerId, input.leaseToken, input.leaseMs],
+      );
+      return renewed.rowCount === 1;
+    },
+
     async acknowledge(input): Promise<boolean> {
       const result = await pool.query(
         `UPDATE signal_outbox
