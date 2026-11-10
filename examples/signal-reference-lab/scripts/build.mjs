@@ -2,7 +2,7 @@ import { readdir, mkdir, readFile, rm, writeFile } from "node:fs/promises";
 import { dirname, join, relative, resolve } from "node:path";
 import ts from "typescript";
 
-const root = resolve("examples/signal-reference-lab");
+const root = resolve(".");
 const sourceRoot = join(root, "src");
 const testRoot = join(root, "test");
 const outputRoot = join(root, "dist");
