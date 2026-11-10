@@ -1,8 +1,9 @@
-import { randomUUID } from "node:crypto";
+import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
-import { createAuditChainEntry } from "../../runtime/src/audit-chain";
+import { createAuditChainEntry, verifyAuditChainEntry } from "../../runtime/src/audit-chain";
+import { signAuditCheckpoint, verifyAuditCheckpoint } from "../../runtime/src/audit-checkpoint";
 import { createPostgresAuditLedger } from "../src/audit-ledger";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
@@ -10,9 +11,15 @@ const integration = describe.skipIf(!connectionString);
 
 integration("PostgreSQL append-only audit ledger", () => {
   const admin = new Pool({ connectionString, max: 3 });
+  const signingKeys = generateKeyPairSync("ed25519");
+  const privateKey = signingKeys.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+  const publicKey = signingKeys.publicKey.export({ type: "spki", format: "pem" }).toString();
+  const keyId = "signal-audit-ledger-integration-test";
   const ledger = createPostgresAuditLedger({
     connectionString: connectionString!,
     applicationName: "signal-audit-ledger-integration-test",
+    verifyEntry: verifyAuditChainEntry,
+    verifyCheckpoint: (checkpoint) => verifyAuditCheckpoint(checkpoint, publicKey, keyId),
   });
 
   beforeAll(async () => {
@@ -49,21 +56,18 @@ integration("PostgreSQL append-only audit ledger", () => {
     const rows = await ledger.readEntries({ afterSequence: -1, limit: 10 });
     expect(rows).toContainEqual(entry);
 
-    const checkpoint = {
-      version: 1 as const,
-      keyId: "integration-key-" + suffix,
-      sequence: 0,
-      chainHeadHash: entry.hash,
-      createdAt: new Date().toISOString(),
-      signature: "test-signature-not-for-production",
-    };
+    const checkpoint = signAuditCheckpoint(
+      [entry],
+      { keyId, privateKey },
+      "2026-11-10T10:00:02.000Z",
+    );
     await ledger.appendCheckpoint(checkpoint);
     expect(await ledger.latestCheckpoint()).toMatchObject(checkpoint);
     await expect(ledger.appendCheckpoint({
       ...checkpoint,
       sequence: 1,
       chainHeadHash: "f".repeat(64),
-    })).rejects.toThrow("does not match a persisted audit chain head");
+    })).rejects.toThrow("Invalid signed audit checkpoint.");
 
     const update = await admin.query(
       "UPDATE signal_audit_entries SET entry = entry WHERE sequence = 0",
