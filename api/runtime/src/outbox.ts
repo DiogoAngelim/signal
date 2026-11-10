@@ -55,23 +55,24 @@ export async function dispatchOutboxBatch(
   let renewalInFlight: Promise<void> | undefined;
   const renewActiveLeases = async () => {
     if (renewalInFlight) return renewalInFlight;
-    renewalInFlight = (async () => {
-      for (const [id, record] of active) {
-        try {
-          const renewed = await outbox.renewLease({
-            id, workerId, leaseToken: record.leaseToken, leaseMs,
-          });
-          if (!renewed) {
-            lost.add(id);
-            active.delete(id);
-          }
-        } catch {
-          // Ownership is uncertain after a renewal error; do not finalize it.
+    renewalInFlight = Promise.all([...active.entries()].map(async ([id, record]) => {
+      if (!active.has(id)) return;
+      try {
+        const renewed = await outbox.renewLease({
+          id, workerId, leaseToken: record.leaseToken, leaseMs,
+        });
+        if (!renewed && active.has(id)) {
+          lost.add(id);
+          active.delete(id);
+        }
+      } catch {
+        // Ownership is uncertain after a renewal error; do not finalize it.
+        if (active.has(id)) {
           lost.add(id);
           active.delete(id);
         }
       }
-    })();
+    })).then(() => undefined);
     await renewalInFlight;
     renewalInFlight = undefined;
   };
