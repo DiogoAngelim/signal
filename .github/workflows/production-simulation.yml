@@ -19,6 +19,7 @@ on:
       - "api/runtime/**"
       - "api/ports/**"
       - "docs/production-simulation.md"
+      - "benchmarks/rabbitmq-broker.mjs"
       - ".github/workflows/production-simulation.yml"
   push:
     branches:
@@ -150,6 +151,8 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts --fileParallelism=false --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
 
+      - name: Measure RabbitMQ publish latency and backlog drain
+        run: node benchmarks/rabbitmq-broker.mjs --messages 500 --concurrency 32 --output simulation-evidence/rabbitmq-broker-benchmark.json
       - name: Run distributed coordination and audit trust-boundary simulations
         run: |
           set -o pipefail
@@ -241,6 +244,7 @@ jobs:
             'runtime-tests.log',
             'postgres-adapter-tests.log',
             'broker-crash-integration.log',
+            'rabbitmq-broker-benchmark.json',
             'network-fault-integration.log',
             'postgres-crash-recovery.log',
             'postgres-backup-restore.log',
