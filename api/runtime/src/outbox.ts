@@ -50,7 +50,7 @@ export async function dispatchOutboxBatch(
     leaseLost: 0,
   };
 
-  const active = new Map(records.map((record) => [record.id, record]));
+  const active = new Map<string, OutboxRecord>(records.map((record) => [record.id, record] as const));
   const lost = new Set<string>();
   let renewalInFlight: Promise<void> | undefined;
   const renewActiveLeases = async () => {
