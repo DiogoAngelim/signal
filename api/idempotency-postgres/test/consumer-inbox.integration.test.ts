@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it, vi } from "vitest";
-import { Pool } from "pg";
+import { Pool, type PoolClient } from "pg";
 import { createPostgresConsumerInbox } from "../src/consumer-inbox";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
@@ -46,7 +46,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   it("commits inbox identity with database side effects and suppresses redelivery", async () => {
     const messageId = "message-" + randomUUID();
     const effectKey = consumerName + ":" + messageId;
-    const handler = vi.fn(async (transaction) => {
+    const handler = vi.fn(async (transaction: PoolClient) => {
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
         [effectKey],
