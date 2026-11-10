@@ -21,6 +21,8 @@ on:
 jobs:
   reference-lab:
     runs-on: ubuntu-latest
+    env:
+      SIGNAL_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
