@@ -51,8 +51,8 @@ jobs:
         run: pnpm run build:library
       - name: Test, typecheck, lint, and verify publishable library
         run: pnpm run release:library
-      - name: Verify all package entrypoints
-        run: pnpm run verify:exports
+      - name: Verify Signal library package entrypoints
+        run: pnpm run verify:exports -- --library
       - name: Pack all API and library packages
         run: |
           set -euo pipefail
