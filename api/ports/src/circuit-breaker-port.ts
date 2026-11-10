@@ -11,6 +11,7 @@ export interface DistributedCircuitBreakerSnapshot {
   readonly state: "closed" | "open" | "half-open";
   readonly threshold: number;
   readonly resetTimeoutMs: number;
+  readonly probeLeaseMs: number;
 }
 
 export interface DistributedCircuitBreakerPermit {
