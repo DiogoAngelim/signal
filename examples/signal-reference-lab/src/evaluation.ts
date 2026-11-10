@@ -41,7 +41,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     try { await fn(assert); } catch (error) { failures.push(error instanceof Error ? error.message : String(error)); }
     results.push({ id, title, status: failures.length ? "failed" : "passed", durationMs: Number((performance.now() - started).toFixed(3)), assertions, failures, evidence: [`scenario:${id}`] });
   };
-  await run("lifecycle", "Request → evidence → assessment → decision → outcome", async (a) => {
+  await run("lifecycle", "Request → evidence → assessment → decision → authorized action → outcome", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review supplier access", description: "Assess whether a supplier should receive temporary access." });
     a(request.status === "received", "request should be received");
     await app.addEvidence({ requestId: request.id, tenantId: "tenant-a", description: "Contract approved by procurement", source: "contract-registry", confidence: 0.92, verified: true });
@@ -51,18 +51,22 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(Boolean(assessed?.assessment?.semanticState.word), "semantic-state should classify the assessment");
     const decision = await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: true, rationale: "Verified contract and security evidence meet policy." });
     a(decision.result === "approved", "decision should be recorded");
+    const action = await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-temporary-access" });
+    a(action.result === "completed", "approved action should execute under an accountable operator");
     const outcome = await app.recordOutcome({ requestId: request.id, tenantId: "tenant-a", result: "success", notes: "Temporary access expired as scheduled." });
     a(outcome.result === "success", "outcome should be linked to decision");
     a(app.listDecisionRecords().length === 1, "Signal decision memory should persist a decision record");
     a(app.listDecisionReviews().length === 1, "Signal decision memory should persist an outcome review");
     a(app.listAgencyTraces().length === 2, "agency should record decision and outcome cycles");
-    a(app.events.length >= 4, "lifecycle should emit request, assessment, decision and outcome events");
+    a(app.events.length >= 5, "lifecycle should emit request, assessment, decision, action and outcome events");
   });
   await run("authorization", "Insufficient evidence blocks approval", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review payment exception", description: "Assess a one-off payment exception request." });
     await app.addEvidence({ requestId: request.id, tenantId: "tenant-a", description: "Requester explanation supplied", source: "requester", confidence: 0.4, verified: false });
     let blocked = false; try { await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: true, rationale: "Approve despite missing evidence." }); } catch { blocked = true; }
     a(blocked, "approval must be blocked when assessment recommends investigation");
+    let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
+    a(actionBlocked, "action execution must be blocked without an approved decision");
   });
   await run("tenant-isolation", "Tenant boundary prevents cross-tenant reads and writes", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review data export", description: "Assess a requested export of customer data." });
