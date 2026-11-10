@@ -15,7 +15,7 @@ The workflow exercises:
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis;
 - `@signal/binding-http` and `@signal/idempotency-postgres`: HTTP dispatch plus durable idempotency, outbox/inbox, retry-budget, circuit-breaker, replay-evidence and audit adapters.
 
-The evaluation harness runs sixteen deterministic scenarios:
+The evaluation harness runs seventeen deterministic scenarios:
 - end-to-end request, evidence, assessment, decision, approved action and outcome;
 - evidence hard-stop and action authorization;
 - tenant isolation;
@@ -25,6 +25,7 @@ The evaluation harness runs sixteen deterministic scenarios:
 - replay-evidence integrity;
 - retry-budget and circuit-breaker recovery;
 - PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger;
+- agency confidence calibration, repeated-outcome learning and self-diagnosis;
 - kernel plugin registration, four-stage orchestration, lifecycle and replay;
 - Signal CLI phase-chain and artifact verification (CI-gated);
 - bounded Prometheus counters and latency histograms.
