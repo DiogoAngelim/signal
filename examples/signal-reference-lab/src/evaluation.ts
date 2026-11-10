@@ -14,6 +14,7 @@ import { SignalOrchestrator, ReplayEngine, StocksOptimizerPlugin } from "@signal
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 import { scoreQuality, type QualityScorecard } from "./quality-score.js";
+import type { BenchmarkReport } from "./benchmark.js";
 
 export type ScenarioStatus = "passed" | "failed" | "blocked" | "not-run";
 export type ScenarioTarget = "signal" | "integration" | "reference-app";
@@ -58,7 +59,7 @@ const capabilities: Capability[] = [
 
 ];
 
-export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityScore: QualityScorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
+export async function runEvaluation(options: { benchmark?: BenchmarkReport & { baseline?: BenchmarkReport } } = {}): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityScore: QualityScorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
   const results: ScenarioResult[] = [];
   const capabilityResults = capabilities.map((item) => ({ ...item, scenarios: [...item.scenarios] }));
   const run = async (id: string, title: string, fn: (assert: (condition: unknown, message: string) => void) => Promise<void>) => {
@@ -484,7 +485,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
-  const qualityScore = scoreQuality(results, capabilityResults);
+  const qualityScore = scoreQuality(results, capabilityResults, options.benchmark);
   const qualityGates = Object.fromEntries((["signal", "integration", "reference-app"] as const).map((target) => {
     const selected = results.filter((item) => item.target === target);
     return [target, { total: selected.length, passed: selected.filter((item) => item.status === "passed").length, failed: selected.filter((item) => item.status === "failed").length, blocked: selected.filter((item) => item.status === "blocked").length }];
