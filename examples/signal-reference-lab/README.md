@@ -67,13 +67,13 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Mutation idempotency and concurrent duplicates | Partial: memory-backed runtime only; no distributed proof |
 | Tenant boundary | Exercised at application repository boundary; not an external identity/authentication certification |
 | Decision evidence assessment, governance, stewardship and rationale | Exercised through `@signal/decision` |
-| Decision record and outcome review storage | Partial: public SDK in-memory store; durable persistence and retention are not exercised |
+| Decision record and outcome review storage | Partial: in-memory and PostgreSQL adapters are exercised; compaction and retention scheduling remain unverified |
 | Approved action execution | Exercised; action execution requires an approved decision and records the accountable operator |
 | Commitment constraints and resource allocation | Exercised through `@signal/commitment` |
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
-| PostgreSQL transactions, idempotency and durable outbox | Exercised against PostgreSQL 16 in CI; at-least-once delivery is not exactly-once external effects |
-| Transactional consumer inbox | Exercised against PostgreSQL 16 with duplicate message suppression |
+| PostgreSQL transactions and idempotency | Exercised against PostgreSQL 16 in CI; cross-process contention remains a separate validation gate |
+| Durable outbox | Partial: PostgreSQL-backed transactional enqueue and delivery are exercised; crash-after-claim recovery and stale-worker fencing are not injected in this harness |\n| Transactional consumer inbox | Exercised against PostgreSQL 16 with duplicate message suppression |
 | Shared retry budget and distributed circuit breaker | Exercised against PostgreSQL 16; multi-region behavior and real provider failure remain unverified |
 | Durable replay evidence and append-only audit ledger | Exercised against PostgreSQL 16; external key custody/anchor operations remain deployment responsibilities |
 | HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |
