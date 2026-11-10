@@ -53,7 +53,9 @@ durable worker guarantee.
 The dispatcher:
 - Claims rows with PostgreSQL `FOR UPDATE SKIP LOCKED`.
 - Uses expiring worker leases so abandoned claims become eligible again.
-- Acknowledges only when the worker still owns the lease.
+- Renews a live lease every third of its configured duration while a handler is running; renewal is fenced by worker ID, lease token, and the still-unexpired lease.
+- Acknowledges or retries only while the worker still owns an unexpired lease.
+- Stops processing a record when lease renewal fails; it never treats an uncertain lease as owned.
 - Retries failures with capped exponential backoff.
 - Moves records to `dead-letter` after the configured attempt limit.
 
@@ -89,8 +91,7 @@ history for investigation and controlled redrive.
 
 ## Operational limits
 
-- A lease must exceed the expected dispatch duration or be renewed by a
-  future lease-extension capability; long handlers can otherwise be reclaimed.
+- The dispatcher renews leases while handlers are running. A process pause longer than the lease, database outage, or delayed heartbeat can still cause lease loss; handlers must remain idempotent because an external side effect may finish after ownership is lost.
 - The worker identifier must be unique per active worker process.
 - Database availability is required to claim and acknowledge messages.
 - The outbox shares the database transaction boundary with idempotency state;
