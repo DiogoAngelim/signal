@@ -78,10 +78,10 @@ Persist an evaluation/scorecard with `pnpm evaluate -- --out evaluation.json`; p
 | Commitment constraints and resource allocation | Exercised through `@signal/commitment` |
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
-| PostgreSQL transactions and idempotency | Exercised against PostgreSQL 16 in CI; cross-process contention remains a separate validation gate |
+| PostgreSQL transactions and idempotency | Exercised against PostgreSQL 16 in CI; multi-process contention under production load remains a separate validation gate |
 | Durable outbox | Partial: PostgreSQL-backed transactional enqueue and delivery are exercised; crash-after-claim recovery and stale-worker fencing are not injected in this harness |
 | Transactional consumer inbox | Exercised against PostgreSQL 16 with duplicate message suppression |
-| Shared retry budget and distributed circuit breaker | PostgreSQL coordination is exercised; multi-region behavior and real provider failure remain unverified |
+| Shared retry budget and distributed circuit breaker | PostgreSQL state coordination is exercised across independent adapter instances; actual multi-process contention, multi-region behavior and real provider failure remain unverified |
 | Durable replay evidence and append-only audit ledger | PostgreSQL persistence, hash-chain verification and signed checkpoint anchoring are exercised; external key custody and independent anchoring remain deployment responsibilities |
 | HTTP binding package | Exercised through Fastify inject; external verified identity middleware remains unconfigured |
 | Runtime-level authorization | Exercised with `requireMutationAuthorization` and operation-level scope policy |
