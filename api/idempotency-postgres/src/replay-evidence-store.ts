@@ -159,7 +159,7 @@ export function createPostgresReplayEvidenceStore(
           !isValidRecord(existing.rows[0].record) ||
           stableJson(existing.rows[0].record) !== stableJson(record)
         ) {
-          throw new Error("Replay evidence execution ID already exists with different or invalid content.");
+          throw new Error("Replay evidence execution ID already exists with different content or invalid stored content.");
         }
       });
     },
