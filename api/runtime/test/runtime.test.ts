@@ -1210,6 +1210,47 @@ describe("runtime", () => {
   });
 
 
+
+  it("measures direct event publishing success and failure", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      operationKind?: string;
+      outcome?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    runtime.registerEvent(
+      defineEvent({
+        name: "observed.publish.v1",
+        kind: "event",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string() }),
+        handler: (payload) => payload,
+      }),
+    );
+
+    const envelope = await runtime.publish("observed.publish.v1", { value: "ok" });
+    await expect(runtime.publish("observed.missing.v1", {})).rejects.toMatchObject({
+      code: "UNSUPPORTED_OPERATION",
+    });
+
+    expect(envelope.name).toBe("observed.publish.v1");
+    expect(observations.filter((item) => item.event === "execution.start")).toHaveLength(2);
+    expect(observations.filter((item) => item.event === "execution.end" && item.outcome === "completed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "execution.end" && item.outcome === "failed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "event.emitted")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(1);
+    expect(observations.every((item) => item.operationKind === "event")).toBe(true);
+    expect(observations.filter((item) => item.durationMs !== undefined).every((item) => item.durationMs! >= 0)).toBe(true);
+  });
+
   it("measures concurrent replay-safe deliveries as coalesced rather than deduped", async () => {
     const observations: Array<{ event: string }> = [];
     const eventPort = createInProcessDispatcher();
