@@ -137,6 +137,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       const body = await readBody(req);
       const ip = String(req.headers["x-forwarded-for"] ?? "unknown").split(",").at(-1)?.trim() || "unknown";
       const ipHash = createHmac("sha256", process.env.SESSION_SECRET ?? "").update(ip).digest("hex");
+      await database().query("DELETE FROM reference_lab_auth_attempts WHERE window_started_at < now() - interval '24 hours'");
       const attempts = await database().query(
         `INSERT INTO reference_lab_auth_attempts (ip_hash, window_started_at, attempts)
          VALUES ($1, now(), 1)
