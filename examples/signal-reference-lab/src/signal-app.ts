@@ -89,6 +89,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   }
   return {
     runtime, events,
+    listRequests(tenantId: string) { return [...requests.values()].filter((item) => item.tenantId === tenantId).map((item) => structuredClone(item)); },
     async submitRequest(input: z.infer<typeof requestInput>) { const result = await runtime.mutation("lab.request.submit.v1", input, { ...context("lab-ui"), idempotencyKey: `submit:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.request as CaseRequest; },
     async addEvidence(input: z.infer<typeof evidenceInput>) { const result = await runtime.mutation("lab.evidence.add.v1", input, { ...context("lab-ui"), idempotencyKey: `evidence:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result as { evidence: Evidence; assessment: Assessment }; },
     async decide(input: z.infer<typeof decisionInput>) { const result = await runtime.mutation("lab.decision.record.v1", input, { ...context("lab-ui"), idempotencyKey: `decision:${hash(JSON.stringify(input))}` }); if (!result.ok) throw new Error(result.error.message); return result.result.decision as Decision; },
