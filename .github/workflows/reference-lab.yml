@@ -57,10 +57,7 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - name: Apply Signal PostgreSQL migrations
-        run: |
-          for migration in api/idempotency-postgres/src/drizzle/migrations/*.sql; do
-            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
-          done
+        run: pnpm --filter @signal/reference-lab db:migrate
       - name: Build and verify Signal CLI
         run: |
           npm ci --prefix signal-cli
