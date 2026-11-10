@@ -202,3 +202,160 @@ export function createCircuitBreakerController(
     },
   };
 }
+
+
+export class RetryDeadlineExceededError extends Error {
+  readonly code = "RETRY_DEADLINE_EXCEEDED";
+  constructor() {
+    super("The retry execution deadline was exceeded.");
+    this.name = "RetryDeadlineExceededError";
+  }
+}
+
+export class RetryAbortedError extends Error {
+  readonly code = "RETRY_ABORTED";
+  constructor(cause?: unknown) {
+    super("The retry execution was aborted.", { cause });
+    this.name = "RetryAbortedError";
+  }
+}
+
+export interface RetryExecutionOptions extends RetryPolicy {
+  /** Absolute Unix epoch milliseconds or an ISO-8601 timestamp. */
+  readonly deadlineAt?: number | string;
+  readonly signal?: AbortSignal;
+  readonly random?: () => number;
+  readonly clock?: () => number;
+  readonly sleep?: (delayMs: number, signal: AbortSignal) => Promise<void>;
+  readonly onRetry?: (input: {
+    attempt: number;
+    delayMs: number;
+    error: unknown;
+  }) => void;
+}
+
+function retryErrorCode(error: unknown): string | undefined {
+  if (typeof error !== "object" || error === null || !("code" in error)) {
+    return undefined;
+  }
+  return typeof error.code === "string" ? error.code : undefined;
+}
+
+function abortReason(signal: AbortSignal): Error {
+  if (signal.reason instanceof RetryDeadlineExceededError) {
+    return signal.reason;
+  }
+  if (signal.reason instanceof Error) return signal.reason;
+  return new RetryAbortedError(signal.reason);
+}
+
+function abortableSleep(delayMs: number, signal: AbortSignal): Promise<void> {
+  if (signal.aborted) return Promise.reject(abortReason(signal));
+  return new Promise((resolve, reject) => {
+    const timer = setTimeout(() => {
+      signal.removeEventListener("abort", onAbort);
+      resolve();
+    }, delayMs);
+    const onAbort = () => {
+      clearTimeout(timer);
+      signal.removeEventListener("abort", onAbort);
+      reject(abortReason(signal));
+    };
+    signal.addEventListener("abort", onAbort, { once: true });
+  });
+}
+
+/**
+ * Execute an operation with a bounded attempt budget, capped exponential
+ * backoff, full jitter, an absolute deadline, and caller cancellation.
+ *
+ * The operation receives an AbortSignal and must honor it to stop in-flight
+ * I/O. A deadline cannot undo a side effect already committed by a dependency;
+ * use idempotency keys at the destination for retry-safe writes.
+ */
+export async function executeWithRetry<T>(
+  operation: (attempt: number, signal: AbortSignal) => Promise<T>,
+  options: RetryExecutionOptions = DEFAULT_RETRY_POLICY,
+): Promise<T> {
+  validateRetryPolicy(options);
+  const clock = options.clock ?? Date.now;
+  const random = options.random ?? Math.random;
+  const deadlineAt = options.deadlineAt === undefined
+    ? undefined
+    : typeof options.deadlineAt === "string"
+      ? Date.parse(options.deadlineAt)
+      : options.deadlineAt;
+  if (deadlineAt !== undefined && !Number.isFinite(deadlineAt)) {
+    throw new RangeError("deadlineAt must be a valid timestamp or epoch millisecond value.");
+  }
+
+  const controller = new AbortController();
+  const externalSignal = options.signal;
+  const relayAbort = () => controller.abort(externalSignal?.reason);
+  if (externalSignal?.aborted) relayAbort();
+  else externalSignal?.addEventListener("abort", relayAbort, { once: true });
+
+  let deadlineTimer: ReturnType<typeof setTimeout> | undefined;
+  if (deadlineAt !== undefined) {
+    const remaining = deadlineAt - clock();
+    if (remaining <= 0) {
+      controller.abort(new RetryDeadlineExceededError());
+    } else {
+      deadlineTimer = setTimeout(
+        () => controller.abort(new RetryDeadlineExceededError()),
+        remaining,
+      );
+    }
+  }
+
+  const sleep = options.sleep ?? abortableSleep;
+  const raceAbort = async <TResult>(promise: Promise<TResult>): Promise<TResult> => {
+    if (controller.signal.aborted) throw abortReason(controller.signal);
+    const aborted = new Promise<never>((_resolve, reject) => {
+      controller.signal.addEventListener(
+        "abort",
+        () => reject(abortReason(controller.signal)),
+        { once: true },
+      );
+    });
+    return Promise.race([promise, aborted]);
+  };
+
+  try {
+    for (let attempt = 1; attempt <= options.maxAttempts; attempt += 1) {
+      if (controller.signal.aborted) throw abortReason(controller.signal);
+      if (deadlineAt !== undefined && clock() >= deadlineAt) {
+        throw new RetryDeadlineExceededError();
+      }
+
+      try {
+        const result = await raceAbort(operation(attempt, controller.signal));
+        if (deadlineAt !== undefined && clock() >= deadlineAt) {
+          throw new RetryDeadlineExceededError();
+        }
+        return result;
+      } catch (error) {
+        if (controller.signal.aborted) throw abortReason(controller.signal);
+        const code = retryErrorCode(error);
+        if (
+          attempt >= options.maxAttempts ||
+          code === undefined ||
+          !isRetryable(code, options)
+        ) {
+          throw error;
+        }
+
+        const delayMs = calculateJitteredBackoff(attempt - 1, options, random);
+        if (deadlineAt !== undefined && clock() + delayMs >= deadlineAt) {
+          throw new RetryDeadlineExceededError();
+        }
+        options.onRetry?.({ attempt, delayMs, error });
+        await raceAbort(sleep(delayMs, controller.signal));
+      }
+    }
+    throw new Error("Retry execution exhausted without a result.");
+  } finally {
+    if (deadlineTimer !== undefined) clearTimeout(deadlineTimer);
+    externalSignal?.removeEventListener("abort", relayAbort);
+  }
+}

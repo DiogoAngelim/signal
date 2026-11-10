@@ -59,3 +59,51 @@ export function createDistributedCircuitBreakerController(
     },
   };
 }
+
+
+export class DistributedCircuitBreakerOpenError extends Error {
+  readonly code = "CIRCUIT_BREAKER_OPEN";
+  constructor() {
+    super("The distributed circuit breaker is open or another half-open probe is in progress.");
+    this.name = "DistributedCircuitBreakerOpenError";
+  }
+}
+
+/**
+ * Executes a real dependency call through the shared breaker controller.
+ * Applications should use this wrapper at outbound dependency boundaries;
+ * Signal cannot automatically wrap dependencies it does not own.
+ */
+export async function executeWithDistributedCircuitBreaker<T>(
+  controller: DistributedCircuitBreakerController,
+  operation: () => Promise<T>,
+  options: {
+    onCoordinationError?: (error: unknown) => void;
+  } = {},
+): Promise<T> {
+  let allowed: boolean;
+  try {
+    allowed = await controller.tryAcquire();
+  } catch (error) {
+    options.onCoordinationError?.(error);
+    throw error;
+  }
+  if (!allowed) throw new DistributedCircuitBreakerOpenError();
+
+  try {
+    const result = await operation();
+    try {
+      await controller.recordSuccess();
+    } catch (error) {
+      options.onCoordinationError?.(error);
+    }
+    return result;
+  } catch (error) {
+    try {
+      await controller.recordFailure();
+    } catch (coordinationError) {
+      options.onCoordinationError?.(coordinationError);
+    }
+    throw error;
+  }
+}

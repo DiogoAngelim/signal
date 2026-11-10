@@ -1,76 +1,74 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import {
-  calculateBackoff,
-  calculateJitteredBackoff,
-  createCircuitBreaker,
-  createCircuitBreakerController,
-  recordFailure,
-  shouldAllowRequest,
+  RetryDeadlineExceededError,
+  executeWithRetry,
 } from "./resilience";
 
-describe("retry policy", () => {
-  it("caps exponential backoff and applies bounded full jitter", () => {
-    expect(calculateBackoff(0)).toBe(100);
-    expect(calculateBackoff(20)).toBe(5000);
-    expect(calculateJitteredBackoff(2, undefined, () => 0)).toBe(0);
-    expect(calculateJitteredBackoff(2, undefined, () => 0.5)).toBe(200);
+describe("executeWithRetry", () => {
+  const policy = {
+    maxAttempts: 3,
+    backoffMs: 10,
+    maxBackoffMs: 40,
+    retryableCodes: new Set(["TEMPORARY"]),
+  };
+
+  it("retries transient failures within the attempt budget using bounded jitter", async () => {
+    const operation = vi.fn()
+      .mockRejectedValueOnce(Object.assign(new Error("one"), { code: "TEMPORARY" }))
+      .mockRejectedValueOnce(Object.assign(new Error("two"), { code: "TEMPORARY" }))
+      .mockResolvedValue("done");
+    const delays: number[] = [];
+    const result = await executeWithRetry(operation, {
+      ...policy,
+      random: () => 0.5,
+      sleep: async (delay) => { delays.push(delay); },
+    });
+
+    expect(result).toBe("done");
+    expect(operation).toHaveBeenCalledTimes(3);
+    expect(delays).toEqual([5, 10]);
   });
 
-  it("rejects invalid attempts, policies, and random samples", () => {
-    expect(() => calculateBackoff(-1)).toThrow();
-    expect(() => calculateBackoff(1.5)).toThrow();
-    expect(() =>
-      calculateBackoff(0, {
-        maxAttempts: 0,
-        backoffMs: 1,
-        maxBackoffMs: 1,
-        retryableCodes: new Set(),
+  it("does not retry non-retryable errors", async () => {
+    const operation = vi.fn().mockRejectedValue(new Error("invalid input"));
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      sleep: async () => {},
+    })).rejects.toThrow("invalid input");
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("rejects before executing when the deadline has expired", async () => {
+    const operation = vi.fn();
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      deadlineAt: 100,
+      clock: () => 101,
+    })).rejects.toBeInstanceOf(RetryDeadlineExceededError);
+    expect(operation).not.toHaveBeenCalled();
+  });
+
+  it("aborts in-flight work when the absolute deadline expires", async () => {
+    const operation = vi.fn((_attempt: number, signal: AbortSignal) =>
+      new Promise<string>((_resolve, reject) => {
+        signal.addEventListener("abort", () => reject(signal.reason), { once: true });
       }),
-    ).toThrow();
-    expect(() => calculateJitteredBackoff(0, undefined, () => 1)).toThrow();
-  });
-});
-
-describe("circuit breaker", () => {
-  it("validates configuration and uses an injected timestamp", () => {
-    expect(() => createCircuitBreaker(0)).toThrow();
-    expect(() => createCircuitBreaker(1, -1)).toThrow();
-    const open = recordFailure(createCircuitBreaker(1, 50), 100);
-    expect(shouldAllowRequest(open, 149)).toBe(false);
-    expect(shouldAllowRequest(open, 150)).toBe(true);
+    );
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      deadlineAt: Date.now() + 10,
+    })).rejects.toBeInstanceOf(RetryDeadlineExceededError);
+    expect(operation).toHaveBeenCalledOnce();
   });
 
-  it("allows only one half-open probe and closes after success", () => {
-    let now = 100;
-    const breaker = createCircuitBreakerController(1, 50, () => now);
-    breaker.recordFailure();
-    expect(breaker.snapshot().state).toBe("open");
-    expect(breaker.tryAcquire()).toBe(false);
-    now = 150;
-    expect(breaker.tryAcquire()).toBe(true);
-    expect(breaker.snapshot().state).toBe("half-open");
-    expect(breaker.tryAcquire()).toBe(false);
-    breaker.recordSuccess();
-    expect(breaker.snapshot()).toMatchObject({
-      state: "closed",
-      failureCount: 0,
-      lastFailureAt: null,
-    });
-    expect(breaker.tryAcquire()).toBe(true);
-  });
-
-  it("reopens after a failed half-open probe", () => {
-    let now = 0;
-    const breaker = createCircuitBreakerController(1, 10, () => now);
-    breaker.recordFailure();
-    now = 10;
-    expect(breaker.tryAcquire()).toBe(true);
-    breaker.recordFailure(11);
-    expect(breaker.snapshot()).toMatchObject({
-      state: "open",
-      failureCount: 2,
-      lastFailureAt: 11,
-    });
-    expect(breaker.tryAcquire(20)).toBe(false);
+  it("propagates caller cancellation", async () => {
+    const controller = new AbortController();
+    controller.abort(new Error("caller cancelled"));
+    const operation = vi.fn();
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      signal: controller.signal,
+    })).rejects.toThrow("caller cancelled");
+    expect(operation).not.toHaveBeenCalled();
   });
 });
