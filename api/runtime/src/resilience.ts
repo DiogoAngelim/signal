@@ -516,7 +516,11 @@ export async function executeWithRetry<T>(
           throw error;
         }
 
-        if (options.retryBudget && !options.retryBudget.tryConsume()) {\n          throw new RetryBudgetExhaustedError(error);\n        }\n\n        const delayMs = calculateJitteredBackoff(attempt - 1, options, random);
+        if (options.retryBudget && !options.retryBudget.tryConsume()) {
+          throw new RetryBudgetExhaustedError(error);
+        }
+
+        const delayMs = calculateJitteredBackoff(attempt - 1, options, random);
         if (deadlineAt !== undefined && clock() + delayMs >= deadlineAt) {
           throw new RetryDeadlineExceededError();
         }
