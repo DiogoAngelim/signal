@@ -20,7 +20,7 @@ async function collect(directory) {
   for (const entry of entries) {
     const path = join(directory, entry.name);
     if (entry.isDirectory()) files.push(...await collect(path));
-    else if (entry.isFile() && entry.name.endsWith(".ts")) files.push(path);
+    else if (entry.isFile() && entry.name.endsWith(".ts") && !entry.name.endsWith(".d.ts")) files.push(path);
   }
   return files;
 }
