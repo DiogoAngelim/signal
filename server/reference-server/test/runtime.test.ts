@@ -71,12 +71,15 @@ describe("reference runtime", () => {
     });
     expect(missingPost.ok ? missingPost.result.post : "unexpected").toBeNull();
 
+    const trustedPostAuth = {
+      auth: { actor: { id: "ops_alice" }, scopes: ["posts:publish"] },
+    };
     const explicitPublish = await runtime.mutation("post.publish.v1", {
       postId: "post_explicit",
       title: "Explicit publish",
       body: "Published with caller-provided identity.",
       publishedAt: "2026-03-26T12:00:00.000Z",
-    });
+    }, trustedPostAuth);
     expect(
       explicitPublish.ok ? explicitPublish.result.post.postId : "missing",
     ).toBe("post_explicit");
@@ -85,7 +88,7 @@ describe("reference runtime", () => {
       title: "Generated publish",
       body: "",
       publishedAt: "",
-    });
+    }, trustedPostAuth);
     expect(
       generatedPublish.ok ? generatedPublish.result.post.postId : "",
     ).toMatch(/^post_/);

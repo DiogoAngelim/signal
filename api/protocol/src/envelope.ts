@@ -22,7 +22,7 @@ export const signalContextSchema = z
     correlationId: z.string().min(1).optional(),
     causationId: z.string().min(1).optional(),
     idempotencyKey: z.string().min(1).optional(),
-    deadlineAt: z.string().datetime().optional(),
+    deadlineAt: z.iso.datetime().optional(),
     traceId: z.string().min(1).optional(),
     trace: signalTraceSchema,
   })
@@ -63,7 +63,7 @@ export const signalEnvelopeSchema = z.object({
   kind: z.enum(signalKinds),
   name: signalNameSchema,
   messageId: z.string().min(1),
-  timestamp: z.string().datetime(),
+  timestamp: z.iso.datetime(),
   source: z
     .object({
       system: z.string().min(1).optional(),
@@ -76,7 +76,7 @@ export const signalEnvelopeSchema = z.object({
   delivery: signalDeliverySchema,
   auth: signalAuthSchema,
   payload: z.unknown(),
-  meta: z.record(z.unknown()).optional(),
+  meta: z.record(z.string(), z.unknown()).optional(),
 });
 
 export type SignalEnvelope<TPayload = unknown> = Omit<

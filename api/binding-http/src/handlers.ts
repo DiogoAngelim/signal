@@ -53,7 +53,7 @@ const signalHttpBodySchema = z
     context: signalContextSchema,
     delivery: signalDeliverySchema,
     auth: signalAuthSchema,
-    meta: z.record(z.unknown()).optional(),
+    meta: z.record(z.string(), z.unknown()).optional(),
     idempotencyKey: z.string().min(1).optional(),
   })
   .passthrough()
