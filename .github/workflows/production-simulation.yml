@@ -148,7 +148,7 @@ jobs:
       - name: Run broker and consumer crash-boundary integration
         run: |
           set -o pipefail
-          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts --fileParallelism=false --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
 
       - name: Run distributed coordination and audit trust-boundary simulations
         run: |
