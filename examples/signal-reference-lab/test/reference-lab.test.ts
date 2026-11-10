@@ -6,7 +6,7 @@ import { compareBenchmarks } from "../src/comparison.js";
 
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
-  assert.equal(report.results.length, 16);
+  assert.equal(report.results.length, 17);
   const cliReady = process.env.SIGNAL_CLI_READY === "1";
   assert.ok(report.results.every((item) => item.status === "passed" || (item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL) || (item.id === "signal-cli" && item.status === "blocked" && !cliReady)), JSON.stringify(report.results));
   const postgres = report.results.find((item) => item.id === "postgres-integration");
@@ -18,8 +18,8 @@ test("reference lab executes lifecycle and safety scenarios", async () => {
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
   assert.equal(report.qualityGates["reference-app"].total, 3);
   assert.equal(report.qualityGates.integration.total, 2);
-  assert.equal(report.qualityGates.signal.total, 11);
-  assert.equal(report.qualityGates.signal.passed, 11 - (process.env.DATABASE_URL ? 0 : 1) - (cliReady ? 0 : 1));
+  assert.equal(report.qualityGates.signal.total, 12);
+  assert.equal(report.qualityGates.signal.passed, 12 - (process.env.DATABASE_URL ? 0 : 1) - (cliReady ? 0 : 1));
   assert.equal(report.score.dimensions.reduce((sum, item) => sum + item.weight, 0), 100);
   assert.ok(report.score.dimensions.every((item) => item.score >= 0 && item.score <= 10));
 });
