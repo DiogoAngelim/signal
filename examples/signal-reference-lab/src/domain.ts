@@ -1,10 +1,10 @@
-import { assessDecisionEvidence, type DecisionAssessment } from "@signal/decision";
+import { assessDecisionEvidence, type DecisionAssessment, type DecisionOutcomeReview } from "@signal/decision";
 export type RequestStatus = "received" | "assessed" | "approved" | "rejected" | "executed" | "reviewed";
 export type Evidence = { id: string; description: string; source: string; confidence: number; observedAt: string; verified: boolean };
 export type CaseRequest = { id: string; tenantId: string; title: string; description: string; status: RequestStatus; createdAt: string; evidence: Evidence[]; assessment?: Assessment; decision?: Decision; outcome?: Outcome };
 export type Assessment = { recommendation: "approve" | "reject" | "investigate"; confidence: number; risk: number; rationale: string; evidenceIds: string[]; assessedAt: string; signalAssessment: DecisionAssessment };
 export type Decision = { id: string; result: "approved" | "rejected"; rationale: string; actor: string; decidedAt: string };
-export type Outcome = { id: string; result: "success" | "failure" | "partial" | "unknown"; notes: string; recordedAt: string };
+export type Outcome = { id: string; result: "success" | "failure" | "partial" | "unknown"; notes: string; recordedAt: string; learningReview: DecisionOutcomeReview };
 export type LabEvent = { id: string; name: string; requestId: string; tenantId: string; occurredAt: string; payload: Record<string, unknown> };
 
 export function assess(request: CaseRequest, now = new Date()): Assessment {
