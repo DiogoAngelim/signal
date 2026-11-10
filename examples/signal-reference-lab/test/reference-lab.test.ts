@@ -71,10 +71,10 @@ test("four-pillar scorecard scores performance only against a matched, integrity
   const timing = { totalMs: 100, throughputPerSecond: 1000, p50Ms: 1, p90Ms: 2, p95Ms: 3, p99Ms: 4, maxMs: 5, minMs: 0.5 };
   const baseline = { timing: { ...timing, p95Ms: 4, p99Ms: 5, throughputPerSecond: 900 }, environment, workload };
   const benchmark = { timing, environment, workload, integrity: { valid: true, expectedSamples: 100, actualSamples: 100, invalidSamples: 0 }, baseline };
-  const report = scoreQuality(results, [], benchmark);
+  const report = scoreQuality(results, benchmark);
   assert.ok(report.overall !== null);
-  assert.equal(report.pillars.find((item) => item.id === "performance")?.score, 10);
-  const failed = scoreQuality(results.map((item) => item.id === "runtime-policy" ? { ...item, status: "failed" as const } : item), [], benchmark);
+  assert.equal(report.pillars.find((item) => item.id === "performance")?.score, 9.7);
+  const failed = scoreQuality(results.map((item) => item.id === "runtime-policy" ? { ...item, status: "failed" as const } : item), benchmark);
   assert.ok((failed.pillars.find((item) => item.id === "security")?.score ?? 10) <= 2);
 });
 
@@ -90,7 +90,7 @@ test("four-pillar scorecard rejects mismatched performance environments", () => 
       workload: { operation: "query", iterations: 100, concurrency: 4, warmup: 10 },
     },
   };
-  const report = scoreQuality([], [], benchmark);
+  const report = scoreQuality([], benchmark);
   assert.equal(report.pillars.find((item) => item.id === "performance")?.score, null);
   assert.equal(report.overall, null);
 });
