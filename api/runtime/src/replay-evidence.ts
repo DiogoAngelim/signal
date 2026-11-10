@@ -3,7 +3,18 @@ import type {
   ReplayExternalReadSnapshot,
   ReplayJsonValue,
 } from "@signal/ports";
-import { fingerprint } from "./hash";
+import { fingerprint, stableStringify } from "./hash";
+
+function cloneAndFreeze<T extends ReplayJsonValue>(value: T): T {
+  const clone = JSON.parse(stableStringify(value)) as T;
+  const freeze = (item: unknown): void => {
+    if (typeof item !== "object" || item === null || Object.isFrozen(item)) return;
+    for (const child of Object.values(item)) freeze(child);
+    Object.freeze(item);
+  };
+  freeze(clone);
+  return clone;
+}
 
 const DIGEST_PATTERN = /^[a-f0-9]{64}$/;
 
@@ -91,7 +102,7 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
     }
     return {
       key: read.key,
-      value: read.value,
+      value: cloneAndFreeze(read.value),
       valueFingerprint: fingerprint(read.value),
       observedAt: read.observedAt,
     };
@@ -104,10 +115,10 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
     operationVersion: input.operationVersion,
     handlerArtifactDigest: input.handlerArtifactDigest,
     policyVersion: input.policyVersion,
-    canonicalInput: input.canonicalInput,
+    canonicalInput: cloneAndFreeze(input.canonicalInput),
     inputFingerprint: fingerprint(input.canonicalInput),
     externalReads: Object.freeze(externalReads),
-    result: input.result,
+    result: cloneAndFreeze(input.result),
     resultFingerprint: fingerprint(input.result),
     capturedAt,
   });
