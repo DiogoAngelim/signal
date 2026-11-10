@@ -15,8 +15,8 @@ integration("PostgreSQL transactional outbox integration", () => {
     const migrationDirectory = join(__dirname, "../src/drizzle/migrations");
     await admin.query(readFileSync(join(migrationDirectory, "0000_initial.sql"), "utf8"));
     await admin.query(readFileSync(join(migrationDirectory, "0001_transactional_outbox.sql"), "utf8"));
-    await admin.query("DELETE FROM signal_outbox");
-    await admin.query("DELETE FROM signal_idempotency_records");
+    await admin.query(readFileSync(join(migrationDirectory, "0002_outbox_lease_fencing.sql"), "utf8"));
+    await admin.query(readFileSync(join(migrationDirectory, "0003_idempotency_reservation_leases.sql"), "utf8"));
   });
 
   afterAll(async () => {
@@ -38,6 +38,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-atomic",
+      reservationToken: reservation.record!.reservationToken!,
       result: { value: 7 },
       messageId: `mutation-${idempotencyKey}`,
       events: [{
@@ -68,13 +69,88 @@ integration("PostgreSQL transactional outbox integration", () => {
     expect(await store.acknowledge({
       id: event!.id,
       workerId: "integration-worker",
+      leaseToken: event!.leaseToken,
     })).toBe(true);
+  });
+
+  it("reclaims expired idempotency reservations and fences stale owners", async () => {
+    const operationName = "integration.reservation-lease.v1";
+    const idempotencyKey = `reservation-${Date.now()}`;
+    const first = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      leaseMs: 1_000,
+    });
+    expect(first.state).toBe("reserved");
+    const firstToken = first.record!.reservationToken!;
+
+    await admin.query(
+      "UPDATE signal_idempotency_records SET reservation_expires_at = now() - interval '1 second' WHERE operation_name = $1 AND idempotency_key = $2",
+      [operationName, idempotencyKey],
+    );
+
+    const second = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      leaseMs: 30_000,
+    });
+    expect(second.state).toBe("reserved");
+    expect(second.record!.reservationToken).not.toBe(firstToken);
+
+    await expect(store.renewReservation({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      leaseMs: 30_000,
+    })).resolves.toBe(false);
+
+    await expect(store.complete({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      result: { stale: true },
+    })).rejects.toThrow(/reservation is missing|stale|no longer pending/i);
+
+    await expect(store.fail({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: firstToken,
+      error: { code: "INTERNAL_ERROR", message: "stale owner" },
+    })).rejects.toThrow(/not pending/i);
+
+    await expect(store.renewReservation({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: second.record!.reservationToken!,
+      leaseMs: 30_000,
+    })).resolves.toBe(true);
+
+    await store.complete({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+      reservationToken: second.record!.reservationToken!,
+      result: { current: true },
+    });
+    const replay = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-reservation",
+    });
+    expect(replay.state).toBe("replayed");
+    expect(replay.record?.result).toEqual({ current: true });
   });
 
   it("rolls back idempotency completion when outbox insertion fails", async () => {
     const operationName = "integration.rollback.v1";
     const idempotencyKey = `rollback-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-rollback",
@@ -91,6 +167,7 @@ integration("PostgreSQL transactional outbox integration", () => {
         operationName,
         idempotencyKey,
         payloadFingerprint: "fingerprint-rollback",
+        reservationToken: reservation.record!.reservationToken!,
         result: { committed: false },
         events: [{
           protocol: "signal.v1",
@@ -118,7 +195,7 @@ integration("PostgreSQL transactional outbox integration", () => {
   it("prevents concurrent workers from claiming the same outbox message", async () => {
     const operationName = "integration.concurrent-claim.v1";
     const idempotencyKey = `concurrent-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-concurrent",
@@ -127,6 +204,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-concurrent",
+      reservationToken: reservation.record!.reservationToken!,
       result: { ok: true },
       events: [0, 1].map((index) => ({
         protocol: "signal.v1",
@@ -152,7 +230,7 @@ integration("PostgreSQL transactional outbox integration", () => {
   it("recovers expired leases and dead-letters after the attempt limit", async () => {
     const operationName = "integration.lease.v1";
     const idempotencyKey = `lease-${Date.now()}`;
-    await store.reserve({
+    const reservation = await store.reserve({
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-lease",
@@ -161,6 +239,7 @@ integration("PostgreSQL transactional outbox integration", () => {
       operationName,
       idempotencyKey,
       payloadFingerprint: "fingerprint-lease",
+      reservationToken: reservation.record!.reservationToken!,
       result: { ok: true },
       events: [{
         protocol: "signal.v1",
@@ -172,31 +251,44 @@ integration("PostgreSQL transactional outbox integration", () => {
       }],
     });
 
-    const first = await store.claimBatch({
-      workerId: "crashed-worker",
-      limit: 1,
+    const firstBatch = await store.claimBatch({
+      workerId: "reused-worker",
+      limit: 100,
       leaseMs: 1000,
     });
-    expect(first).toHaveLength(1);
+    const first = firstBatch.find((item) => item.envelope.messageId === `lease-event-${idempotencyKey}`);
+    expect(first).toBeDefined();
     await admin.query(
       "UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE message_id = $1",
       [`lease-event-${idempotencyKey}`],
     );
 
-    const recovered = await store.claimBatch({
-      workerId: "recovery-worker",
-      limit: 1,
+    const recoveredBatch = await store.claimBatch({
+      workerId: "reused-worker",
+      limit: 100,
       leaseMs: 30_000,
     });
-    expect(recovered[0]?.attempts).toBe(2);
+    const recovered = recoveredBatch.find((item) => item.envelope.messageId === `lease-event-${idempotencyKey}`);
+    expect(recovered?.attempts).toBe(2);
+    expect(recovered?.leaseToken).not.toBe(first!.leaseToken);
     expect(await store.acknowledge({
-      id: recovered[0].id,
-      workerId: "crashed-worker",
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: first!.leaseToken,
     })).toBe(false);
+    expect(await store.retry({
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: first!.leaseToken,
+      availableAt: new Date().toISOString(),
+      error: "stale worker must not reschedule",
+      maxAttempts: 2,
+    })).toBe("lease-lost");
 
     expect(await store.retry({
-      id: recovered[0].id,
-      workerId: "recovery-worker",
+      id: recovered!.id,
+      workerId: "reused-worker",
+      leaseToken: recovered!.leaseToken,
       availableAt: new Date().toISOString(),
       error: "permanent failure",
       maxAttempts: 2,

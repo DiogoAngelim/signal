@@ -8,6 +8,7 @@ function record(id: string, attempts = 1): OutboxRecord {
     id,
     attempts,
     createdAt: "2026-11-09T00:00:00.000Z",
+    leaseToken: "lease-" + id,
     envelope: {
       protocol: "signal.v1",
       kind: "event",

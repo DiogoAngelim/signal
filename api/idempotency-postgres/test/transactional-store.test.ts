@@ -34,6 +34,7 @@ const completion = {
   operationName: "invoice.issue.v1",
   idempotencyKey: "invoice-1",
   payloadFingerprint: "fingerprint",
+  reservationToken: "reservation-token",
   result: { invoiceId: "inv-1" },
   messageId: "mutation-1",
 };
@@ -109,6 +110,7 @@ describe("PostgreSQL transactional storage", () => {
         envelope: event,
         attempts: 1,
         created_at: new Date("2026-11-09T00:00:00.000Z"),
+        lease_token: "lease-token-1",
       }],
     });
     mocks.client.query.mockResolvedValueOnce({ rowCount: null, rows: [] });
@@ -125,13 +127,16 @@ describe("PostgreSQL transactional storage", () => {
     const acknowledged = await store.acknowledge({
       id: "10",
       workerId: "worker-1",
+      leaseToken: "lease-token-1",
     });
 
     expect(claimed).toHaveLength(1);
     expect(claimed[0].id).toBe("10");
+    expect(claimed[0].leaseToken).toBe("lease-token-1");
     expect(mocks.client.query.mock.calls[1][0]).toContain("FOR UPDATE SKIP LOCKED");
     expect(acknowledged).toBe(true);
     expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_by = $2");
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("lease_token = $3");
   });
 
   it("reports bounded-cardinality outbox queue health", async () => {

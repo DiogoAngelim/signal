@@ -30,5 +30,16 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("dead-letter");
     expect(sql).toContain("signal_outbox_pending_available");
   });
+  it("adds expiring fenced idempotency reservations", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0003_idempotency_reservation_leases.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("reservation_token");
+    expect(sql).toContain("reservation_expires_at");
+    expect(sql).toContain("signal_idempotency_reservation_lease_consistency");
+    expect(sql).toContain("signal_idempotency_expired_reservations");
+  });
+
 });
 

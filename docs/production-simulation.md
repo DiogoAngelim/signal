@@ -1,62 +1,91 @@
-# Signal production simulation
+# Signal production simulation and code-level assurance
 
-## Purpose and trust boundary
+## Purpose and certification boundary
 
-The GitHub Actions workflow `.github/workflows/production-simulation.yml` exercises Signal's infrastructure-facing PostgreSQL adapter against a disposable PostgreSQL 16 service. It is a repeatable failure-oriented CI environment, not a production environment.
+This workflow is Signal's repeatable, failure-oriented **code-level infrastructure assurance suite**. It provisions disposable PostgreSQL, RabbitMQ, and Toxiproxy services on GitHub Actions and exercises Signal's PostgreSQL adapter, outbox contract, and recovery patterns against them.
 
-The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a weekly schedule, and manual dispatch. The manual `extended` profile and scheduled runs repeat the PostgreSQL integration suite three times to expose order dependence and intermittent failures.
+It is deliberately not a production deployment. The user-requested scope excludes real-world validation, live customer workloads, real cloud accounts, external key custody, and production operations. Therefore:
 
-## What is exercised
+- A **green code-level certification run** means the exact source revision passed the listed automated infrastructure simulations and software checks.
+- It does not mean Signal has been deployed, operated, independently audited, or certified against a real production environment.
+- No SLO, capacity, RTO, RPO, exactly-once delivery, cloud immutability, or regulatory-compliance claim may be inferred from this workflow.
+- Simulation-only credentials and ephemeral signing keys are never production secrets.
 
-| Area | Executed evidence | Boundary |
-|---|---|---|
-| Atomic mutation + event persistence | Real PostgreSQL migration and transaction integration tests | One disposable database; not a multi-region database |
-| Idempotent replay | Adapter integration test reserves, completes, and re-reserves the same operation | Does not reproduce arbitrary external reads or side effects |
-| Outbox claiming and acknowledgement | Real PostgreSQL lease/claim and worker-ownership checks | No external broker or real consumer |
-| Lease expiry and recovery | Expired claim is reclaimed by a different worker identity | Deterministic state transition; not an OS process-kill test |
-| Retry and dead-letter | Adapter retry limit and dead-letter persistence | No operator redrive workflow is certified |
-| Transaction rollback | Forced outbox constraint violation verifies atomic rollback | Does not simulate every storage-engine failure mode |
-| Runtime resilience and audit | Runtime package tests execute against the same source revision | No distributed breaker coordinator or independently anchored audit store |
-| Architecture | Dependency boundary check | Static architecture check only |
+The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a weekly schedule, and manual dispatch. The `extended` profile and scheduled runs repeat the PostgreSQL, broker, network-fault, and trust-boundary integration scenarios three times. All evidence is tied to the exact source SHA and GitHub Actions run identity.
 
-The workflow records the source SHA, run identity, selected profile, runtime version, PostgreSQL image, and logs in a 30-day GitHub Actions artifact. Evidence is tied to the exact commit and run; it should not be detached from that provenance.
+## Implemented and exercised assurance gates
 
-## Run it
+| Risk / previous gap | Executable simulation | What the result establishes | What it does not establish |
+|---|---|---|---|
+| Atomic mutation and outbox persistence | PostgreSQL migration and transactional integration tests | Result and outbox writes commit or roll back together | Multi-region transactions or storage-provider behavior outside PostgreSQL |
+| Concurrent outbox claims | Competing PostgreSQL workers using `FOR UPDATE SKIP LOCKED` | One row is not concurrently claimed by two active leases | Global coordination across independent databases |
+| Stale outbox worker acknowledgement | Per-claim UUID fencing token, persisted in PostgreSQL and required by acknowledge/retry | A worker cannot acknowledge or reschedule a newer lease, even if its worker ID is reused | Fencing external side effects already performed before lease loss |\n| Expired idempotency reservation and stale owner | Expiring reservation token, atomic reclaim, heartbeat renewal, and token-guarded completion/failure | A crashed or expired owner can be replaced; the stale owner cannot complete, fail, or renew the newer reservation | Preventing duplicate external side effects performed by a handler before its lease is lost; handlers still need idempotent side effects |
+| Broker publish / worker-loss boundary | Real RabbitMQ management API; publish, abandon acknowledgement, expire lease, reclaim, and republish | At-least-once redelivery occurs after an ambiguous publish outcome | An OS-level worker kill at every instruction boundary or exactly-once broker delivery |
+| Consumer side-effect deduplication | Durable inbox primary key and side effect in one PostgreSQL transaction | Duplicate broker deliveries produce one simulated durable side effect | Correctness of every real consumer's own transaction or third-party API |
+| Broker unavailable | Failed network attempt, no acknowledgement, lease expiry, recovery publish | An unacknowledged event remains recoverable after a broker outage | Broker quorum loss, replication failure, or cloud network behavior |
+| PostgreSQL network interruption | Toxiproxy cuts a live connection during a transaction | Interrupted transaction is rolled back and a fresh connection succeeds after restoration | Every packet-loss, DNS, TLS, routing, and regional partition mode |
+| PostgreSQL process crash | SIGKILL the disposable PostgreSQL container with a committed row and an open transaction | WAL recovery preserves committed data and rolls back the in-flight transaction | Physical disk, host, filesystem, or cloud-volume failure |
+| Backup and restore | `pg_dump` / `pg_restore` into a second disposable database; compare outbox row counts | The tested logical backup can be restored into a clean database | Point-in-time recovery, backup retention policy, offsite copies, or measured RTO/RPO |
+| Distributed half-open coordination pattern | Concurrent PostgreSQL row-lock simulation and lease-token fencing | The reference protocol admits one half-open probe and rejects stale completion | A production distributed circuit-breaker implementation; the runtime controller remains explicitly single-process |
+| Audit checkpoint trust primitives | Ephemeral Ed25519 signing keys, signature verification, tamper rejection, and overlapping-key rotation | The cryptographic primitive detects modified checkpoint bytes and validates rotation mechanics | Independent checkpoint storage, cloud object lock, trusted timestamping, IAM separation, or production key custody |
+| Database load smoke | Fixed `pgbench` workload with raw output retained | The disposable database completed a reproducible smoke workload | Signal throughput, production capacity, latency SLOs, or controlled-runner benchmarks |
+| Runtime resilience and audit | Runtime package tests | The runtime's checked unit and integration behavior remains green | External operational telemetry or incident response |
+| Architecture | Dependency boundary check | The declared package dependency boundaries remain valid | Runtime security or deployment isolation |
+
+## Lease fencing contract
+
+Outbox ownership is now represented by two independent values:
+
+- `workerId` identifies the worker process for diagnostics.
+- `leaseToken` identifies one specific claim generation.
+
+Every successful claim creates a new UUID token. Acknowledge and retry operations must present both values. The database update is conditional on the current worker identity and token; stale operations affect zero rows and are reported as lease loss. Reusing a worker ID after restart does not restore authority from an earlier lease.
+
+The migration `0002_outbox_lease_fencing.sql` adds the outbox token and a database constraint requiring it exactly while a row is processing. The migration `0003_idempotency_reservation_leases.sql` adds a finite reservation expiry and a generation token. Runtime handlers renew their reservation every 60 seconds against a five-minute lease; completion and failure require the current token and an unexpired lease. Expired reservations are atomically reclaimed with a new token. Consumers still must deduplicate on `envelope.messageId`: the outbox is at-least-once by design.
+
+## How to run it
 
 - Open **Actions → Signal production simulation → Run workflow**.
-- Choose `standard` for the normal integration and resilience suite.
-- Choose `extended` to repeat the PostgreSQL integration tests three times.
-- Scheduled weekly runs also use the repeatability pass.
+- Choose `standard` for the complete default suite.
+- Choose `extended` for three additional infrastructure repeatability passes.
+- Scheduled weekly runs also execute the repeatability passes.
 
-The same core integration suite can be run locally after starting PostgreSQL:
+Local PostgreSQL integration:
 
 ```sh
 SIGNAL_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/signal_simulation \
   pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts
 ```
 
-## What a green run does not establish
+The broker, Toxiproxy, database crash-restart, backup/restore, and load gates are orchestrated by the workflow because they require disposable sibling containers and their service network. The broker scenario models worker loss by withholding acknowledgement and expiring the lease; it does not kill a worker process at the OS level.
 
-A green run means only that the configured scenarios passed on the recorded source revision and ephemeral GitHub-hosted runner. It does **not** establish:
+## Evidence and provenance
 
-- Production availability, throughput, latency, capacity, or an SLO.
-- Correct behavior under a real message broker, real consumer side effects, or process termination at every commit/publish/acknowledgement boundary.
-- Distributed circuit-breaker coordination, cross-region consistency, or retry budgets.
-- Independent audit immutability, cloud object-lock retention, IAM separation, signing-key custody, or key rotation.
-- Backup restoration, disaster recovery, or measured RTO/RPO.
-- Statistical validity on representative, independent production outcomes.
-- Correctness of Redis, S3-compatible storage, or any other infrastructure not explicitly provisioned and exercised by this workflow.
+Each run uploads a 30-day artifact containing:
 
-GitHub-hosted runner performance is noisy and must not be used as a capacity benchmark. A MinIO-compatible API test would not prove independent cloud trust or object-lock enforcement; a real cloud integration gate must use isolated temporary resources, least-privilege identity, and separately protected credentials before it can support those claims.
+- Source SHA, repository/ref, run ID, attempt, profile, Node version, and PostgreSQL image.
+- PostgreSQL transaction, broker crash-boundary, network fault, and trust-boundary test logs.
+- PostgreSQL crash-recovery and backup/restore results.
+- Raw database load-smoke output.
+- Runtime and full PostgreSQL adapter test output.
+- Extended repeatability output when enabled.
 
-## Next evidence gates
+The manifest classifies the result as simulation-only. Preserve the artifact together with its run URL and commit SHA; a log detached from provenance is not certification evidence.
 
-1. Add a real broker and idempotent consumer harness, then kill/restart workers around publish and acknowledgement boundaries.
-2. Exercise reservation expiry/fencing with competing processes and prove stale workers cannot complete newer reservations.
-3. Validate independent checkpoint storage, tamper/substitution attacks, key rotation, and restore procedures using a separately controlled trust boundary.
-4. Add deterministic network fault injection and database restart/connection interruption tests.
-5. Run sustained and burst workloads on a controlled runner with published workload shape, raw results, and measured resource usage.
-6. Validate backup restore and operational recovery objectives in an isolated environment.
-7. Use representative, leakage-free outcome datasets for statistical governance tests.
+## Explicit exclusions and remaining non-code evidence
 
-These are explicit follow-on gates, not silently implied by this simulation workflow. No deployment is changed and no production certification is granted by this CI suite.
+The following are intentionally not claimed as solved by code-level simulation:
+
+1. **Independent audit durability:** a locally generated signing key cannot prove cloud IAM separation, object-lock enforcement, external timestamp authority, or that an administrator cannot replace both data and trust anchors.
+2. **Production key custody:** the simulation validates Ed25519 verification and rotation mechanics only; it does not use a KMS/HSM or validate access policy.
+3. **Distributed circuit breaker product behavior:** the PostgreSQL row-lock test is a reference coordination contract, not a production implementation wired into Signal's runtime. The current runtime breaker is single-process.
+4. **Statistical validity:** synthetic and unit fixtures can validate calculations, invariants, and calibration-report behavior. They cannot establish representative sampling, absence of leakage in a real dataset, or generalization to a target population.
+5. **Performance and capacity:** GitHub-hosted runner results are smoke evidence only. They are noisy and cannot establish an SLO or production capacity.
+6. **Disaster recovery objectives:** logical restore is exercised, but no production backup system, offsite retention, point-in-time recovery, RTO, or RPO is certified.
+7. **External side effects:** consumer deduplication is simulated using a transactional inbox. A third-party API must provide idempotency or a reconciliation protocol; Signal cannot make arbitrary external side effects exactly once.
+
+These exclusions must remain visible in release notes and certification reports. Do not promote a code-level pass into a real-world production certification claim.
+
+## Certification decision
+
+The suite may report **PASS — CODE-LEVEL INFRASTRUCTURE SIMULATION** only when every required job and scenario passes on the exact commit. A skipped test, missing service, absent artifact, or incomplete run is not a pass. The result must retain the exclusions above and must never be shortened to “production certified.”

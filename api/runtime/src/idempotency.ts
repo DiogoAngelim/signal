@@ -1,3 +1,4 @@
+import { randomUUID } from "node:crypto";
 import type {
   IdempotencyRecord,
   IdempotencyReservation,
@@ -21,6 +22,8 @@ export function createMemoryIdempotencyStore(): StoragePort &
   TransactionalStoragePort &
   OutboxPort {
   const records = new Map<string, IdempotencyRecord>();
+  let reservationSequence = 0;
+  const nextReservationToken = () => `memory-reservation-${++reservationSequence}`;
   const outbox = new Map<string, MemoryOutboxItem>();
 
   const keyFor = (operationName: string, idempotencyKey: string) =>
@@ -30,19 +33,22 @@ export function createMemoryIdempotencyStore(): StoragePort &
     operationName: string;
     idempotencyKey: string;
     payloadFingerprint: string;
+    reservationToken: string;
     result: unknown;
     resultMeta?: import("@signal/protocol").SignalResultMeta;
     messageId?: string;
   }): Promise<void> => {
     const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-    if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") {
-      return;
+    if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
+      throw new Error("Idempotency reservation is missing, expired, or fenced.");
     }
     record.status = "completed";
     record.result = input.result;
     record.resultMeta = input.resultMeta;
     record.messageId = input.messageId;
     record.updatedAt = new Date().toISOString();
+    record.reservationToken = undefined;
+    record.reservationExpiresAt = undefined;
   };
 
   return {
@@ -60,11 +66,23 @@ export function createMemoryIdempotencyStore(): StoragePort &
       };
     },
     async reserve(input): Promise<IdempotencyReservation> {
+      const leaseMs = input.leaseMs ?? 300_000;
+      if (!Number.isSafeInteger(leaseMs) || leaseMs < 1_000 || leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
       const key = keyFor(input.operationName, input.idempotencyKey);
       const existing = records.get(key);
       if (existing) {
         if (existing.payloadFingerprint !== input.payloadFingerprint) return { state: "conflict", record: existing };
-        if (existing.status === "pending") return { state: "inflight", record: existing };
+        if (existing.status === "pending") {
+          if (!existing.reservationExpiresAt || Date.parse(existing.reservationExpiresAt) <= Date.now()) {
+            existing.reservationToken = nextReservationToken();
+            existing.reservationExpiresAt = new Date(Date.now() + leaseMs).toISOString();
+            existing.updatedAt = new Date().toISOString();
+            return { state: "reserved", record: existing };
+          }
+          return { state: "inflight", record: existing };
+        }
         return { state: "replayed", record: existing };
       }
       const now = new Date().toISOString();
@@ -75,17 +93,31 @@ export function createMemoryIdempotencyStore(): StoragePort &
         status: "pending",
         createdAt: now,
         updatedAt: now,
+        reservationToken: nextReservationToken(),
+        reservationExpiresAt: new Date(Date.now() + leaseMs).toISOString(),
       };
       records.set(key, record);
       return { state: "reserved", record };
+    },
+    async renewReservation(input) {
+      const record = records.get(keyFor(input.operationName, input.idempotencyKey));
+      if (!record || record.status !== "pending" || record.payloadFingerprint !== input.payloadFingerprint ||
+          record.reservationToken !== input.reservationToken || !record.reservationExpiresAt ||
+          Date.parse(record.reservationExpiresAt) <= Date.now()) return false;
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
+      record.reservationExpiresAt = new Date(Date.now() + input.leaseMs).toISOString();
+      record.updatedAt = new Date().toISOString();
+      return true;
     },
     async complete(input) {
       await complete(input);
     },
     async completeWithEvents(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") {
-        throw new Error("Idempotency reservation is missing, stale, or no longer pending.");
+      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
+        throw new Error("Idempotency reservation is missing, expired, or fenced.");
       }
       // Stage all records before mutating the idempotency record: no partial
       // in-memory commit can escape if event serialization/validation fails.
@@ -96,6 +128,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
         createdAt: new Date().toISOString(),
         status: "pending" as const,
         availableAt: Date.now(),
+        leaseToken: "",
       }));
       const stagedIds = new Set<string>();
       for (const item of staged) {
@@ -115,10 +148,14 @@ export function createMemoryIdempotencyStore(): StoragePort &
     },
     async fail(input) {
       const record = records.get(keyFor(input.operationName, input.idempotencyKey));
-      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending") return;
+      if (!record || record.payloadFingerprint !== input.payloadFingerprint || record.status !== "pending" || record.reservationToken !== input.reservationToken || !record.reservationExpiresAt || Date.parse(record.reservationExpiresAt) <= Date.now()) {
+        throw new Error("Cannot fail an expired or fenced idempotency reservation.");
+      }
       record.status = "failed";
       record.error = input.error as SignalErrorEnvelope;
       record.updatedAt = new Date().toISOString();
+      record.reservationToken = undefined;
+      record.reservationExpiresAt = undefined;
     },
     async claimBatch(input) {
       if (!Number.isSafeInteger(input.limit) || input.limit < 1 || !Number.isFinite(input.leaseMs) || input.leaseMs < 1) {
@@ -134,26 +171,29 @@ export function createMemoryIdempotencyStore(): StoragePort &
         item.status = "processing";
         item.lockedBy = input.workerId;
         item.lockedUntil = now + input.leaseMs;
+        item.leaseToken = randomUUID();
         item.attempts += 1;
       }
       return eligible.map(({ id, envelope, attempts, createdAt }) => ({
-        id, envelope: structuredClone(envelope), attempts, createdAt,
+        id, envelope: structuredClone(envelope), attempts, createdAt, leaseToken: outbox.get(id)!.leaseToken,
       }));
     },
     async acknowledge(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId) return false;
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return false;
       item.status = "delivered";
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
+      item.leaseToken = "";
       return true;
     },
     async retry(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId) return "lease-lost";
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return "lease-lost";
       item.lastError = input.error;
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
+      item.leaseToken = "";
       if (item.attempts >= input.maxAttempts) {
         item.status = "dead-letter";
         return "dead-lettered";

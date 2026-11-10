@@ -17,6 +17,7 @@ on:
     paths:
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
+      - "api/ports/**"
       - "docs/production-simulation.md"
       - ".github/workflows/production-simulation.yml"
   push:
@@ -26,6 +27,7 @@ on:
     paths:
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
+      - "api/ports/**"
       - "docs/production-simulation.md"
       - ".github/workflows/production-simulation.yml"
 
@@ -42,6 +44,24 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     services:
+      toxiproxy:
+        image: ghcr.io/shopify/toxiproxy:2.11.0
+        ports:
+          - 8474:8474
+          - 8666:8666
+      rabbitmq:
+        image: rabbitmq:3-management
+        env:
+          RABBITMQ_DEFAULT_USER: signal
+          RABBITMQ_DEFAULT_PASS: signal-simulation-only
+        ports:
+          - 5672:5672
+          - 15672:15672
+        options: >-
+          --health-cmd "rabbitmq-diagnostics -q ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 12
       postgres:
         image: postgres:16
         env:
@@ -58,6 +78,10 @@ jobs:
     env:
       SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_simulation
       SIGNAL_SIMULATION_PROFILE: ${{ inputs.profile || 'standard' }}
+      SIGNAL_RABBITMQ_MANAGEMENT_URL: http://localhost:15672
+      SIGNAL_RABBITMQ_USER: signal
+      SIGNAL_RABBITMQ_PASSWORD: signal-simulation-only
+      SIGNAL_TOXIPROXY_URL: http://localhost:8474
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -107,6 +131,69 @@ jobs:
           set -o pipefail
           pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/postgres-integration.log
 
+      - name: Wait for network fault proxy
+        run: |
+          for attempt in $(seq 1 30); do
+            if curl --fail --silent http://localhost:8474/version >/dev/null; then exit 0; fi
+            sleep 2
+          done
+          echo 'Toxiproxy did not become ready' >&2
+          exit 1
+
+      - name: Run PostgreSQL network fault and recovery integration
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/network-fault.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/network-fault-integration.log
+
+      - name: Run broker and consumer crash-boundary integration
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
+
+      - name: Run distributed coordination and audit trust-boundary simulations
+        run: |
+          set -o pipefail
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/trust-boundary.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/trust-boundary-integration.log
+
+      - name: Simulate PostgreSQL crash recovery, backup restore, and load
+        run: |
+          set -euo pipefail
+          mkdir -p simulation-evidence
+          container_id="$(docker ps --filter ancestor=postgres:16 --format '{{.ID}}' | head -n 1)"
+          test -n "$container_id"
+          docker exec "$container_id" psql -U postgres -d signal_simulation -v ON_ERROR_STOP=1 -c "CREATE TABLE IF NOT EXISTS signal_crash_durability (id text PRIMARY KEY, committed boolean NOT NULL); INSERT INTO signal_crash_durability VALUES ('committed-before-crash', true) ON CONFLICT DO NOTHING;"
+          docker exec -d "$container_id" psql -U postgres -d signal_simulation -v ON_ERROR_STOP=1 -c "SET application_name='signal-crash-probe'; BEGIN; INSERT INTO signal_crash_durability VALUES ('uncommitted-at-crash', false); SELECT pg_sleep(300);"
+          for attempt in $(seq 1 30); do
+            active="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM pg_stat_activity WHERE application_name='signal-crash-probe' AND state='active'")"
+            if [ "$active" = "1" ]; then break; fi
+            sleep 1
+          done
+          test "$active" = "1"
+          echo "Killing PostgreSQL container to force crash recovery"
+          docker kill --signal=KILL "$container_id"
+          docker start "$container_id"
+          for attempt in $(seq 1 60); do
+            if docker exec "$container_id" pg_isready -U postgres -d signal_simulation >/dev/null 2>&1; then break; fi
+            sleep 2
+          done
+          docker exec "$container_id" pg_isready -U postgres -d signal_simulation
+          committed="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_crash_durability WHERE id='committed-before-crash' AND committed")"
+          uncommitted="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_crash_durability WHERE id='uncommitted-at-crash'")"
+          test "$committed" = "1"
+          test "$uncommitted" = "0"
+          echo "Committed transaction survived; in-flight transaction rolled back" | tee simulation-evidence/postgres-crash-recovery.log
+          docker exec "$container_id" pg_dump -U postgres -d signal_simulation -Fc -f /tmp/signal-simulation.dump
+          docker exec "$container_id" createdb -U postgres signal_restore
+          docker exec "$container_id" pg_restore -U postgres -d signal_restore /tmp/signal-simulation.dump
+          source_count="$(docker exec "$container_id" psql -U postgres -d signal_simulation -Atc "SELECT count(*) FROM signal_outbox")"
+          restored_count="$(docker exec "$container_id" psql -U postgres -d signal_restore -Atc "SELECT count(*) FROM signal_outbox")"
+          test "$source_count" = "$restored_count"
+          echo "Backup restore preserved outbox rows: $restored_count" | tee simulation-evidence/postgres-backup-restore.log
+          docker exec "$container_id" createdb -U postgres signal_bench
+          docker exec "$container_id" pgbench -U postgres -i -s 5 signal_bench
+          docker exec "$container_id" pgbench -U postgres -c 8 -j 2 -T 20 signal_bench 2>&1 | tee simulation-evidence/postgres-load-smoke.log
+          echo "Load smoke is runner-relative and is not an SLO or capacity certification." | tee -a simulation-evidence/postgres-load-smoke.log
+
       - name: Run runtime resilience and audit tests
         run: |
           set -o pipefail
@@ -115,7 +202,7 @@ jobs:
       - name: Run complete PostgreSQL adapter test suite
         run: |
           set -o pipefail
-          pnpm --filter @signal/idempotency-postgres test 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
+          pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
 
       - name: Extended repeatability pass
         if: inputs.profile == 'extended' || github.event_name == 'schedule'
@@ -123,7 +210,7 @@ jobs:
           set -o pipefail
           for pass in 1 2 3; do
             echo "Repeatability pass ${pass}"
-            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts --reporter=dot
+            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts test/broker-crash.integration.test.ts test/network-fault.integration.test.ts test/trust-boundary.integration.test.ts --fileParallelism=false --reporter=dot
           done 2>&1 | tee simulation-evidence/repeatability.log
 
       - name: Finalize evidence manifest
@@ -139,6 +226,12 @@ jobs:
             'postgres-integration.log',
             'runtime-tests.log',
             'postgres-adapter-tests.log',
+            'broker-crash-integration.log',
+            'network-fault-integration.log',
+            'postgres-crash-recovery.log',
+            'postgres-backup-restore.log',
+            'postgres-load-smoke.log',
+            'trust-boundary-integration.log',
             'repeatability.log'
           ].filter((name) => existsSync(`simulation-evidence/${name}`));
           writeFileSync(path, JSON.stringify(manifest, null, 2) + '\n');

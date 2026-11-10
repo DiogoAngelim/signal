@@ -31,6 +31,8 @@ type IdempotencyRow = {
   message_id: string | null;
   created_at: Date;
   updated_at: Date;
+  reservation_token: string | null;
+  reservation_expires_at: Date | null;
 };
 
 function toRecord(row: IdempotencyRow): IdempotencyRecord {
@@ -47,6 +49,8 @@ function toRecord(row: IdempotencyRow): IdempotencyRecord {
     messageId: row.message_id ?? undefined,
     createdAt: new Date(row.created_at).toISOString(),
     updatedAt: new Date(row.updated_at).toISOString(),
+    reservationToken: row.reservation_token ?? undefined,
+    reservationExpiresAt: row.reservation_expires_at ? new Date(row.reservation_expires_at).toISOString() : undefined,
   };
 }
 
@@ -83,14 +87,17 @@ export function createPostgresTransactionalStore(
       result: unknown;
       resultMeta?: SignalResultMeta;
       messageId?: string;
+      reservationToken: string;
     },
   ): Promise<void> {
     const updated = await client.query(
       `UPDATE signal_idempotency_records
        SET status = 'completed', result = $4::jsonb,
-           result_meta = $5::jsonb, message_id = $6, updated_at = now()
+           result_meta = $5::jsonb, message_id = $6, updated_at = now(),
+           reservation_token = NULL, reservation_expires_at = NULL
        WHERE operation_name = $1 AND idempotency_key = $2
-         AND payload_fingerprint = $3 AND status = 'pending'`,
+         AND payload_fingerprint = $3 AND status = 'pending'
+         AND reservation_token = $7 AND reservation_expires_at > now()`,
       [
         input.operationName,
         input.idempotencyKey,
@@ -98,6 +105,7 @@ export function createPostgresTransactionalStore(
         JSON.stringify(input.result),
         input.resultMeta === undefined ? null : JSON.stringify(input.resultMeta),
         input.messageId ?? null,
+        input.reservationToken,
       ],
     );
     if (updated.rowCount !== 1) {
@@ -134,16 +142,35 @@ export function createPostgresTransactionalStore(
       };
     },
     async reserve(input): Promise<IdempotencyReservation> {
+      const leaseMs = input.leaseMs ?? 300_000;
+      if (!Number.isSafeInteger(leaseMs) || leaseMs < 1_000 || leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
       const inserted = await pool.query<IdempotencyRow>(
         `INSERT INTO signal_idempotency_records
-          (operation_name, idempotency_key, payload_fingerprint, status)
-         VALUES ($1, $2, $3, 'pending')
+          (operation_name, idempotency_key, payload_fingerprint, status, reservation_token, reservation_expires_at)
+         VALUES ($1, $2, $3, 'pending', gen_random_uuid(), now() + ($4 * interval '1 millisecond'))
          ON CONFLICT (operation_name, idempotency_key) DO NOTHING
          RETURNING *`,
-        [input.operationName, input.idempotencyKey, input.payloadFingerprint],
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, leaseMs],
       );
       if (inserted.rows[0]) {
         return { state: "reserved", record: toRecord(inserted.rows[0]) };
+      }
+
+      const reclaimed = await pool.query<IdempotencyRow>(
+        `UPDATE signal_idempotency_records
+         SET reservation_token = gen_random_uuid(),
+             reservation_expires_at = now() + ($4 * interval '1 millisecond'),
+             updated_at = now()
+         WHERE operation_name = $1 AND idempotency_key = $2
+           AND payload_fingerprint = $3 AND status = 'pending'
+           AND reservation_expires_at <= now()
+         RETURNING *`,
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, leaseMs],
+      );
+      if (reclaimed.rows[0]) {
+        return { state: "reserved", record: toRecord(reclaimed.rows[0]) };
       }
 
       const existing = await pool.query<IdempotencyRow>(
@@ -159,6 +186,21 @@ export function createPostgresTransactionalStore(
       }
       if (record.status === "pending") return { state: "inflight", record };
       return { state: "replayed", record };
+    },
+
+    async renewReservation(input): Promise<boolean> {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Idempotency reservation lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const renewed = await pool.query(
+        `UPDATE signal_idempotency_records
+         SET reservation_expires_at = now() + ($5 * interval '1 millisecond'), updated_at = now()
+         WHERE operation_name = $1 AND idempotency_key = $2
+           AND payload_fingerprint = $3 AND reservation_token = $4
+           AND status = 'pending' AND reservation_expires_at > now()`,
+        [input.operationName, input.idempotencyKey, input.payloadFingerprint, input.reservationToken, input.leaseMs],
+      );
+      return renewed.rowCount === 1;
     },
 
     async complete(input): Promise<void> {
@@ -208,14 +250,17 @@ export function createPostgresTransactionalStore(
     async fail(input): Promise<void> {
       const result = await pool.query(
         `UPDATE signal_idempotency_records
-         SET status = 'failed', error = $4::jsonb, updated_at = now()
+         SET status = 'failed', error = $4::jsonb, updated_at = now(),
+             reservation_token = NULL, reservation_expires_at = NULL
          WHERE operation_name = $1 AND idempotency_key = $2
-           AND payload_fingerprint = $3 AND status = 'pending'`,
+           AND payload_fingerprint = $3 AND status = 'pending'
+           AND reservation_token = $5 AND reservation_expires_at > now()`,
         [
           input.operationName,
           input.idempotencyKey,
           input.payloadFingerprint,
           JSON.stringify(input.error),
+          input.reservationToken,
         ],
       );
       if (result.rowCount !== 1) {
@@ -238,6 +283,7 @@ export function createPostgresTransactionalStore(
           envelope: SignalEnvelope;
           attempts: number;
           created_at: Date;
+          lease_token: string;
         }>(
           `WITH candidates AS (
              SELECT id FROM signal_outbox
@@ -250,10 +296,11 @@ export function createPostgresTransactionalStore(
            UPDATE signal_outbox AS outbox
            SET status = 'processing', locked_by = $2,
                locked_until = now() + ($3 * interval '1 millisecond'),
+               lease_token = gen_random_uuid(),
                attempts = outbox.attempts + 1
            FROM candidates
            WHERE outbox.id = candidates.id
-           RETURNING outbox.id, outbox.envelope, outbox.attempts, outbox.created_at`,
+           RETURNING outbox.id, outbox.envelope, outbox.attempts, outbox.created_at, outbox.lease_token`,
           [input.limit, input.workerId, input.leaseMs],
         );
         await client.query("COMMIT");
@@ -262,6 +309,7 @@ export function createPostgresTransactionalStore(
           envelope: row.envelope,
           attempts: row.attempts,
           createdAt: new Date(row.created_at).toISOString(),
+          leaseToken: row.lease_token,
         }));
       } catch (error) {
         await rollback(client);
@@ -275,9 +323,9 @@ export function createPostgresTransactionalStore(
       const result = await pool.query(
         `UPDATE signal_outbox
          SET status = 'delivered', delivered_at = now(),
-             locked_by = NULL, locked_until = NULL, last_error = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2`,
-        [input.id, input.workerId],
+             locked_by = NULL, locked_until = NULL, lease_token = NULL, last_error = NULL
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3`,
+        [input.id, input.workerId, input.leaseToken],
       );
       return result.rowCount === 1;
     },
@@ -285,12 +333,12 @@ export function createPostgresTransactionalStore(
     async retry(input) {
       const result = await pool.query<{ status: "pending" | "dead-letter" }>(
         `UPDATE signal_outbox
-         SET status = CASE WHEN attempts >= $5 THEN 'dead-letter' ELSE 'pending' END,
-             available_at = $3::timestamptz, last_error = $4,
-             locked_by = NULL, locked_until = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2
+         SET status = CASE WHEN attempts >= $6 THEN 'dead-letter' ELSE 'pending' END,
+             available_at = $4::timestamptz, last_error = $5,
+             locked_by = NULL, locked_until = NULL, lease_token = NULL
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
          RETURNING status`,
-        [input.id, input.workerId, input.availableAt, input.error, input.maxAttempts],
+        [input.id, input.workerId, input.leaseToken, input.availableAt, input.error, input.maxAttempts],
       );
       const status = result.rows[0]?.status;
       if (!status) return "lease-lost";

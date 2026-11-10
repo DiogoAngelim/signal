@@ -38,6 +38,11 @@ export async function executeMutation<TInput, TResult>(
   let definition: ReturnType<SignalRegistry["getMutation"]> | undefined;
   let payloadFingerprint = "";
   let reservedRecord = false;
+  let reservationToken: string | undefined;
+  let reservationLeaseTimer: ReturnType<typeof setInterval> | undefined;
+  let reservationRenewal: Promise<boolean> | undefined;
+  let reservationLeaseLost = false;
+  const reservationLeaseMs = 300_000;
 
   try {
     throwIfExecutionBlocked(context.request);
@@ -94,6 +99,7 @@ export async function executeMutation<TInput, TResult>(
         operationName: name,
         idempotencyKey,
         payloadFingerprint,
+        leaseMs: reservationLeaseMs,
       });
 
       if (reservation.state === "conflict") {
@@ -154,6 +160,28 @@ export async function executeMutation<TInput, TResult>(
       }
 
       reservedRecord = reservation.state === "reserved";
+      if (reservedRecord) {
+        reservationToken = reservation.record?.reservationToken;
+        if (!reservationToken) throw new Error("Storage adapter returned a reservation without a fencing token.");
+        reservationLeaseTimer = setInterval(() => {
+          if (reservationRenewal) return;
+          reservationRenewal = storagePort.renewReservation({
+            operationName: name,
+            idempotencyKey,
+            payloadFingerprint,
+            reservationToken: reservationToken!,
+            leaseMs: reservationLeaseMs,
+          }).then((renewed) => {
+            if (!renewed) reservationLeaseLost = true;
+            return renewed;
+          }).catch(() => {
+            reservationLeaseLost = true;
+            return false;
+          }).finally(() => {
+            reservationRenewal = undefined;
+          });
+        }, 60_000);
+      }
     }
 
     const emittedEvents: SignalEnvelope[] = [];
@@ -181,6 +209,22 @@ export async function executeMutation<TInput, TResult>(
 
     const result = await definition.handler(validatedInput, executionContext);
     const validatedResult = definition.resultSchema.parse(result);
+
+    if (reservedRecord && storagePort && idempotencyKey && reservationToken) {
+      if (reservationLeaseTimer) clearInterval(reservationLeaseTimer);
+      reservationLeaseTimer = undefined;
+      if (reservationRenewal && !(await reservationRenewal)) reservationLeaseLost = true;
+      const renewed = await storagePort.renewReservation({
+        operationName: name,
+        idempotencyKey,
+        payloadFingerprint,
+        reservationToken,
+        leaseMs: reservationLeaseMs,
+      });
+      if (reservationLeaseLost || !renewed) {
+        throw new Error("Idempotency reservation lease was lost before commit.");
+      }
+    }
 
     if (
       storagePort &&
@@ -218,6 +262,7 @@ export async function executeMutation<TInput, TResult>(
           operationName: name,
           idempotencyKey,
           payloadFingerprint,
+          reservationToken: reservationToken!,
           result: validatedResult,
           resultMeta: meta,
           messageId: envelope.messageId,
@@ -237,6 +282,7 @@ export async function executeMutation<TInput, TResult>(
           operationName: name,
           idempotencyKey,
           payloadFingerprint,
+          reservationToken: reservationToken!,
           result: validatedResult,
           resultMeta: meta,
           messageId: envelope.messageId,
@@ -273,6 +319,9 @@ export async function executeMutation<TInput, TResult>(
       envelope,
     };
   } catch (error) {
+    if (reservationLeaseTimer) clearInterval(reservationLeaseTimer);
+    if (reservationRenewal) await reservationRenewal;
+
     if (isZodError(error)) {
       const failure = createSignalError("VALIDATION_ERROR", error.message, {
         details: { issues: error.issues },
@@ -285,12 +334,15 @@ export async function executeMutation<TInput, TResult>(
         definition &&
         definition.idempotency !== "none"
       ) {
-        await storagePort.fail({
-          operationName: name,
-          idempotencyKey,
-          payloadFingerprint,
-          error: failure,
-        });
+        try {
+          await storagePort.fail({
+            operationName: name,
+            idempotencyKey,
+            payloadFingerprint,
+            reservationToken: reservationToken!,
+            error: failure,
+          });
+        } catch { /* A lost lease must not be overwritten by the stale owner. */ }
       }
 
       return toFailure<TResult>(failure);
@@ -305,12 +357,15 @@ export async function executeMutation<TInput, TResult>(
       definition &&
       definition.idempotency !== "none"
     ) {
-      await storagePort.fail({
-        operationName: name,
-        idempotencyKey,
-        payloadFingerprint,
-        error: failure,
-      });
+      try {
+        await storagePort.fail({
+          operationName: name,
+          idempotencyKey,
+          payloadFingerprint,
+          reservationToken: reservationToken!,
+          error: failure,
+        });
+      } catch { /* A lost lease must not be overwritten by the stale owner. */ }
     }
 
     return toFailure<TResult>(failure);

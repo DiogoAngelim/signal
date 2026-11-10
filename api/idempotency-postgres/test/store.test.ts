@@ -1,27 +1,37 @@
 import type { SignalErrorEnvelope } from "@signal/protocol";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
-const mocks = vi.hoisted(() => ({
-  drizzle: vi.fn(),
-  pool: vi.fn(),
-}));
-
-vi.mock("drizzle-orm/node-postgres", () => ({
-  drizzle: mocks.drizzle,
-}));
-
-vi.mock("pg", () => ({
-  Pool: mocks.pool,
-}));
+const mocks = vi.hoisted(() => ({ drizzle: vi.fn(), pool: vi.fn() }));
+vi.mock("drizzle-orm/node-postgres", () => ({ drizzle: mocks.drizzle }));
+vi.mock("pg", () => ({ Pool: mocks.pool }));
 
 import { createPostgresIdempotencyStore } from "../src";
 
+function makeRow(overrides: Record<string, unknown> = {}) {
+  return {
+    operationName: "payment.capture.v1",
+    idempotencyKey: "capture-1",
+    payloadFingerprint: "fingerprint-a",
+    status: "pending",
+    result: null,
+    resultMeta: null,
+    error: null,
+    messageId: null,
+    createdAt: new Date("2026-03-25T00:00:00.000Z"),
+    updatedAt: new Date("2026-03-25T00:00:00.000Z"),
+    reservationToken: "reservation-token",
+    reservationExpiresAt: new Date(Date.now() + 60_000),
+    ...overrides,
+  };
+}
+
 function createDbHarness() {
   const selectQueue: unknown[][] = [];
-  const updates: Array<{ type: "complete" | "fail"; values: unknown }> = [];
+  const insertQueue: unknown[][] = [];
+  const updateQueue: unknown[][] = [];
+  const updates: Array<{ values: unknown }> = [];
   const inserted: unknown[] = [];
   let insertShouldThrow = false;
-
   const db = {
     select: vi.fn(() => ({
       from: vi.fn(() => ({
@@ -31,343 +41,164 @@ function createDbHarness() {
       })),
     })),
     insert: vi.fn(() => ({
-      values: vi.fn(async (values: unknown) => {
-        if (insertShouldThrow) {
-          throw new Error("unique violation");
-        }
+      values: vi.fn((values: unknown) => {
         inserted.push(values);
+        return {
+          onConflictDoNothing: vi.fn(() => ({
+            returning: vi.fn(async () => {
+              if (insertShouldThrow) throw new Error("unique violation");
+              return insertQueue.shift() ?? [];
+            }),
+          })),
+        };
       }),
     })),
     update: vi.fn(() => ({
       set: vi.fn((values: unknown) => ({
-        where: vi.fn(async () => {
-          updates.push({
-            type:
-              values &&
-              typeof values === "object" &&
-              "error" in (values as Record<string, unknown>)
-                ? "fail"
-                : "complete",
-            values,
-          });
-        }),
+        where: vi.fn(() => ({
+          returning: vi.fn(async () => {
+            updates.push({ values });
+            return updateQueue.shift() ?? [];
+          }),
+        })),
       })),
     })),
   };
-
   return {
-    db,
-    selectQueue,
-    updates,
-    inserted,
-    setInsertShouldThrow(value: boolean) {
-      insertShouldThrow = value;
-    },
+    db, selectQueue, insertQueue, updateQueue, updates, inserted,
+    setInsertShouldThrow(value: boolean) { insertShouldThrow = value; },
   };
 }
 
 beforeEach(() => {
   mocks.drizzle.mockReset();
   mocks.pool.mockReset();
+  mocks.pool.mockImplementation(() => ({}));
 });
 
 describe("postgres idempotency store", () => {
-  it("reserves new records and completes them", async () => {
+  it("reserves a new record and completes it with the reservation token", async () => {
     const harness = createDbHarness();
     mocks.drizzle.mockReturnValue(harness.db);
-
-    const store = createPostgresIdempotencyStore({
-      connectionString: "postgres://example",
-    });
-
-    harness.selectQueue.push([]);
+    harness.insertQueue.push([makeRow()]);
+    harness.updateQueue.push([{ operationName: "payment.capture.v1" }]);
+    const store = createPostgresIdempotencyStore({ connectionString: "postgres://example" });
 
     const reservation = await store.reserve({
       operationName: "payment.capture.v1",
       idempotencyKey: "capture-1",
       payloadFingerprint: "fingerprint-a",
     });
+    expect(reservation.state).toBe("reserved");
+    expect(reservation.record?.reservationToken).toBe("reservation-token");
 
     await store.complete({
       operationName: "payment.capture.v1",
       idempotencyKey: "capture-1",
       payloadFingerprint: "fingerprint-a",
+      reservationToken: "reservation-token",
       result: { ok: true },
-      resultMeta: {
-        outcome: "completed",
-        operation: {
-          kind: "mutation",
-          name: "payment.capture.v1",
-        },
-        envelope: {
-          messageId: "msg-1",
-        },
-        timing: {
-          startedAt: "2026-03-25T00:00:00.000Z",
-          completedAt: "2026-03-25T00:00:00.010Z",
-          durationMs: 10,
-        },
-      },
       messageId: "msg-1",
     });
-    await store.complete({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-1",
-      payloadFingerprint: "fingerprint-a",
-      result: { ok: true },
-    });
 
-    expect(reservation.state).toBe("reserved");
     expect(harness.inserted).toHaveLength(1);
-    expect(harness.updates).toEqual([
-      {
-        type: "complete",
-        values: {
-          status: "completed",
-          result: { ok: true },
-          resultMeta: {
-            outcome: "completed",
-            operation: {
-              kind: "mutation",
-              name: "payment.capture.v1",
-            },
-            envelope: {
-              messageId: "msg-1",
-            },
-            timing: {
-              startedAt: "2026-03-25T00:00:00.000Z",
-              completedAt: "2026-03-25T00:00:00.010Z",
-              durationMs: 10,
-            },
-          },
-          messageId: "msg-1",
-          updatedAt: expect.any(Date),
-        },
-      },
-      {
-        type: "complete",
-        values: {
-          status: "completed",
-          result: { ok: true },
-          resultMeta: undefined,
-          messageId: null,
-          updatedAt: expect.any(Date),
-        },
-      },
-    ]);
-    expect(mocks.pool).toHaveBeenCalledWith({
-      connectionString: "postgres://example",
+    expect(harness.inserted[0]).toMatchObject({
+      status: "pending",
+      reservationToken: expect.any(String),
+      reservationExpiresAt: expect.any(Date),
+    });
+    expect(harness.updates[0].values).toMatchObject({
+      status: "completed",
+      reservationToken: null,
+      reservationExpiresAt: null,
     });
   });
 
-  it("detects conflicts, inflight records, and completed replays", async () => {
+  it("reclaims an expired reservation with a new fencing token", async () => {
     const harness = createDbHarness();
     mocks.drizzle.mockReturnValue(harness.db);
-    const store = createPostgresIdempotencyStore({
-      connectionString: "postgres://example",
-    });
+    harness.insertQueue.push([]);
+    harness.updateQueue.push([makeRow({
+      reservationToken: "new-token",
+      reservationExpiresAt: new Date(Date.now() + 60_000),
+    })]);
+    const store = createPostgresIdempotencyStore({ connectionString: "postgres://example" });
 
-    harness.selectQueue.push([
-      {
+    const reservation = await store.reserve({
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-1",
+      payloadFingerprint: "fingerprint-a",
+    });
+    expect(reservation.state).toBe("reserved");
+    expect(reservation.record?.reservationToken).toBe("new-token");
+  });
+
+  it("renews only the current unexpired reservation", async () => {
+    const harness = createDbHarness();
+    mocks.drizzle.mockReturnValue(harness.db);
+    harness.updateQueue.push([{ operationName: "payment.capture.v1" }], []);
+    const store = createPostgresIdempotencyStore({ connectionString: "postgres://example" });
+
+    await expect(store.renewReservation({
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-1",
+      payloadFingerprint: "fingerprint-a",
+      reservationToken: "reservation-token",
+      leaseMs: 30_000,
+    })).resolves.toBe(true);
+    await expect(store.renewReservation({
+      operationName: "payment.capture.v1",
+      idempotencyKey: "capture-1",
+      payloadFingerprint: "fingerprint-a",
+      reservationToken: "stale-token",
+      leaseMs: 30_000,
+    })).resolves.toBe(false);
+  });
+
+  it("distinguishes inflight, completed replay, failed replay, and fingerprint conflict", async () => {
+    const harness = createDbHarness();
+    mocks.drizzle.mockReturnValue(harness.db);
+    const store = createPostgresIdempotencyStore({ connectionString: "postgres://example" });
+    const cases = [
+      { row: makeRow(), fingerprint: "fingerprint-a", state: "inflight" },
+      { row: makeRow({ status: "completed", result: { ok: true } }), fingerprint: "fingerprint-a", state: "replayed" },
+      { row: makeRow({ status: "failed", error: { code: "INTERNAL_ERROR", message: "failed" } satisfies SignalErrorEnvelope }), fingerprint: "fingerprint-a", state: "replayed" },
+      { row: makeRow({ status: "completed" }), fingerprint: "different", state: "conflict" },
+    ];
+    for (const testCase of cases) {
+      harness.insertQueue.push([]);
+      harness.updateQueue.push([]);
+      harness.selectQueue.push([testCase.row]);
+      const result = await store.reserve({
         operationName: "payment.capture.v1",
         idempotencyKey: "capture-1",
-        payloadFingerprint: "fingerprint-a",
-        status: "pending",
-        result: null,
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: null,
-      },
-    ]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-2",
-        payloadFingerprint: "fingerprint-b",
-        status: "completed",
-        result: { ok: true },
-        resultMeta: {
-          outcome: "completed",
-        },
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: "msg-2",
-      },
-    ]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-3",
-        payloadFingerprint: "fingerprint-c",
-        status: "failed",
-        result: null,
-        error: {
-          code: "CONFLICT",
-          message: "failed",
-        } satisfies SignalErrorEnvelope,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: null,
-      },
-    ]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-4",
-        payloadFingerprint: "fingerprint-other",
-        status: "completed",
-        result: { ok: true },
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: "msg-4",
-      },
-    ]);
-
-    const inflight = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-1",
-      payloadFingerprint: "fingerprint-a",
-    });
-    const replayed = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-2",
-      payloadFingerprint: "fingerprint-b",
-    });
-    const failed = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-3",
-      payloadFingerprint: "fingerprint-c",
-    });
-    const conflict = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-4",
-      payloadFingerprint: "fingerprint-d",
-    });
-
-    expect(inflight.state).toBe("inflight");
-    expect(replayed.state).toBe("replayed");
-    expect(replayed.record?.resultMeta).toEqual({ outcome: "completed" });
-    expect(failed.state).toBe("replayed");
-    expect(conflict.state).toBe("conflict");
+        payloadFingerprint: testCase.fingerprint,
+      });
+      expect(result.state).toBe(testCase.state);
+    }
   });
 
-  it("handles insert races and failure updates", async () => {
+  it("fences failure updates by reservation token", async () => {
     const harness = createDbHarness();
     mocks.drizzle.mockReturnValue(harness.db);
-    const store = createPostgresIdempotencyStore({
-      connectionString: "postgres://example",
-    });
-
-    harness.setInsertShouldThrow(true);
-    harness.selectQueue.push([]);
-    harness.selectQueue.push([]);
-
-    const inflight = await store.reserve({
-      operationName: "user.onboard.v1",
-      idempotencyKey: "onboard-1",
-      payloadFingerprint: "fingerprint-a",
-    });
+    harness.updateQueue.push([{ operationName: "user.onboard.v1" }]);
+    const store = createPostgresIdempotencyStore({ connectionString: "postgres://example" });
 
     await store.fail({
       operationName: "user.onboard.v1",
       idempotencyKey: "onboard-1",
       payloadFingerprint: "fingerprint-a",
+      reservationToken: "reservation-token",
       error: {
         code: "INTERNAL_ERROR",
         message: "boom",
         retryable: true,
       },
     });
-
-    expect(inflight.state).toBe("inflight");
-    expect(harness.updates).toEqual([
-      {
-        type: "fail",
-        values: {
-          status: "failed",
-          error: {
-            code: "INTERNAL_ERROR",
-            message: "boom",
-            retryable: true,
-          },
-          updatedAt: expect.any(Date),
-        },
-      },
-    ]);
-  });
-
-  it("reconciles retry records after a unique violation", async () => {
-    const harness = createDbHarness();
-    mocks.drizzle.mockReturnValue(harness.db);
-    const store = createPostgresIdempotencyStore({
-      connectionString: "postgres://example",
+    expect(harness.updates[0].values).toMatchObject({
+      status: "failed",
+      reservationToken: null,
+      reservationExpiresAt: null,
     });
-
-    harness.setInsertShouldThrow(true);
-    harness.selectQueue.push([]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-10",
-        payloadFingerprint: "fingerprint-other",
-        status: "completed",
-        result: { ok: true },
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: "msg-10",
-      },
-    ]);
-    harness.selectQueue.push([]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-11",
-        payloadFingerprint: "fingerprint-b",
-        status: "pending",
-        result: null,
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: null,
-      },
-    ]);
-    harness.selectQueue.push([]);
-    harness.selectQueue.push([
-      {
-        operationName: "payment.capture.v1",
-        idempotencyKey: "capture-12",
-        payloadFingerprint: "fingerprint-c",
-        status: "completed",
-        result: { ok: true },
-        error: null,
-        createdAt: new Date("2026-03-25T00:00:00.000Z"),
-        updatedAt: new Date("2026-03-25T00:00:00.000Z"),
-        messageId: "msg-12",
-      },
-    ]);
-
-    const conflict = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-10",
-      payloadFingerprint: "fingerprint-a",
-    });
-    const inflight = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-11",
-      payloadFingerprint: "fingerprint-b",
-    });
-    const replayed = await store.reserve({
-      operationName: "payment.capture.v1",
-      idempotencyKey: "capture-12",
-      payloadFingerprint: "fingerprint-c",
-    });
-
-    expect(conflict.state).toBe("conflict");
-    expect(inflight.state).toBe("inflight");
-    expect(replayed.state).toBe("replayed");
   });
 });

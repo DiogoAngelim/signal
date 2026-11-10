@@ -5,6 +5,7 @@ import {
   text,
   timestamp,
   uniqueIndex,
+  uuid,
 } from "drizzle-orm/pg-core";
 
 export const signalIdempotencyStatus = pgEnum("signal_idempotency_status", [
@@ -24,6 +25,8 @@ export const signalIdempotencyRecords = pgTable(
     resultMeta: jsonb("result_meta"),
     error: jsonb("error"),
     messageId: text("message_id"),
+    reservationToken: uuid("reservation_token"),
+    reservationExpiresAt: timestamp("reservation_expires_at", { withTimezone: true }),
     createdAt: timestamp("created_at", { withTimezone: true })
       .notNull()
       .defaultNow(),
