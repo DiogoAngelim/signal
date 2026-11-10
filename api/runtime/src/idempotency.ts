@@ -178,9 +178,19 @@ export function createMemoryIdempotencyStore(): StoragePort &
         id, envelope: structuredClone(envelope), attempts, createdAt, leaseToken: outbox.get(id)!.leaseToken,
       }));
     },
+    async renewLease(input) {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Outbox lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const item = outbox.get(input.id);
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId ||
+          item.leaseToken !== input.leaseToken || (item.lockedUntil ?? 0) <= Date.now()) return false;
+      item.lockedUntil = Date.now() + input.leaseMs;
+      return true;
+    },
     async acknowledge(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return false;
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken || (item.lockedUntil ?? 0) <= Date.now()) return false;
       item.status = "delivered";
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
@@ -189,7 +199,7 @@ export function createMemoryIdempotencyStore(): StoragePort &
     },
     async retry(input) {
       const item = outbox.get(input.id);
-      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken) return "lease-lost";
+      if (!item || item.status !== "processing" || item.lockedBy !== input.workerId || item.leaseToken !== input.leaseToken || (item.lockedUntil ?? 0) <= Date.now()) return "lease-lost";
       item.lastError = input.error;
       item.lockedBy = undefined;
       item.lockedUntil = undefined;
