@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm run build:library && pnpm --filter @signal/reference-lab run build",
+  "buildCommand": "pnpm -w run build:library && pnpm --filter @signal/reference-lab run build",
   "installCommand": "pnpm install --frozen-lockfile",
   "headers": [
     {
