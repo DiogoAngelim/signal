@@ -58,6 +58,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   const now = options.now ?? (() => new Date());
   const requests = new Map<string, CaseRequest>();
   const events: LabEvent[] = [];
+  const inFlightSubmissions = new Map<string, Promise<CaseRequest>>();
   const memory = createInMemoryDecisionMemoryStore();
   const agency = createAgencyPipeline({
     policy: { minimumConfidence: 0.7, humanApprovalRequired: true },
@@ -443,16 +444,26 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
         .filter((item) => item.tenantId === tenantId)
         .map((item) => structuredClone(item));
     },
-    async submitRequest(input: z.infer<typeof requestInput>) {
-      const result = await runtime.mutation<
-        z.infer<typeof requestInput>,
-        { request: CaseRequest }
-      >("lab.request.submit.v1", input, {
-        ...context("lab-ui"),
-        idempotencyKey: `submit:${hash(JSON.stringify(input))}`,
-      });
-      if (!result.ok) throw new Error(result.error.message);
-      return result.result.request as CaseRequest;
+    submitRequest(input: z.infer<typeof requestInput>) {
+      const key = hash(JSON.stringify(input));
+      const inFlight = inFlightSubmissions.get(key);
+      if (inFlight) return inFlight.then((request) => structuredClone(request));
+      const operation = (async () => {
+        const result = await runtime.mutation<
+          z.infer<typeof requestInput>,
+          { request: CaseRequest }
+        >("lab.request.submit.v1", input, {
+          ...context("lab-ui"),
+          idempotencyKey: `submit:${key}`,
+        });
+        if (!result.ok) throw new Error(result.error.message);
+        return result.result.request as CaseRequest;
+      })();
+      inFlightSubmissions.set(key, operation);
+      return operation.then(
+        (request) => structuredClone(request),
+        (error) => { throw error; },
+      ).finally(() => inFlightSubmissions.delete(key));
     },
     async addEvidence(input: z.infer<typeof evidenceInput>) {
       const result = await runtime.mutation<
