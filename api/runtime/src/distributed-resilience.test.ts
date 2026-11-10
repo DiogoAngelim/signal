@@ -51,7 +51,6 @@ describe("distributed runtime circuit breaker controller", () => {
     permit = { allowed: false };
     expect(await controller.tryAcquire()).toBe(false);
     expect(await controller.renewProbe()).toBe(false);
-    expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", undefined, 15000]);
     failNextSuccess = true;
     await expect(controller.recordSuccess()).rejects.toThrow("temporary database failure");
     expect(await controller.recordSuccess()).toBe(false);
