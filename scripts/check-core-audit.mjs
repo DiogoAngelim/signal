@@ -18,11 +18,22 @@ for(const block of blocks){
     findings.push({severity,packageName,path:corePath});
   }
 }
-if(parsed===0 && /vulnerabilities found/i.test(output)){
+const totals=output.match(/(\d+) vulnerabilities found/i)?.[1]??null;
+if(parsed===0 && totals!==null){
+  const summary=[...output.matchAll(/Severity:\s*(\d+)\s+(critical|high|moderate|low)/gi)];
+  const summarizedTotal=summary.reduce((sum,match)=>sum+Number(match[1]),0);
+  const hasHighOrCritical=summary.some(match=>["critical","high"].includes(match[2].toLowerCase()) && Number(match[1])>0);
+  if(summary.length===0 || summarizedTotal!==Number(totals)){
+    throw new Error("Could not reconcile pnpm audit summary; refusing to report a false clean result.");
+  }
+  if(hasHighOrCritical){
+    throw new Error("pnpm audit summary reports high/critical findings but did not provide parseable advisory paths.");
+  }
+  process.stdout.write(`Full workspace audit: ${totals} vulnerabilities reported; severity summary: ${summary.map(match=>match[1]+" "+match[2]).join(", ")}. Detailed advisories were omitted by pnpm.\n`);
+}else if(parsed===0 && !/no known vulnerabilities found/i.test(output)){
   throw new Error("Could not parse pnpm audit findings; refusing to report a false clean result.");
 }
-const totals=output.match(/(\d+) vulnerabilities found/i)?.[1]??"unknown";
-process.stdout.write(`Full workspace audit: ${totals} vulnerabilities reported. Parsed advisories: ${parsed}.\n`);
+process.stdout.write(`Full workspace audit: ${totals??"0"} vulnerabilities reported. Parsed advisories: ${parsed}.\n`);
 if(findings.length){
   process.stderr.write("High/critical findings in Signal runtime/domain/server dependency paths:\n");
   for(const finding of findings) process.stderr.write(`- ${finding.severity}: ${finding.packageName} (${finding.path})\n`);
