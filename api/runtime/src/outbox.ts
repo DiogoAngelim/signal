@@ -50,62 +50,80 @@ export async function dispatchOutboxBatch(
     leaseLost: 0,
   };
 
-  for (const record of records) {
-    let leaseLost = false;
-    let renewalInFlight: Promise<void> | undefined;
-    const renew = async () => {
-      if (renewalInFlight || leaseLost) return renewalInFlight;
-      renewalInFlight = (async () => {
+  const active = new Map(records.map((record) => [record.id, record]));
+  const lost = new Set<string>();
+  let renewalInFlight: Promise<void> | undefined;
+  const renewActiveLeases = async () => {
+    if (renewalInFlight) return renewalInFlight;
+    renewalInFlight = (async () => {
+      for (const [id, record] of active) {
         try {
           const renewed = await outbox.renewLease({
-            id: record.id, workerId, leaseToken: record.leaseToken, leaseMs,
+            id, workerId, leaseToken: record.leaseToken, leaseMs,
           });
-          if (!renewed) leaseLost = true;
+          if (!renewed) {
+            lost.add(id);
+            active.delete(id);
+          }
         } catch {
-          // A failed renewal means ownership cannot safely be assumed.
-          leaseLost = true;
+          // Ownership is uncertain after a renewal error; do not finalize it.
+          lost.add(id);
+          active.delete(id);
         }
-      })();
-      await renewalInFlight;
-      renewalInFlight = undefined;
-    };
-    const heartbeat = setInterval(() => { void renew(); }, Math.max(250, Math.floor(leaseMs / 3)));
-    try {
-      await eventPort.dispatch(record.envelope);
-      clearInterval(heartbeat);
-      if (renewalInFlight) await renewalInFlight;
-      if (leaseLost) {
+      }
+    })();
+    await renewalInFlight;
+    renewalInFlight = undefined;
+  };
+  // Keep every unprocessed claim alive, not only the record currently dispatched.
+  const heartbeat = setInterval(() => { void renewActiveLeases(); }, Math.max(250, Math.floor(leaseMs / 3)));
+
+  try {
+    for (const record of records) {
+      if (lost.has(record.id) || !active.has(record.id)) {
         result.leaseLost += 1;
         continue;
       }
-      const acknowledged = await outbox.acknowledge({
-        id: record.id,
-        workerId,
-        leaseToken: record.leaseToken,
-      });
-      if (acknowledged) result.delivered += 1;
-      else result.leaseLost += 1;
-    } catch (error) {
-      clearInterval(heartbeat);
-      if (renewalInFlight) await renewalInFlight;
-      if (leaseLost) {
-        result.leaseLost += 1;
-        continue;
+      try {
+        await eventPort.dispatch(record.envelope);
+        if (renewalInFlight) await renewalInFlight;
+        if (lost.has(record.id) || !active.has(record.id)) {
+          result.leaseLost += 1;
+          continue;
+        }
+        const acknowledged = await outbox.acknowledge({
+          id: record.id,
+          workerId,
+          leaseToken: record.leaseToken,
+        });
+        active.delete(record.id);
+        if (acknowledged) result.delivered += 1;
+        else result.leaseLost += 1;
+      } catch (error) {
+        if (renewalInFlight) await renewalInFlight;
+        if (lost.has(record.id) || !active.has(record.id)) {
+          result.leaseLost += 1;
+          continue;
+        }
+        const attempts = Math.max(1, record.attempts);
+        const delayMs = Math.min(300_000, 1000 * 2 ** Math.min(attempts - 1, 8));
+        const retry = await outbox.retry({
+          id: record.id,
+          workerId,
+          leaseToken: record.leaseToken,
+          availableAt: new Date(now() + delayMs).toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+          maxAttempts,
+        });
+        active.delete(record.id);
+        if (retry === "scheduled") result.scheduled += 1;
+        else if (retry === "dead-lettered") result.deadLettered += 1;
+        else result.leaseLost += 1;
       }
-      const attempts = Math.max(1, record.attempts);
-      const delayMs = Math.min(300_000, 1000 * 2 ** Math.min(attempts - 1, 8));
-      const retry = await outbox.retry({
-        id: record.id,
-        workerId,
-        leaseToken: record.leaseToken,
-        availableAt: new Date(now() + delayMs).toISOString(),
-        error: error instanceof Error ? error.message : String(error),
-        maxAttempts,
-      });
-      if (retry === "scheduled") result.scheduled += 1;
-      else if (retry === "dead-lettered") result.deadLettered += 1;
-      else result.leaseLost += 1;
     }
+  } finally {
+    clearInterval(heartbeat);
+    if (renewalInFlight) await renewalInFlight;
   }
 
   return result;
