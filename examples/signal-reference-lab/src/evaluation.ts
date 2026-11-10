@@ -193,23 +193,50 @@ export type Scorecard = { overall: number; dimensions: { name: string; weight: n
 const weights = [{ name: "Functional correctness/effectiveness", weight: 18 }, { name: "Reliability/resilience", weight: 16 }, { name: "Performance/resource efficiency", weight: 12 }, { name: "Architecture/design", weight: 14 }, { name: "Security/privacy/integrity", weight: 12 }, { name: "Maintainability/evolvability", weight: 10 }, { name: "Testing/verification", weight: 8 }, { name: "Developer experience/adoption", weight: 6 }, { name: "Operability/delivery", weight: 4 }];
 export function scoreEngineering(results: ScenarioResult[], inventory: Capability[]): Scorecard {
   const passRate = results.length ? results.filter((item) => item.status === "passed").length / results.length : 0;
-  const exercised = inventory.filter((item) => item.status === "exercised").length / inventory.length;
-  const unverified = inventory.filter((item) => item.status === "not-verified").length;
-  const scores = [Math.min(10, 5 + passRate * 5), 3.5, 5, 7, 6.5, 7, Math.min(10, 4 + passRate * 6), 7, 5];
-  const evidenceByDimension = [
-    results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions)`),
-    ["In-process idempotency and subscriber delivery only", "PostgreSQL/outbox/inbox/recovery remain unverified"],
-    ["Local in-process query benchmark reports latency/throughput/RSS", "No production or cross-host baseline is included"],
-    ["Public SDK operations; separate domain/evaluation modules", "No private package imports"],
-    ["Tenant-scoped read/write tests and evidence hard-stop", "No external identity provider or adversarial security test"],
-    ["Small typed modules with explicit domain contracts and docs", "No long-term migration/evolution exercise"],
-    results.map((item) => `${item.id}:${item.status}`),
-    ["CLI evaluate/coverage/benchmark/compare commands", "Local browser workflow and workspace package scripts"],
-    ["Dedicated CI workflow builds workspace dependency closure", "No deployed environment, SLOs or operational telemetry"]
+  const statusWeight = (status: Capability["status"]) => status === "exercised" ? 1 : status === "partial" ? 0.5 : 0;
+  const coverage = inventory.length ? inventory.reduce((sum, item) => sum + statusWeight(item.status), 0) / inventory.length : 0;
+  const areaCoverage = (areas: string[]) => {
+    const selected = inventory.filter((item) => areas.includes(item.area));
+    return selected.length ? selected.reduce((sum, item) => sum + statusWeight(item.status), 0) / selected.length : 0;
+  };
+  const reliabilityCoverage = areaCoverage(["Events", "PostgreSQL", "Outbox", "Inbox", "Resilience"]);
+  const securityCoverage = areaCoverage(["Runtime", "HTTP binding", "Security", "Audit", "Replay"]);
+  const exercisedCount = inventory.filter((item) => item.status === "exercised").length;
+  const partialCount = inventory.filter((item) => item.status === "partial").length;
+  const unverifiedCount = inventory.filter((item) => item.status === "not-verified").length;
+  const scores = [
+    Math.min(10, 2 + passRate * 4 + coverage * 4),
+    Math.min(10, 2 + passRate * 3 + reliabilityCoverage * 5),
+    5,
+    Math.min(10, 3 + coverage * 7),
+    Math.min(10, 2 + securityCoverage * 6),
+    7,
+    Math.min(10, 2 + passRate * 8),
+    7,
+    4
   ];
-  const dimensions = weights.map((dimension, index) => ({ ...dimension, score: Number(scores[index].toFixed(1)), confidence: index === 1 || index === 2 || index === 4 || index === 8 ? "low" as const : "medium" as const, evidence: evidenceByDimension[index] }));
+  const evidenceByDimension = [
+    [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions)`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
+    [`Reliability-related capability coverage: ${(reliabilityCoverage * 100).toFixed(0)}%.`, "PostgreSQL durability, outbox/inbox and distributed recovery remain unverified where not explicitly exercised."],
+    ["Local in-process query benchmark reports latency/throughput/RSS.", "No production or cross-host baseline is included; score is neutral and low-confidence."],
+    [`Weighted capability coverage across ${inventory.length} registered surfaces: ${(coverage * 100).toFixed(0)}%.`, "Public SDK operations; separate domain/evaluation modules; no private package imports."],
+    [`Security/integrity capability coverage: ${(securityCoverage * 100).toFixed(0)}%.`, "No external identity provider or full adversarial security certification."],
+    ["Small typed modules with explicit domain contracts and documentation.", "No long-term migration/evolution exercise."],
+    [`${results.filter((item) => item.status === "passed").length}/${results.length} scenarios passed.`, "Scenario assertions and capability evidence are independently reported."],
+    ["CLI evaluate/coverage/benchmark/compare commands.", "Local browser workflow and workspace package scripts."],
+    ["Dedicated CI workflow builds workspace dependency closure.", "No deployed environment, SLOs or operational telemetry."]
+  ];
+  const dimensions = weights.map((dimension, index) => ({
+    ...dimension,
+    score: Number(scores[index].toFixed(1)),
+    confidence: index === 2 || index === 8 || (index === 1 && reliabilityCoverage < 0.7) || (index === 4 && securityCoverage < 0.7) ? "low" as const : "medium" as const,
+    evidence: evidenceByDimension[index]
+  }));
   const overall = Number((dimensions.reduce((sum, item) => sum + item.score * item.weight, 0) / 100).toFixed(2));
-  return { overall, dimensions, interpretation: "Provisional reference-app integration score, not a certification or production score for Signal. Unverified database, resilience, replay, audit and telemetry capabilities are explicitly not credited. Performance is low-confidence until repeatable benchmark workloads and resource collectors are connected." };
+  return {
+    overall,
+    dimensions,
+    interpretation: "Provisional reference-app integration score, not a certification or production score for Signal. Scenario pass rate and weighted capability coverage both influence correctness and architecture scores. Unverified capabilities reduce coverage rather than being silently credited. Performance and operability remain low-confidence until production-like measurements and telemetry are connected."
+  };
 }
-
 export function summarizeRequests(items: CaseRequest[]) { return { total: items.length, assessed: items.filter((item) => item.assessment).length, decided: items.filter((item) => item.decision).length, outcomes: items.filter((item) => item.outcome).length }; }
