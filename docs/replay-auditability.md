@@ -32,6 +32,45 @@ versions, handler artifact identity, and snapshots of all external reads. Runtim
 metadata such as message identifiers, wall-clock timestamps, and durations may
 legitimately differ.
 
+## Versioned replay evidence records
+
+Signal now provides an explicit replay-evidence contract and PostgreSQL
+persistence for execution records. A record binds:
+- operation name and version;
+- handler artifact SHA-256 digest and policy version;
+- canonical JSON input and its fingerprint;
+- explicitly captured external-read snapshots, each with an observation time
+  and content fingerprint;
+- normalized result and its fingerprint;
+- execution ID and capture timestamp.
+
+Use createReplayEvidenceRecord from @signal/runtime to construct the record,
+verifyReplayEvidenceRecord before trusting it, and ReplayEvidencePort to persist
+it. The PostgreSQL implementation is createPostgresReplayEvidenceStore from
+@signal/idempotency-postgres. Migration 0006_immutable_replay_evidence.sql
+creates immutable persistence with row mutation/truncate guards and an
+insert-only application contract.
+
+replayWithEvidence verifies the record, requires exact operation, handler
+artifact, and policy identity, supplies captured external reads to the
+deterministic computation, and rejects result divergence. This supports
+reconstruction after process restart when the record and compatible handler
+artifact are retained.
+
+Capture is explicit: Signal cannot automatically observe arbitrary database
+reads, network calls, environment variables, clock access, randomness, or
+application globals. The application must record every decision-relevant
+external read at its boundary. The supplied replay computation must be pure
+and side-effect-free; the helper cannot prevent arbitrary I/O inside a callback.
+External actions must be represented as separate commands and must never be
+reissued by replay.
+
+Exact handler artifact matching is intentionally conservative. A newer handler
+or policy must not be substituted silently. Cross-version replay requires
+retaining the original executable artifact or an independently validated
+compatibility adapter. This repository does not yet certify historical
+execution across arbitrary runtime upgrades.
+
 ## Replay Principles
 
 ### 1. Deterministic Evidence
