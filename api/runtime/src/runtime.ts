@@ -216,13 +216,70 @@ export class SignalRuntime implements SignalBinding {
       description: options.description,
     });
 
+    const observedHandler = async (envelope: SignalEnvelope): Promise<void> => {
+      const startedAt = Date.now();
+      try {
+        await handler(envelope);
+        this.emitObservation({
+          event: "subscriber.delivered",
+          operationName: name,
+          operationKind: "event",
+          messageId: envelope.messageId,
+          correlationId: envelope.context?.correlationId,
+          traceId: envelope.context?.traceId,
+          durationMs: Math.max(0, Date.now() - startedAt),
+          outcome: "completed",
+          isReplay: this.isReplay,
+        });
+      } catch (error) {
+        const failure = toSignalFailure(
+          error,
+          "INTERNAL_ERROR",
+          "Subscriber handler failed",
+        );
+        const context = {
+          operationName: name,
+          operationKind: "event",
+          messageId: envelope.messageId,
+          correlationId: envelope.context?.correlationId,
+          traceId: envelope.context?.traceId,
+          durationMs: Math.max(0, Date.now() - startedAt),
+          outcome: "failed",
+          isReplay: this.isReplay,
+        };
+        this.emitObservation({
+          event: "subscriber.failed",
+          ...context,
+          meta: { errorCode: failure.code },
+        });
+        this.emitObservation({
+          event: "error.occurred",
+          ...context,
+          meta: { errorCode: failure.code, source: "subscriber" },
+        });
+        throw error;
+      }
+    };
+
     const subscriber =
       options.replaySafe || options.deduper
-        ? createReplaySafeSubscriber(handler, {
+        ? createReplaySafeSubscriber(observedHandler, {
             consumerId: options.consumerId,
             deduper: options.deduper,
+            onDeduplicated: (envelope, reason) => {
+              this.emitObservation({
+                event: "subscriber.deduped",
+                operationName: name,
+                operationKind: "event",
+                messageId: envelope.messageId,
+                correlationId: envelope.context?.correlationId,
+                traceId: envelope.context?.traceId,
+                outcome: reason,
+                isReplay: this.isReplay,
+              });
+            },
           })
-        : handler;
+        : observedHandler;
 
     return this.eventPort.subscribe(name, subscriber);
   }
