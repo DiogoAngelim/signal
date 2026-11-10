@@ -21,7 +21,22 @@ on:
 jobs:
   reference-lab:
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signal
+          POSTGRES_PASSWORD: signal
+          POSTGRES_DB: signal_reference_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U signal -d signal_reference_lab"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
     env:
+      DATABASE_URL: postgresql://signal:signal@localhost:5432/signal_reference_lab
       SIGNAL_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
@@ -33,6 +48,11 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Apply Signal PostgreSQL migrations
+        run: |
+          for migration in api/idempotency-postgres/src/drizzle/migrations/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
       - run: pnpm --filter @signal/reference-lab... build
       - run: pnpm --filter @signal/reference-lab test
       - run: pnpm --filter @signal/reference-lab coverage:verify
