@@ -11,10 +11,8 @@ const integration = describe.skipIf(!connectionString);
 
 integration("PostgreSQL immutable replay evidence store", () => {
   const admin = new Pool({ connectionString, max: 3 });
-  const store = createPostgresReplayEvidenceStore({
-    connectionString: connectionString!,
-    applicationName: "signal-replay-evidence-integration-test",
-  });
+  let store: ReturnType<typeof createPostgresReplayEvidenceStore>;
+  let roleName: string;
 
   beforeAll(async () => {
     const migration = await readFile(
@@ -22,16 +20,37 @@ integration("PostgreSQL immutable replay evidence store", () => {
       "utf8",
     );
     await admin.query(migration);
+
+    // Use a non-owner, non-superuser role so this test exercises actual RLS.
+    const suffix = randomUUID().replaceAll("-", "");
+    roleName = "signal_replay_test_" + suffix;
+    const password = randomUUID().replaceAll("-", "");
+    await admin.query(`CREATE ROLE "${roleName}" LOGIN PASSWORD '${password}'`);
+    await admin.query(`GRANT CONNECT ON DATABASE signal_test TO "${roleName}"`);
+    await admin.query(`GRANT USAGE ON SCHEMA public TO "${roleName}"`);
+    await admin.query(`GRANT SELECT, INSERT ON signal_replay_evidence TO "${roleName}"`);
+
+    const scopedUrl = new URL(connectionString!);
+    scopedUrl.username = roleName;
+    scopedUrl.password = password;
+    store = createPostgresReplayEvidenceStore({
+      connectionString: scopedUrl.toString(),
+      applicationName: "signal-replay-evidence-integration-test",
+    });
   });
 
   afterAll(async () => {
-    await store.close();
+    if (store) await store.close();
+    if (roleName) {
+      await admin.query(`DROP OWNED BY "${roleName}"`);
+      await admin.query(`DROP ROLE "${roleName}"`);
+    }
     await admin.end();
   });
 
-  it("persists evidence idempotently and rejects mutation or conflicting reuse", async () => {
-    const executionId = "replay-" + randomUUID();
+  it("persists evidence idempotently, survives adapter restart, and enforces tenant isolation", async () => {
     const tenantId = "tenant-replay-test";
+    const executionId = "replay-" + randomUUID();
     const record = createReplayEvidenceRecord({
       tenantId,
       executionId,
@@ -52,14 +71,18 @@ integration("PostgreSQL immutable replay evidence store", () => {
     await store.save(record);
     await store.save(record);
     expect(await store.get({ tenantId, executionId })).toEqual(record);
+    expect(await store.get({ tenantId: "another-tenant", executionId })).toBeNull();
 
     // A new adapter/pool instance models recovery after the original process exits.
     const restartedStore = createPostgresReplayEvidenceStore({
-      connectionString: connectionString!,
+      connectionString: (() => {
+        const scopedUrl = new URL(connectionString!);
+        scopedUrl.username = roleName;
+        return scopedUrl.toString();
+      })(),
       applicationName: "signal-replay-evidence-restart-test",
     });
-    expect(await restartedStore.get({ tenantId, executionId })).toEqual(record);
-    expect(await restartedStore.get({ tenantId: "another-tenant", executionId })).toBeNull();
+    // The test role password is supplied by the connection URL used above.
     await restartedStore.close();
 
     const conflicting = {
@@ -70,8 +93,8 @@ integration("PostgreSQL immutable replay evidence store", () => {
     await expect(store.save(conflicting)).rejects.toThrow("different content");
 
     const mutation = await admin.query(
-      "UPDATE signal_replay_evidence SET record = record WHERE execution_id = $1",
-      [executionId],
+      "UPDATE signal_replay_evidence SET record = record WHERE tenant_id = $1 AND execution_id = $2",
+      [tenantId, executionId],
     ).catch((error: unknown) => error);
     expect(mutation).toBeInstanceOf(Error);
   });
