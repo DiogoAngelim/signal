@@ -369,6 +369,15 @@ importers:
 
   examples/signal-reference-lab:
     dependencies:
+      '@signal/agency':
+        specifier: workspace:*
+        version: link:../../packages/agency
+      '@signal/commitment':
+        specifier: workspace:*
+        version: link:../../packages/commitment
+      '@signal/semantic-state':
+        specifier: workspace:*
+        version: link:../../packages/semantic-state
       '@signal/decision':
         specifier: workspace:*
         version: link:../../packages/decision
