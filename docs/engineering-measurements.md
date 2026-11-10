@@ -53,3 +53,15 @@ A missing artifact is **Not measured**, not zero and not a pass. CI benchmark
 results must be archived by commit SHA. Performance regressions should be
 reviewed against a rolling baseline on the same runner class; initial reports
 establish the baseline rather than imposing invented universal thresholds.
+
+
+## Dependency security scope
+
+The scheduled security workflow retains the full workspace production audit as
+an artifact, while the release gate fails on high/critical advisories reachable
+from `api/`, `packages/`, or `server/`. Example applications are reported
+separately because they may have independent dependency trees and release
+cadences; they are not silently treated as clean. Do not deploy an example
+application with unresolved high/critical findings. The full audit artifact
+must be reviewed and its findings remediated or explicitly risk-accepted by
+the owner of that example.
