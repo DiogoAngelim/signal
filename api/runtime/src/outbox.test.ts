@@ -86,7 +86,7 @@ describe("durable outbox dispatcher", () => {
   it("renews the lease while a slow handler is running", async () => {
     vi.useFakeTimers();
     try {
-      const harness = createOutbox([record("event-slow")]);
+      const harness = createOutbox([record("event-slow"), record("event-waiting")]);
       let finish!: () => void;
       const dispatch = vi.fn(() => new Promise<void>((resolve) => { finish = resolve; }));
       const pending = dispatchOutboxBatch(
@@ -98,8 +98,11 @@ describe("durable outbox dispatcher", () => {
       expect(harness.outbox.renewLease).toHaveBeenCalledWith({
         id: "event-slow", workerId: "worker-slow", leaseToken: "lease-event-slow", leaseMs: 1000,
       });
+      expect(harness.outbox.renewLease).toHaveBeenCalledWith({
+        id: "event-waiting", workerId: "worker-slow", leaseToken: "lease-event-waiting", leaseMs: 1000,
+      });
       finish();
-      await expect(pending).resolves.toMatchObject({ delivered: 1, leaseLost: 0 });
+      await expect(pending).resolves.toMatchObject({ delivered: 2, leaseLost: 0 });
     } finally {
       vi.useRealTimers();
     }
