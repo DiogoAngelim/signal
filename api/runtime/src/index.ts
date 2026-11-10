@@ -19,3 +19,4 @@ export * from "./types";
 export * from "./audit-checkpoint";
 
 export * from "./replay-evidence";
+export * from "./prometheus-metrics";
