@@ -41,6 +41,19 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("signal_idempotency_expired_reservations");
   });
 
+  it("creates immutable replay evidence storage", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0006_immutable_replay_evidence.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_replay_evidence");
+    expect(sql).toContain("handler_artifact_digest");
+    expect(sql).toContain("operation_version");
+    expect(sql).toContain("signal_replay_evidence_no_update_delete");
+    expect(sql).toContain("signal_replay_evidence_no_truncate");
+    expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
+  });
+
   it("creates append-only audit entries and signed checkpoint storage", () => {
     const sql = readFileSync(
       join(__dirname, "../src/drizzle/migrations/0005_append_only_audit_ledger.sql"),
