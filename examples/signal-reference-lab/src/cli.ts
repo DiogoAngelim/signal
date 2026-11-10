@@ -57,7 +57,19 @@ async function main() {
   }
 
   if (command === "coverage" || command === "evaluate") {
-    const report = await runEvaluation();
+    const baselineIndex = process.argv.indexOf("--baseline");
+    const baselinePath = baselineIndex >= 0 ? process.argv[baselineIndex + 1] : undefined;
+    let benchmark;
+    if (baselinePath) {
+      const baseline = JSON.parse(await readFile(baselinePath, "utf8")) as BenchmarkReport;
+      const current = await runBenchmark({
+        iterations: baseline.workload.iterations,
+        concurrency: baseline.workload.concurrency,
+        warmup: baseline.workload.warmup,
+      });
+      benchmark = { ...current, baseline };
+    }
+    const report = await runEvaluation({ benchmark });
     await emit({ ...provenance(), ...report });
     const hasFailure = report.results.some((item) => item.status === "failed");
     const hasBlockedGate = report.results.some((item) => item.status === "blocked");
