@@ -29,7 +29,7 @@ The evaluation harness runs fourteen deterministic scenarios:
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
 
-It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
+It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references. With `DATABASE_URL` configured, the PostgreSQL scenario also exercises durable idempotency/outbox, inbox deduplication, shared retry budgets, distributed circuit breakers, decision-memory persistence, replay-evidence storage and append-only audit checkpoints. Without a database, that scenario is explicitly marked blocked and those capabilities are not credited.
 
 ## Run
 
