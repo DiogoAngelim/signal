@@ -140,8 +140,8 @@ try {
   if (consumed !== messages || receivedSequences.size !== messages || duplicates !== 0) {
     throw new Error(`Broker drain mismatch: consumed=${consumed}, unique=${receivedSequences.size}, expected=${messages}`);
   }
-  if (Number(queueAfterDrain.messages_ready ?? 0) !== 0) {
-    throw new Error("RabbitMQ queue retained ready messages after the drain");
+  if (Number(queueAfterDrain.messages_ready ?? 0) !== 0 || Number(queueAfterDrain.messages_unacknowledged ?? 0) !== 0) {
+    throw new Error("RabbitMQ queue retained ready or unacknowledged messages after the drain");
   }
 
   const cpu = process.cpuUsage(cpuBefore);
@@ -174,6 +174,7 @@ try {
       drainBatchLatency: stats(drainBatchLatencies),
       duplicateDeliveries: duplicates,
       readyMessagesAfterDrain: Number(queueAfterDrain.messages_ready ?? 0),
+      unacknowledgedMessagesAfterDrain: Number(queueAfterDrain.messages_unacknowledged ?? 0),
       cpuUserMs: cpu.user / 1000,
       cpuSystemMs: cpu.system / 1000,
       heapUsedBeforeBytes: memoryBefore.heapUsed,
@@ -190,6 +191,7 @@ try {
       everyMessagePublished: publishLatencies.length === messages,
       everyMessageConsumedOnce: consumed === messages && receivedSequences.size === messages,
       noReadyBacklogAfterDrain: Number(queueAfterDrain.messages_ready ?? 0) === 0,
+      noUnacknowledgedMessagesAfterDrain: Number(queueAfterDrain.messages_unacknowledged ?? 0) === 0,
     },
   };
   await mkdir(output.split("/").slice(0, -1).join("/") || ".", { recursive: true });
