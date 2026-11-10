@@ -217,9 +217,23 @@ jobs:
         if: always()
         run: |
           node --input-type=module <<'NODE'
-          import { readFileSync, writeFileSync, existsSync } from 'node:fs';
-          const path = 'simulation-evidence/run-manifest.json';
-          const manifest = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {};
+          import { readFileSync, writeFileSync, existsSync, mkdirSync } from 'node:fs';
+          const directory = 'simulation-evidence';
+          mkdirSync(directory, { recursive: true });
+          const path = `${directory}/run-manifest.json`;
+          const manifest = existsSync(path) ? JSON.parse(readFileSync(path, 'utf8')) : {
+            classification: 'SIMULATION_ONLY_NOT_PRODUCTION_CERTIFICATION',
+            repository: process.env.GITHUB_REPOSITORY,
+            commit: process.env.GITHUB_SHA,
+            ref: process.env.GITHUB_REF,
+            runId: process.env.GITHUB_RUN_ID,
+            runAttempt: process.env.GITHUB_RUN_ATTEMPT,
+            profile: process.env.SIGNAL_SIMULATION_PROFILE,
+            postgresImage: 'postgres:16',
+            node: process.version,
+            startedAt: null,
+            initializationFailedBeforeManifest: true
+          };
           manifest.completedAt = new Date().toISOString();
           manifest.jobStatus = process.env.JOB_STATUS ?? 'see workflow job conclusion';
           manifest.evidenceFiles = [
