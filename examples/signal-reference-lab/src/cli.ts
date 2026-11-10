@@ -1,4 +1,5 @@
 import { readFile, writeFile } from "node:fs/promises";
+import { cpus, release } from "node:os";
 import { runEvaluation } from "./evaluation.js";
 import { runBenchmark, type BenchmarkReport } from "./benchmark.js";
 import { compareBenchmarks } from "./comparison.js";
@@ -27,7 +28,7 @@ async function main() {
   }
   if (command !== "evaluate") throw new Error(`Unknown command: ${command}. Use evaluate, benchmark, compare or coverage.`);
   const report = await runEvaluation();
-  console.log(JSON.stringify({ generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", environment: { node: process.version, platform: process.platform, arch: process.arch }, ...report }, null, 2));
+  console.log(JSON.stringify({ generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", environment: { node: process.version, platform: process.platform, osRelease: release(), arch: process.arch, cpuModel: cpus()[0]?.model ?? "unknown", cpus: cpus().length }, ...report }, null, 2));
   if (report.results.some((item) => item.status !== "passed")) process.exitCode = 1;
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });
