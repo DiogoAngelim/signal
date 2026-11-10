@@ -1,10 +1,12 @@
 import type { SignalAuth } from "@signal/protocol";
 import type { SignalRuntime } from "@signal/sdk-node";
-import fastify, { type FastifyInstance, type FastifyRequest } from "fastify";
+import fastify, { type FastifyInstance, type FastifyRequest, type FastifyServerOptions } from "fastify";
 import { registerSignalHttpRoutes, type SignalHttpRateLimits } from "./routes";
 
 export interface CreateSignalHttpServerOptions {
   logger?: boolean;
+  /** Explicitly trust only known reverse proxies; defaults to false. */
+  trustProxy?: FastifyServerOptions["trustProxy"];
   basePath?: string;
   rateLimits?: SignalHttpRateLimits;
   /**
@@ -21,7 +23,10 @@ export function createSignalHttpServer(
   runtime: SignalRuntime,
   options: CreateSignalHttpServerOptions = {},
 ): FastifyInstance {
-  const app = fastify({ logger: options.logger ?? false });
+  const app = fastify({
+    logger: options.logger ?? false,
+    trustProxy: options.trustProxy ?? false,
+  });
   registerSignalHttpRoutes(app, runtime, {
     basePath: options.basePath,
     rateLimits: options.rateLimits,
