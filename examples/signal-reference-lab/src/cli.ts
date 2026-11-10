@@ -59,9 +59,9 @@ async function main() {
   if (command === "coverage" || command === "evaluate") {
     const report = await runEvaluation();
     await emit({ ...provenance(), ...report });
-    if (report.results.some((item) => item.status === "failed" || item.status === "blocked")) {
-      process.exitCode = 1;
-    }
+    const hasFailure = report.results.some((item) => item.status === "failed");
+    const hasBlockedGate = report.results.some((item) => item.status === "blocked");
+    if (hasFailure || (command === "coverage" && hasBlockedGate)) process.exitCode = 1;
     return;
   }
 
