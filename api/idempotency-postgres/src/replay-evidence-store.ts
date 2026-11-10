@@ -1,6 +1,13 @@
 import type { ReplayEvidencePort, ReplayEvidenceRecord } from "@signal/ports";
 import { Pool } from "pg";
 
+function stableJson(value: unknown): string {
+  if (value === null || typeof value !== "object") return JSON.stringify(value);
+  if (Array.isArray(value)) return "[" + value.map(stableJson).join(",") + "]";
+  const record = value as Record<string, unknown>;
+  return "{" + Object.keys(record).sort().map((key) => JSON.stringify(key) + ":" + stableJson(record[key])).join(",") + "}";
+}
+
 export interface CreatePostgresReplayEvidenceStoreOptions {
   readonly connectionString: string;
   readonly maxConnections?: number;
@@ -58,7 +65,7 @@ export function createPostgresReplayEvidenceStore(
         "SELECT record FROM signal_replay_evidence WHERE execution_id = $1",
         [record.executionId],
       );
-      if (!existing.rows[0] || JSON.stringify(existing.rows[0].record) !== JSON.stringify(record)) {
+      if (!existing.rows[0] || stableJson(existing.rows[0].record) !== stableJson(record)) {
         throw new Error("Replay evidence execution ID already exists with different content.");
       }
     },
