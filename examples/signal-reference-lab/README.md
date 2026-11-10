@@ -27,7 +27,7 @@ The evaluation harness runs seventeen deterministic scenarios:
 - PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger;
 - agency confidence calibration, repeated-outcome learning and self-diagnosis;
 - kernel plugin registration, four-stage orchestration, lifecycle and replay;
-- Signal CLI phase-chain and artifact verification (CI-gated);
+- Signal CLI verify, replay, test/build wrappers and audit proof generation (CI-gated);
 - bounded Prometheus counters and latency histograms.
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
@@ -94,7 +94,7 @@ Persist an evaluation/scorecard with `pnpm evaluate -- --out evaluation.json`; p
 | Prometheus metrics exposition and cardinality bounds | Partial: counters/histograms render with bounded series; external scrape and trace export remain unverified |
 | Local throughput/latency/RSS benchmark | Exercised; production load, distributed metrics/tracing export and soak remain unverified |
 | Kernel plugin pipeline, orchestration and replay | Exercised with the public `@signal/kernel` package |
-| Signal CLI verify command | Exercised in CI against its checked-in phase-chain and proof artifacts; replay/test/build/audit commands remain separate CLI surfaces |
+| Signal CLI verify, replay, test/build wrappers and audit | Exercised in CI against its checked-in phase chain; build/test wrappers use explicit no-op commands to test verification boundaries without changing application source |
 
 A capability is not credited merely because a package exists. Each status must be backed by a scenario and observable evidence. In-process delivery is not proof of durable delivery or exactly-once external effects. The inventory deliberately distinguishes exercised, partial and unverified capabilities rather than presenting simulated adapters as production integrations.
 
