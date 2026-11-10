@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
+import { createAuditChainEntry } from "../../runtime/src/audit-chain";
 import { createPostgresAuditLedger } from "../src/audit-ledger";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
@@ -29,18 +30,12 @@ integration("PostgreSQL append-only audit ledger", () => {
 
   it("persists a contiguous chain and a checkpoint bound to its stored head", async () => {
     const suffix = randomUUID().replaceAll("-", "");
-    const previousHash = "0".repeat(64);
-    const hash = suffix.padEnd(64, "0").slice(0, 64);
-    const entry = {
-      sequence: 0,
-      timestamp: new Date().toISOString(),
+    const entry = createAuditChainEntry(null, {
       operationName: "audit.integration.v1",
       operationKind: "mutation",
       messageId: "audit-" + suffix,
-      outcome: "completed" as const,
-      previousHash,
-      hash,
-    };
+      outcome: "completed",
+    });
     await ledger.appendEntry(entry);
     await expect(ledger.appendEntry({ ...entry, messageId: "duplicate-" + suffix }))
       .rejects.toThrow();
