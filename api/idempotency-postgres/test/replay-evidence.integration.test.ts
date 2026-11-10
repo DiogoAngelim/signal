@@ -27,7 +27,9 @@ integration("PostgreSQL immutable replay evidence store", () => {
     roleName = "signal_replay_test_" + suffix;
     const password = randomUUID().replaceAll("-", "");
     await admin.query(`CREATE ROLE "${roleName}" LOGIN PASSWORD '${password}'`);
-    await admin.query(`GRANT CONNECT ON DATABASE signal_test TO "${roleName}"`);
+    const databaseName = decodeURIComponent(new URL(connectionString!).pathname.slice(1));
+    const quotedDatabaseName = '"' + databaseName.replaceAll('"', '""') + '"';
+    await admin.query(`GRANT CONNECT ON DATABASE ${quotedDatabaseName} TO "${roleName}"`);
     await admin.query(`GRANT USAGE ON SCHEMA public TO "${roleName}"`);
     await admin.query(`GRANT SELECT, INSERT ON signal_replay_evidence TO "${roleName}"`);
 
