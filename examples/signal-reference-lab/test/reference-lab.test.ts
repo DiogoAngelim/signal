@@ -16,6 +16,8 @@ test("reference lab executes lifecycle and safety scenarios", async () => {
   assert.equal(report.capabilities.find((item) => item.id === "postgres.transactions")?.status, process.env.DATABASE_URL ? "exercised" : "not-verified");
   assert.equal(report.capabilities.find((item) => item.id === "cli.signal-verification")?.status, cliReady ? "exercised" : "not-verified");
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
+  assert.equal(report.score.dimensions.reduce((sum, item) => sum + item.weight, 0), 100);
+  assert.ok(report.score.dimensions.every((item) => item.score >= 0 && item.score <= 10));
 });
 
 test("scorecard keeps unverified capabilities explicit", () => {
