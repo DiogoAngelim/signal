@@ -184,7 +184,7 @@ export function executeBuild(
   const auditProofPath = writeProof(
     PROOF_TYPES.AUDIT_PROOF,
     "PASS",
-    [preLastHash, buildPhase.hash],
+    [preLastHash ?? GENESIS_HASH, buildPhase.hash],
     true,
     {
       preVerify: true,
