@@ -7,10 +7,15 @@ For idempotent mutations that emit events, use
 The older `createPostgresIdempotencyStore` persists idempotency records only
 and is not sufficient for mutations that emit events.
 
-Apply migrations in order:
+Apply the PostgreSQL adapter migrations in numeric order before enabling the related capabilities:
 
 1. `0000_initial.sql`
 2. `0001_transactional_outbox.sql`
+3. `0002_outbox_lease_fencing.sql`
+4. `0003_idempotency_reservation_leases.sql`
+5. `0004_distributed_circuit_breakers.sql`
+6. `0005_append_only_audit_ledger.sql`
+7. `0006_immutable_replay_evidence.sql`
 
 The runtime refuses to dispatch emitted events from an idempotent mutation
 unless the injected storage adapter implements both transactional completion
