@@ -47,7 +47,8 @@
     "bench:runtime": "pnpm build:library && node benchmarks/runtime-dispatch.mjs",
     "bench:http": "pnpm build:library && node benchmarks/http-binding.mjs",
     "bench:postgres": "pnpm build:library && node benchmarks/prepare-postgres.mjs && node benchmarks/postgres-outbox.mjs",
-    "bench:circuit-breaker": "pnpm build:library && node benchmarks/distributed-circuit-breaker.mjs"
+    "bench:circuit-breaker": "pnpm build:library && node benchmarks/distributed-circuit-breaker.mjs",
+    "bench:in-memory-circuit-breaker": "pnpm build:library && node benchmarks/in-memory-circuit-breaker.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
