@@ -4,9 +4,9 @@
   "private": true,
   "type": "module",
   "scripts": {
-    "dev": "export NODE_ENV=development && pnpm run build && pnpm run start",
-    "build": "pnpm --filter @signal/agency build && pnpm --filter @signal/decision build && pnpm --filter @signal/decision-memory build && node ./build.mjs",
-    "start": "node --enable-source-maps ./dist/index.mjs",
+    "dev": "node init && export NODE_ENV=development && pnpm run build && pnpm run start",
+    "build": "node init && pnpm --filter @signal/agency build && pnpm --filter @signal/decision build && pnpm --filter @signal/decision-memory build && node ./build.mjs",
+    "start": "node init && node --enable-source-maps ./dist/index.mjs",
     "worker:signal-queue": "node --enable-source-maps ./dist/signal-queue-worker.mjs",
     "db:migrate": "node ./scripts/migrate-signal-api.mjs",
     "db:migrate:validate": "node ./scripts/validate-signal-migrations.mjs",
