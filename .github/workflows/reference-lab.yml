@@ -56,6 +56,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
+      - name: Build Signal workspace libraries
+        run: pnpm build:library
       - name: Apply Signal PostgreSQL migrations
         run: pnpm --filter @signal/reference-lab db:migrate
       - name: Build and verify Signal CLI
