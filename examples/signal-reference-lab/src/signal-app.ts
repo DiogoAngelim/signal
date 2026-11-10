@@ -17,7 +17,8 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   const memory = createInMemoryDecisionMemoryStore();
   const agency = createAgencyPipeline({ policy: { minimumConfidence: 0.7, humanApprovalRequired: true } });
   const seen = new Set<string>();
-  const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab", bindings: { inProcess: true } });
+  const telemetry: unknown[] = [];
+  const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab", bindings: { inProcess: true }, observabilityPort: { emit(context) { telemetry.push(context); } } });
   const publish = async (name: string, request: CaseRequest, payload: Record<string, unknown>) => {
     const event = { id: `${name}:${request.id}:${events.length + 1}`, name, requestId: request.id, tenantId: request.tenantId, occurredAt: now().toISOString(), payload };
     events.push(event);
@@ -115,6 +116,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   }
   return {
     runtime, events, memory, agency,
+    listTelemetry() { return [...telemetry]; },
     listAgencyTraces() { return agency.memory.list(); },
     listDecisionRecords() { return memory.listDecisionRecords(); },
     listDecisionReviews() { return memory.listDecisionReviews(); },
