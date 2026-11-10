@@ -66,7 +66,13 @@ operator-owned replay procedure before enabling delivery.
 ## Delivery semantics
 
 The outbox provides **durable at-least-once delivery**, not exactly-once
-delivery. If a consumer performs its side effect and the dispatcher crashes
+delivery. Signal provides createPostgresConsumerInbox from
+`@signal/idempotency-postgres` as a transactional consumer-side deduplication
+adapter. Apply `0008_transactional_consumer_inbox.sql` and wrap the consumer's
+database writes in `processOnce({ consumerName, messageId }, handler)`. The
+inbox identity and the handler's PostgreSQL side effects commit or roll back
+in one transaction. All replicas of a consumer must use the same consumerName
+and messageId namespace. If a consumer performs its side effect and the dispatcher crashes
 before acknowledging the event, the event is delivered again. Every consumer
 that performs a non-idempotent side effect must deduplicate using the stable
 `envelope.messageId` in the same transaction as its own side effect.
@@ -85,3 +91,19 @@ history for investigation and controlled redrive.
   it does not atomically include arbitrary external side effects performed
   inside a mutation handler.
 - Do not run schema migrations automatically from request handlers.
+
+
+## Transactional consumer inbox
+
+The inbox adapter prevents duplicate deliveries from repeating database
+side-effects when the inbox claim and those side-effects share the same
+PostgreSQL transaction. If the handler throws, the inbox claim rolls back and
+the message can be retried. If a later delivery finds the same consumerName
+and messageId, the handler is skipped and the outcome is `duplicate`.
+
+This does not make third-party HTTP calls, emails, payments, or other external
+side-effects atomic with PostgreSQL. Use the destination's idempotency key or
+a durable command/outbox plus reconciliation protocol for those actions.
+Inbox retention must exceed the maximum broker redelivery and replay horizon;
+deleting inbox rows too early re-enables duplicate processing. Apply retention
+only under an explicit, reviewed policy.
