@@ -1,3 +1,4 @@
+import { createAgencyPipeline } from "@signal/agency";
 import { reviewDecisionOutcome } from "@signal/decision";
 import { createSignalRuntime, createDecisionRecord, createInMemoryDecisionMemoryStore, type SignalEventDefinition, type SignalMutationDefinition, type SignalQueryDefinition } from "@signal/sdk-node";
 import { z } from "zod";
@@ -13,6 +14,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   const requests = new Map<string, CaseRequest>();
   const events: LabEvent[] = [];
   const memory = createInMemoryDecisionMemoryStore();
+  const agency = createAgencyPipeline({ policy: { minimumConfidence: 0.7, humanApprovalRequired: true } });
   const seen = new Set<string>();
   const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab", bindings: { inProcess: true } });
   const publish = async (name: string, request: CaseRequest, payload: Record<string, unknown>) => {
@@ -67,6 +69,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
       request.decision = decision; request.status = input.approve ? "approved" : "rejected";
       const record = createDecisionRecord({ decisionId: decision.id, source: "signal-reference-lab", appId: "signal-reference-lab", domain: "case-management", timestamp: decision.decidedAt, version: "v1", observation: { requestId: request.id, title: request.title, evidence: request.evidence }, assessment: request.assessment.signalAssessment, coherence: { score: Math.round(request.assessment.confidence * 100), status: request.assessment.risk > 0.55 ? "tension" : "stable", contradictions: [], consensusLevel: Math.round(request.assessment.confidence * 100), actionAllowed: true, actionScale: input.approve ? 1 : 0, trustAdjustment: 0, agencyAdjustment: 0, confidenceAdjustment: 0, explanation: [request.assessment.rationale] }, action: { result: decision.result, actor: decision.actor }, humanSummary: decision.rationale, retentionTier: "hot" });
       await memory.saveDecisionRecord(record);
+      agency.runAgencyCycle({ decision: { decisionId: decision.id, kind: "case-decision", confidence: request.assessment.confidence, rationale: decision.rationale, expectedOutcome: "The recorded decision will be reviewed against an observed outcome." }, sizing: { size: request.assessment.commitment.totalRecommended, unit: "case-capacity" }, action: input.approve ? { kind: "authorize-case-action", performedAt: decision.decidedAt } : undefined, approvalGranted: input.approve, blockReasons: request.assessment.commitment.blockedBy });
       await publish("lab.decision.recorded.v1", request, { decisionId: decision.id, result: decision.result, actor: decision.actor });
       return { decision };
     }
@@ -82,6 +85,7 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
       const result: Outcome = { id: `outcome-${hash(`${request.id}:${input.result}:${input.notes}`)}`, result: input.result, notes: input.notes, recordedAt, learningReview };
       request.outcome = result; request.status = "reviewed";
       await memory.saveDecisionReview({ reviewId: learningReview.reviewId, decisionId: request.decision.id, appId: "signal-reference-lab", domain: "case-management", timestamp: recordedAt, version: "v1", source: "signal-reference-lab", reviewedAt: recordedAt, classification: input.result === "success" ? "correct" : input.result === "failure" ? "wrong" : "inconclusive", whatWasRecommended: request.decision.result, whyRecommended: request.decision.rationale, whatHappened: input.notes, lesson: learningReview.learning.whatShouldChange, confidenceAdjustment: 0, trustAdjustment: 0, metadata: { outcome: input.result } });
+      agency.runAgencyCycle({ decision: { decisionId: request.decision.id, kind: "case-decision", confidence: request.assessment?.confidence ?? 0, rationale: request.decision.rationale }, outcome: { success: input.result === "success" ? true : input.result === "failure" ? false : null, outcomeLabel: input.result === "success" ? "positive" : input.result === "failure" ? "negative" : input.result === "partial" ? "neutral" : "unknown" } });
       await publish("lab.outcome.recorded.v1", request, { outcomeId: result.id, result: result.result });
       return { outcome: result };
     }
@@ -95,7 +99,8 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     runtime.subscribe(name, (envelope) => { if (!seen.has(envelope.messageId)) seen.add(envelope.messageId); }, { consumerId: "reference-lab-journal", replaySafe: true });
   }
   return {
-    runtime, events, memory,
+    runtime, events, memory, agency,
+    listAgencyTraces() { return agency.memory.list(); },
     listDecisionRecords() { return memory.listDecisionRecords(); },
     listDecisionReviews() { return memory.listDecisionReviews(); },
     listRequests(tenantId: string) { return [...requests.values()].filter((item) => item.tenantId === tenantId).map((item) => structuredClone(item)); },
