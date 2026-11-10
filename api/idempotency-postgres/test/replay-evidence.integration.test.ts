@@ -13,6 +13,7 @@ integration("PostgreSQL immutable replay evidence store", () => {
   const admin = new Pool({ connectionString, max: 3 });
   let store: ReturnType<typeof createPostgresReplayEvidenceStore>;
   let roleName: string;
+  let scopedConnectionString: string;
 
   beforeAll(async () => {
     const migration = await readFile(
@@ -33,8 +34,9 @@ integration("PostgreSQL immutable replay evidence store", () => {
     const scopedUrl = new URL(connectionString!);
     scopedUrl.username = roleName;
     scopedUrl.password = password;
+    scopedConnectionString = scopedUrl.toString();
     store = createPostgresReplayEvidenceStore({
-      connectionString: scopedUrl.toString(),
+      connectionString: scopedConnectionString,
       applicationName: "signal-replay-evidence-integration-test",
     });
   });
@@ -75,14 +77,10 @@ integration("PostgreSQL immutable replay evidence store", () => {
 
     // A new adapter/pool instance models recovery after the original process exits.
     const restartedStore = createPostgresReplayEvidenceStore({
-      connectionString: (() => {
-        const scopedUrl = new URL(connectionString!);
-        scopedUrl.username = roleName;
-        return scopedUrl.toString();
-      })(),
+      connectionString: scopedConnectionString,
       applicationName: "signal-replay-evidence-restart-test",
     });
-    // The test role password is supplied by the connection URL used above.
+    expect(await restartedStore.get({ tenantId, executionId })).toEqual(record);
     await restartedStore.close();
 
     const conflicting = {
