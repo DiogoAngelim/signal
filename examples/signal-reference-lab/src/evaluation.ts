@@ -374,6 +374,22 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       item.evidence = "In-memory duplicate handling and PostgreSQL-backed durable idempotency replay are exercised."; 
       item.limitation = "Cross-host contention under production load remains unmeasured."; 
     }
+    if (item.id === "resilience.retry-budgets") {
+      item.scenarios = postgresPassed ? ["resilience", "postgres-integration"] : ["resilience"];
+      item.evidence = postgresPassed ? "Local retry budget and PostgreSQL shared retry-budget exhaustion are exercised." : "Local retry budget is exercised; PostgreSQL shared coordination remains unverified."; 
+    }
+    if (item.id === "resilience.circuit-breakers") {
+      item.scenarios = postgresPassed ? ["resilience", "postgres-integration"] : ["resilience"];
+      item.evidence = postgresPassed ? "Local breaker transitions and PostgreSQL distributed breaker coordination are exercised." : "Local breaker transitions are exercised; distributed coordination remains unverified."; 
+    }
+    if (item.id === "audit.chain-checkpoints" && postgresPassed) {
+      item.scenarios = ["audit-integrity", "postgres-integration"];
+      item.evidence = "In-memory chain/checkpoint verification plus PostgreSQL append-only audit ledger and persisted signed checkpoints are exercised."; 
+    }
+    if (item.id === "replay.evidence" && postgresPassed) {
+      item.scenarios = ["replay-evidence", "postgres-integration"];
+      item.evidence = "Content-addressed record verification and tenant-scoped PostgreSQL replay evidence persistence are exercised."; 
+    }
     if (item.id === "memory.lifecycle" && postgresPassed) {
       item.scenarios = ["lifecycle", "postgres-integration"];
       item.evidence = "In-memory lifecycle plus NeonPostgresAdapter decision/review persistence and retrieval are exercised."; 
