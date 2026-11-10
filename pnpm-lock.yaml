@@ -387,6 +387,9 @@ importers:
       '@signal/idempotency-postgres':
         specifier: workspace:*
         version: link:../../api/idempotency-postgres
+      '@signal/kernel':
+        specifier: workspace:*
+        version: link:../../packages/kernel
       '@signal/sdk-node':
         specifier: workspace:*
         version: link:../../api/sdk-node
