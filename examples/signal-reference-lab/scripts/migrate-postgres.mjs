@@ -19,7 +19,7 @@ try {
   )`);
 
   const migrations = (await readdir(migrationDirectory))
-    .filter((name) => /^\\d+_.*\\.sql$/.test(name))
+    .filter((name) => /^\d+_.*\.sql$/.test(name))
     .sort();
 
   for (const name of migrations) {
