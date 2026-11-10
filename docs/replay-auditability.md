@@ -51,7 +51,8 @@ it. The PostgreSQL implementation is createPostgresReplayEvidenceStore from
 creates immutable persistence with row mutation/truncate guards, tenant-scoped
 row-level security, and an insert-only application contract. Reads and writes
 must supply the tenant identity; PostgreSQL enforces the transaction-local
-signal.tenant_id setting for each adapter operation.
+signal.tenant_id setting for each adapter operation. Derive tenantId from a
+trusted authenticated principal, never from an untrusted request payload.
 
 replayWithEvidence verifies the record, requires exact operation, handler
 artifact, and policy identity, supplies captured external reads to the
