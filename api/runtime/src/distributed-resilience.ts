@@ -36,7 +36,7 @@ export function createDistributedCircuitBreakerController(
     snapshot: () => port.snapshot(key),
     async tryAcquire(now) {
       const permit = await port.tryAcquire(key, config, now);
-      probeToken = permit.probeToken;
+      if (permit.allowed) probeToken = permit.probeToken;
       return permit.allowed;
     },
     async renewProbe() {
