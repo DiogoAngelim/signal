@@ -50,9 +50,17 @@ read-only audit, and checkpoint anchoring.
 ## Runtime wiring
 
     import { createPostgresAuditLedger } from "@signal/idempotency-postgres";
+    import { verifyAuditChainEntry, verifyAuditCheckpoint } from "@signal/runtime";
 
     const ledger = createPostgresAuditLedger({
       connectionString: process.env.SIGNAL_AUDIT_DATABASE_URL!,
+      verifyEntry: verifyAuditChainEntry,
+      verifyCheckpoint: (checkpoint) => {
+        const publicKey = trustedPublicKeys.get(checkpoint.keyId);
+        return publicKey
+          ? verifyAuditCheckpoint(checkpoint, publicKey, checkpoint.keyId)
+          : false;
+      },
       maxConnections: 5,
     });
 
