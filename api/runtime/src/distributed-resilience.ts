@@ -30,11 +30,25 @@ export function createDistributedCircuitBreakerController(
 ): DistributedCircuitBreakerController {
   if (!port) throw new Error("A distributed circuit breaker port is required.");
   if (!key.trim()) throw new RangeError("Circuit breaker key is required.");
+  if (!Number.isSafeInteger(config.threshold) || config.threshold < 1) {
+    throw new RangeError("Circuit breaker threshold must be a positive integer.");
+  }
+  if (!Number.isFinite(config.resetTimeoutMs) || config.resetTimeoutMs <= 0) {
+    throw new RangeError("Circuit breaker reset timeout must be positive.");
+  }
+  if (!Number.isFinite(config.probeLeaseMs) || config.probeLeaseMs <= 0) {
+    throw new RangeError("Circuit breaker probe lease must be positive.");
+  }
+
   let probeToken: string | undefined;
 
   return {
     snapshot: () => port.snapshot(key),
     async tryAcquire(now) {
+      // A new acquisition attempt supersedes any locally retained permit.
+      // Clear first so a denied/failed acquisition can never reuse a stale
+      // generation token from an earlier half-open probe.
+      probeToken = undefined;
       const permit = await port.tryAcquire(key, config, now);
       if (permit.allowed) probeToken = permit.probeToken;
       return permit.allowed;
