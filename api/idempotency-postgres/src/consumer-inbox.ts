@@ -1,6 +1,7 @@
 import { Pool, type PoolClient } from "pg";
 
 export interface ConsumerInboxInput {
+  readonly tenantId: string;
   readonly consumerName: string;
   readonly messageId: string;
 }
@@ -38,6 +39,9 @@ export function createPostgresConsumerInbox(
 
   return {
     async processOnce<T>(input, handler): Promise<ConsumerInboxOutcome<T>> {
+      if (!input.tenantId.trim() || input.tenantId.length > 200) {
+        throw new RangeError("tenantId must contain 1 to 200 non-whitespace characters.");
+      }
       if (!input.consumerName.trim() || input.consumerName.length > 200) {
         throw new RangeError("consumerName must contain 1 to 200 non-whitespace characters.");
       }
@@ -47,12 +51,13 @@ export function createPostgresConsumerInbox(
       const client = await pool.connect();
       try {
         await client.query("BEGIN");
+        await client.query("SELECT set_config('signal.tenant_id', $1, true)", [input.tenantId]);
         const inserted = await client.query(
-          `INSERT INTO signal_consumer_inbox (consumer_name, message_id)
-           VALUES ($1, $2)
-           ON CONFLICT (consumer_name, message_id) DO NOTHING
+          `INSERT INTO signal_consumer_inbox (tenant_id, consumer_name, message_id)
+           VALUES ($1, $2, $3)
+           ON CONFLICT (tenant_id, consumer_name, message_id) DO NOTHING
            RETURNING message_id`,
-          [input.consumerName, input.messageId],
+          [input.tenantId, input.consumerName, input.messageId],
         );
         if (inserted.rowCount === 0) {
           await client.query("COMMIT");
