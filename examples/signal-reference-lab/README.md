@@ -41,6 +41,7 @@ From the repository root:
 pnpm install
 npm ci --prefix signal-cli
 npm run build --prefix signal-cli
+npm run verify --prefix signal-cli
 export SIGNAL_CLI_READY=1
 pnpm --filter @signal/reference-lab build
 pnpm --filter @signal/reference-lab evaluate
