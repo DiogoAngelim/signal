@@ -20,13 +20,13 @@ The workflow runs on relevant pull requests, pushes to `main` and `codex/**`, a 
 | Atomic mutation and outbox persistence | PostgreSQL migration and transactional integration tests | Result and outbox writes commit or roll back together | Multi-region transactions or storage-provider behavior outside PostgreSQL |
 | Concurrent outbox claims | Competing PostgreSQL workers using `FOR UPDATE SKIP LOCKED` | One row is not concurrently claimed by two active leases | Global coordination across independent databases |
 | Stale outbox worker acknowledgement | Per-claim UUID fencing token, persisted in PostgreSQL and required by acknowledge/retry | A worker cannot acknowledge or reschedule a newer lease, even if its worker ID is reused | Fencing external side effects already performed before lease loss |\n| Expired idempotency reservation and stale owner | Expiring reservation token, atomic reclaim, heartbeat renewal, and token-guarded completion/failure | A crashed or expired owner can be replaced; the stale owner cannot complete, fail, or renew the newer reservation | Preventing duplicate external side effects performed by a handler before its lease is lost; handlers still need idempotent side effects |
-| Broker publish / worker-loss boundary | Real RabbitMQ management API; publish, abandon acknowledgement, expire lease, reclaim, and republish | At-least-once redelivery occurs after an ambiguous publish outcome | An OS-level worker kill at every instruction boundary or exactly-once broker delivery |
+| Broker publish / worker SIGKILL boundary | Real RabbitMQ management API plus a child Node worker that claims and publishes, then receives SIGKILL before database acknowledgement; recovery worker reclaims and republishes | The actual worker process can die after a successful publish; the event is recovered and the durable consumer inbox limits the simulated side effect to one | Every possible instruction boundary, broker node failure, or exactly-once broker delivery |
 | Consumer side-effect deduplication | Durable inbox primary key and side effect in one PostgreSQL transaction | Duplicate broker deliveries produce one simulated durable side effect | Correctness of every real consumer's own transaction or third-party API |
 | Broker unavailable | Failed network attempt, no acknowledgement, lease expiry, recovery publish | An unacknowledged event remains recoverable after a broker outage | Broker quorum loss, replication failure, or cloud network behavior |
 | PostgreSQL network interruption | Toxiproxy cuts a live connection during a transaction | Interrupted transaction is rolled back and a fresh connection succeeds after restoration | Every packet-loss, DNS, TLS, routing, and regional partition mode |
 | PostgreSQL process crash | SIGKILL the disposable PostgreSQL container with a committed row and an open transaction | WAL recovery preserves committed data and rolls back the in-flight transaction | Physical disk, host, filesystem, or cloud-volume failure |
 | Backup and restore | `pg_dump` / `pg_restore` into a second disposable database; compare outbox row counts | The tested logical backup can be restored into a clean database | Point-in-time recovery, backup retention policy, offsite copies, or measured RTO/RPO |
-| Distributed half-open coordination pattern | Concurrent PostgreSQL row-lock simulation and lease-token fencing | The reference protocol admits one half-open probe and rejects stale completion | A production distributed circuit-breaker implementation; the runtime controller remains explicitly single-process |
+| Distributed circuit breaker | PostgreSQL-backed runtime port, shared state, atomic half-open lease acquisition, expiring UUID probe tokens, and stale-owner fencing across independent adapter instances | Separate runtime processes coordinate through one durable row; only one valid half-open probe is admitted; expired probe leases can be reclaimed; stale probe results are rejected | Multi-region database availability, external dependency behavior, or a guarantee during loss of the coordination database |
 | Audit checkpoint trust primitives | Ephemeral Ed25519 signing keys, signature verification, tamper rejection, and overlapping-key rotation | The cryptographic primitive detects modified checkpoint bytes and validates rotation mechanics | Independent checkpoint storage, cloud object lock, trusted timestamping, IAM separation, or production key custody |
 | Database load smoke | Fixed `pgbench` workload with raw output retained | The disposable database completed a reproducible smoke workload | Signal throughput, production capacity, latency SLOs, or controlled-runner benchmarks |
 | Runtime resilience and audit | Runtime package tests | The runtime's checked unit and integration behavior remains green | External operational telemetry or incident response |
@@ -43,6 +43,20 @@ Every successful claim creates a new UUID token. Acknowledge and retry operation
 
 The migration `0002_outbox_lease_fencing.sql` adds the outbox token and a database constraint requiring it exactly while a row is processing. The migration `0003_idempotency_reservation_leases.sql` adds a finite reservation expiry and a generation token. Runtime handlers renew their reservation every 60 seconds against a five-minute lease; completion and failure require the current token and an unexpired lease. Expired reservations are atomically reclaimed with a new token. Consumers still must deduplicate on `envelope.messageId`: the outbox is at-least-once by design.
 
+## Distributed circuit-breaker contract
+
+The runtime now exposes `createDistributedCircuitBreakerController`, which delegates to the `DistributedCircuitBreakerPort`. The PostgreSQL adapter implements that port using the `signal_circuit_breakers` table introduced by `0004_distributed_circuit_breakers.sql`.
+
+- Breaker identity is a stable, bounded key chosen by the integrating service (for example, a provider or downstream dependency).
+- Threshold and reset timeout are persisted with the row. Processes using the same key but different configuration fail closed with a configuration-drift error rather than silently fighting over policy.
+- Closed-state failures increment a shared counter atomically. Reaching the threshold opens the breaker and records the cooldown start.
+- Once the cooldown expires, a conditional database update grants a single half-open probe and assigns a fresh UUID token with a finite lease.
+- The probe owner can renew its finite lease while a health check is still running. If the owner disappears, another process may reclaim the probe after lease expiry. Success/failure from the previous owner is rejected because its token is no longer current.
+- A valid probe success closes and resets the breaker. A valid probe failure reopens it and starts a new cooldown.
+- The adapter does not silently fall back to process-local state if PostgreSQL is unavailable. Integrators must treat coordination-store errors as a failed acquisition and avoid issuing the protected request.
+
+The adapter is intentionally a separate infrastructure package: applications construct the PostgreSQL port and pass it to the runtime controller. This preserves the runtime's dependency inversion and avoids coupling the runtime package to PostgreSQL. The controller is now implemented and integration-tested; individual application call sites must explicitly wrap the downstream operation with acquire/result reporting. This does not automatically instrument arbitrary network calls.
+
 ## How to run it
 
 - Open **Actions → Signal production simulation → Run workflow**.
@@ -57,7 +71,7 @@ SIGNAL_TEST_DATABASE_URL=postgresql://postgres:postgres@localhost:5432/signal_si
   pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts
 ```
 
-The broker, Toxiproxy, database crash-restart, backup/restore, and load gates are orchestrated by the workflow because they require disposable sibling containers and their service network. The broker scenario models worker loss by withholding acknowledgement and expiring the lease; it does not kill a worker process at the OS level.
+The broker, Toxiproxy, distributed circuit-breaker integration, database crash-restart, backup/restore, and load gates are orchestrated by the workflow because they require disposable sibling containers and their service network. The broker suite includes both an ambiguous-publish lease-loss simulation and an actual child-process SIGKILL after RabbitMQ accepts the publish but before the worker acknowledges the outbox row. The test then expires/reclaims the lease, republishes, and verifies the consumer inbox prevents a duplicate simulated side effect. It does not kill a worker at every possible instruction boundary.
 
 ## Evidence and provenance
 
@@ -78,7 +92,7 @@ The following are intentionally not claimed as solved by code-level simulation:
 
 1. **Independent audit durability:** a locally generated signing key cannot prove cloud IAM separation, object-lock enforcement, external timestamp authority, or that an administrator cannot replace both data and trust anchors.
 2. **Production key custody:** the simulation validates Ed25519 verification and rotation mechanics only; it does not use a KMS/HSM or validate access policy.
-3. **Distributed circuit breaker product behavior:** the PostgreSQL row-lock test is a reference coordination contract, not a production implementation wired into Signal's runtime. The current runtime breaker is single-process.
+3. **Distributed circuit-breaker operations:** the shared-state controller and PostgreSQL adapter are implemented and simulated, but application-specific downstream call sites must adopt the controller. The coordination database is a dependency; its outage, failover, and regional partition behavior are not certified.
 4. **Statistical validity:** synthetic and unit fixtures can validate calculations, invariants, and calibration-report behavior. They cannot establish representative sampling, absence of leakage in a real dataset, or generalization to a target population.
 5. **Performance and capacity:** GitHub-hosted runner results are smoke evidence only. They are noisy and cannot establish an SLO or production capacity.
 6. **Disaster recovery objectives:** logical restore is exercised, but no production backup system, offsite retention, point-in-time recovery, RTO, or RPO is certified.

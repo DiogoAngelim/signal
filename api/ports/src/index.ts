@@ -21,6 +21,13 @@ export type {
 export type { EventPort } from "./event-port";
 
 export type {
+  DistributedCircuitBreakerPort,
+  DistributedCircuitBreakerSnapshot,
+  DistributedCircuitBreakerPermit,
+  DistributedCircuitBreakerConfig,
+} from "./circuit-breaker-port";
+
+export type {
   ObservabilityPort,
   ObservabilityContext,
   RuntimeLifecycleEvent,

@@ -41,5 +41,18 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("signal_idempotency_expired_reservations");
   });
 
+  it("creates durable cross-process circuit breaker state with fenced probe leases", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0004_distributed_circuit_breakers.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_circuit_breakers");
+    expect(sql).toContain("probe_token uuid");
+    expect(sql).toContain("probe_expires_at timestamptz");
+    expect(sql).toContain("probe_lease_ms integer NOT NULL");
+    expect(sql).toContain("signal_circuit_breaker_probe_consistency");
+    expect(sql).toContain("signal_circuit_breakers_open_due");
+  });
+
 });
 
