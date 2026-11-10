@@ -14,13 +14,13 @@ This document is the release gate for Signal itself. A passing package build or 
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
 - The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
 - The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.
-- The in-memory adapter implements the same contract for deterministic tests; it is not durable.
+- The in-memory adapter implements the same contract for deterministic tests; it is not durable.\n- Versioned replay-evidence records bind operation/version, handler artifact digest, policy version, canonical input, external-read snapshots, and result fingerprints. An immutable PostgreSQL store persists these records; the replay validator rejects identity mismatches and result divergence.
 
 ## Guarantees and non-guarantees
 
 | Concern | Current guarantee | Production limitation |
 |---|---|---|
-| Replay | Same idempotency key and fingerprint can return the stored result | External state and side effects are not recreated |
+| Replay | Idempotency replay returns a stored result; explicit replay evidence can persist versioned inputs, policy/handler identity, captured external reads, and result fingerprints; replayWithEvidence verifies compatibility and result equivalence | Every runtime execution is not automatically captured; applications must explicitly snapshot all decision-relevant reads and supply a pure handler; cross-version historical execution and external side-effect reproduction are not certified |
 | Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery | Migration must be applied; worker must run continuously; consumer deduplication and external side-effect idempotency remain mandatory |
 | Idempotency | PostgreSQL and in-memory adapters support expiring reservation leases, renewal, atomic reclaim, and stale-owner fencing | Cross-region consistency and external side-effect idempotency remain adapter-specific |
 | Audit chain | Supplied entries can be checked for internal hash-chain consistency | A chain is not immutable if an attacker can rewrite the full history and trusted head |
