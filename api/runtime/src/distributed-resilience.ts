@@ -40,19 +40,22 @@ export function createDistributedCircuitBreakerController(
       return permit.allowed;
     },
     async renewProbe() {
-      return probeToken
-        ? port.renewProbe(key, probeToken, config.probeLeaseMs)
-        : false;
+      if (!probeToken) return false;
+      const renewed = await port.renewProbe(key, probeToken, config.probeLeaseMs);
+      if (!renewed) probeToken = undefined;
+      return renewed;
     },
     async recordSuccess() {
       const token = probeToken;
-      probeToken = undefined;
-      return port.recordSuccess(key, token);
+      const recorded = await port.recordSuccess(key, token);
+      if (recorded || token) probeToken = undefined;
+      return recorded;
     },
     async recordFailure(now) {
       const token = probeToken;
-      probeToken = undefined;
-      return port.recordFailure(key, config, token, now);
+      const recorded = await port.recordFailure(key, config, token, now);
+      if (recorded || token) probeToken = undefined;
+      return recorded;
     },
   };
 }
