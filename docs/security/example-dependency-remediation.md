@@ -25,7 +25,9 @@ mandatory.
 The structured pnpm audit artifact is retained with every security workflow
 run so advisory IDs, severity, affected versions, and dependency paths remain
 inspectable. These overrides remediate the advisories reported for the audited
-dependency graph. They do not certify third-party financial integrations,
+dependency graph. The release target is zero high/critical advisories across the complete
+production dependency graph; lower-severity findings remain visible and must
+be reviewed rather than silently suppressed. They do not certify third-party financial integrations,
 validate provider credentials, or remove the need to monitor future advisories. When
 upgrading an overridden package, run the complete example build, typecheck,
 test, and security-audit workflows before release.
