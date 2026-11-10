@@ -42,7 +42,7 @@ infrastructure and must remain explicitly unvalidated until evidence exists:
 - Multi-process and multi-region scaling, failover, and network partition cost beyond the two-adapter, single-database contention scenario measured in CI.
 - Sustained memory/CPU behavior and leak trends over hours or days.
 - Cost per 1,000 successful operations on the target hosting and database plans.
-- Availability, SLO attainment, alert quality, restore time, and recovery point.
+- Availability, SLO attainment, alert quality, and production restore time/recovery point. CI records only runner-local disposable PostgreSQL crash-recovery and logical backup/restore timings.
 - Independent developer time-to-first-proof and support burden.
 
 Do not substitute synthetic numbers for these measurements. The release owner
