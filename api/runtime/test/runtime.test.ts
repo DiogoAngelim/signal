@@ -1431,14 +1431,19 @@ describe("runtime", () => {
     });
     let attempts = 0;
     let release!: () => void;
+    let markStarted!: () => void;
     const gate = new Promise<void>((resolve) => {
       release = resolve;
+    });
+    const started = new Promise<void>((resolve) => {
+      markStarted = resolve;
     });
 
     runtime.subscribe(
       "observed.coalesced.v1",
       async () => {
         attempts += 1;
+        markStarted();
         await gate;
       },
       { replaySafe: true, consumerId: "coalescing-test" },
@@ -1452,6 +1457,7 @@ describe("runtime", () => {
     const first = eventPort.dispatch(envelope);
     const concurrent = eventPort.dispatch(envelope);
 
+    await started;
     expect(attempts).toBe(1);
     release();
     await Promise.all([first, concurrent]);
