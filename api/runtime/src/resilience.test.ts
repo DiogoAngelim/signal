@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  RetryBudgetExhaustedError,
   RetryDeadlineExceededError,
   createCircuitBreakerController,
+  createRetryBudget,
   executeWithRetry,
 } from "./resilience";
 
@@ -28,6 +30,54 @@ describe("executeWithRetry", () => {
     expect(result).toBe("done");
     expect(operation).toHaveBeenCalledTimes(3);
     expect(delays).toEqual([5, 10]);
+  });
+
+  it("bounds aggregate retries with a shared token-bucket budget", async () => {
+    let now = 0;
+    const budget = createRetryBudget({
+      capacity: 1,
+      refillRatePerSecond: 1,
+      clock: () => now,
+    });
+    const transient = () => Object.assign(new Error("temporary"), { code: "TEMPORARY" });
+    const first = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("first");
+    const second = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("second");
+
+    await expect(executeWithRetry(first, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).resolves.toBe("first");
+    await expect(executeWithRetry(second, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).rejects.toBeInstanceOf(RetryBudgetExhaustedError);
+    expect(second).toHaveBeenCalledOnce();
+
+    now = 1_000;
+    await expect(executeWithRetry(second, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).resolves.toBe("second");
+    expect(budget.snapshot().available).toBe(0);
+  });
+
+  it("rejects invalid retry budget configuration and non-monotonic clocks", () => {
+    expect(() => createRetryBudget({ capacity: 0 })).toThrow("capacity");
+    expect(() => createRetryBudget({ capacity: 1, refillRatePerSecond: -1 })).toThrow("refillRatePerSecond");
+    let now = 10;
+    const budget = createRetryBudget({ capacity: 1, clock: () => now });
+    now = 9;
+    expect(() => budget.tryConsume()).toThrow("monotonic");
   });
 
   it("does not retry non-retryable errors", async () => {
