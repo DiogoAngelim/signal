@@ -39,6 +39,31 @@ export function computeEntryHash(entry: Omit<AuditChainEntry, "hash">): string {
 const GENESIS_HASH = "0".repeat(64);
 const SHA256_PATTERN = /^[a-f0-9]{64}$/;
 
+/** Verify one entry's schema and content hash without requiring its chain context. */
+export function verifyAuditChainEntry(entry: AuditChainEntry): boolean {
+  if (
+    !Number.isSafeInteger(entry.sequence) ||
+    entry.sequence < 0 ||
+    typeof entry.timestamp !== "string" ||
+    !Number.isFinite(Date.parse(entry.timestamp)) ||
+    typeof entry.operationName !== "string" ||
+    entry.operationName.length === 0 ||
+    typeof entry.operationKind !== "string" ||
+    entry.operationKind.length === 0 ||
+    typeof entry.messageId !== "string" ||
+    entry.messageId.length === 0 ||
+    !["completed", "replayed", "failed"].includes(entry.outcome) ||
+    !SHA256_PATTERN.test(entry.previousHash) ||
+    !SHA256_PATTERN.test(entry.hash) ||
+    (entry.payloadFingerprint !== undefined &&
+      !SHA256_PATTERN.test(entry.payloadFingerprint))
+  ) {
+    return false;
+  }
+  const { hash: _hash, ...content } = entry;
+  return entry.hash === computeEntryHash(content);
+}
+
 export function createAuditChainEntry(
   previousEntry: AuditChainEntry | null,
   input: {
