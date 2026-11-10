@@ -59,6 +59,7 @@ async function main() {
   if (command === "coverage" || command === "evaluate") {
     const baselineIndex = process.argv.indexOf("--baseline");
     const baselinePath = baselineIndex >= 0 ? process.argv[baselineIndex + 1] : undefined;
+    if (baselineIndex >= 0 && !baselinePath) throw new Error("Usage: pnpm evaluate -- --baseline <benchmark-baseline.json>");
     let benchmark;
     if (baselinePath) {
       const baseline = JSON.parse(await readFile(baselinePath, "utf8")) as BenchmarkReport;
