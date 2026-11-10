@@ -10,6 +10,7 @@
     "lab": "pnpm run build && node dist/src/cli.js",
     "evaluate": "pnpm run build && node dist/src/cli.js evaluate",
     "benchmark": "pnpm run build && node dist/src/cli.js benchmark",
+    "compare": "pnpm run build && node dist/src/cli.js compare",
     "coverage:verify": "pnpm run build && node dist/src/cli.js coverage",
     "start": "pnpm run build && node dist/src/web.js"
   },
