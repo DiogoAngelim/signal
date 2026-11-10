@@ -31,7 +31,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
 | Observability | Bounded in-memory metric recorder is available | It is not durable and does not provide alerting, aggregation, or retention guarantees |
-| Performance | CI archives reproducible runtime, HTTP/rate-limit, in-memory breaker, PostgreSQL outbox/idempotency, and distributed-breaker benchmarks with p50/p95/p99, throughput, CPU, and memory observations | CI runner and ephemeral PostgreSQL results are regression evidence, not production capacity or SLO certification |
+| Performance | CI archives reproducible runtime, HTTP/rate-limit, in-memory breaker, PostgreSQL outbox/idempotency, distributed-breaker, and RabbitMQ queue benchmarks with p50/p95/p99, throughput, queue age/backlog, CPU, and memory observations | CI runner and ephemeral PostgreSQL results are regression evidence, not production capacity or SLO certification |
 
 ## Release-blocking production evidence
 
@@ -88,7 +88,7 @@ Do not label Signal production-certified until the following evidence exists:
 
 The transactional outbox, source-level statistical safeguards, signed audit-checkpoint primitives, and queue-health metrics are implemented in this branch. The PostgreSQL adapter is exercised by a disposable PostgreSQL service in CI. The transactional outbox is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.
 
-The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. Source-only changes cannot truthfully certify those controls.
+The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. The RabbitMQ benchmark uses the ephemeral broker management API; it is not an application AMQP client benchmark or production broker certification. Source-only changes cannot truthfully certify those controls.
 
 ## Certification rule
 
