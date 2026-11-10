@@ -424,7 +424,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
-  return { results, capabilities: capabilityResults, score, summary: passed + "/" + results.length + " scenarios passed; " + capabilityResults.filter((item) => item.status === "exercised").length + "/" + capabilityResults.length + " capabilities directly exercised." };
+  return { results, capabilities: capabilityResults, score, summary: passed + "/" + results.length + " scenarios passed; " + results.filter((item) => item.status === "blocked").length + " blocked; " + results.filter((item) => item.status === "failed").length + " failed; " + capabilityResults.filter((item) => item.status === "exercised").length + "/" + capabilityResults.length + " capabilities directly exercised." };
 }
 
 export type Scorecard = { overall: number; dimensions: { name: string; weight: number; score: number; confidence: "high" | "medium" | "low"; evidence: string[] }[]; interpretation: string };
@@ -455,7 +455,7 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     Math.min(10, 2 + observabilityCoverage * 6)
   ];
   const evidenceByDimension = [
-    [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions)`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
+    [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions${item.failureAttribution ? `; attribution=${item.failureAttribution}` : ""})`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
     [`Reliability-related capability coverage: ${(reliabilityCoverage * 100).toFixed(0)}%.`, "PostgreSQL durability, outbox/inbox and distributed recovery remain unverified where not explicitly exercised."],
     ["Local in-process query benchmark reports latency/throughput/RSS.", "No production or cross-host baseline is included; score is neutral and low-confidence."],
     [`Weighted capability coverage across ${inventory.length} registered surfaces: ${(coverage * 100).toFixed(0)}%.`, "Public SDK operations; separate domain/evaluation modules; no private package imports."],
