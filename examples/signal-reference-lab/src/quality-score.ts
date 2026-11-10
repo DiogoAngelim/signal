@@ -101,9 +101,9 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     baseline.environment.cpuModel === benchmark.environment.cpuModel &&
     baseline.environment.cpus === benchmark.environment.cpus);
   if (!valid || !comparable || !baseline) return [
-    criterion("performance.baseline", "Comparable performance baseline", 35, "unverified", ["A benchmark was supplied, but a valid matched baseline is required for a scored comparison."], "Performance is not assigned an absolute score from hardware-specific measurements."),
+    criterion("performance.baseline", "Comparable performance baseline", 10, "unverified", ["A benchmark was supplied, but a valid matched baseline is required for a scored comparison."], "Performance is not assigned an absolute score from hardware-specific measurements."),
     criterion("performance.latency", "Latency distribution and tail behavior", 30, "unverified", valid ? [`Observed p95=${benchmark.timing.p95Ms}ms; p99=${benchmark.timing.p99Ms}ms`] : [], "A valid sample set without a matched baseline is descriptive, not a regression score."),
-    criterion("performance.throughput", "Sustained throughput and concurrency", 20, "unverified", valid ? [`Observed ${benchmark.timing.throughputPerSecond} operations/second at concurrency ${benchmark.workload.concurrency}`] : [], "A single local run does not establish sustained or production throughput."),
+    criterion("performance.throughput", "Sustained throughput and concurrency", 25, "unverified", valid ? [`Observed ${benchmark.timing.throughputPerSecond} operations/second at concurrency ${benchmark.workload.concurrency}`] : [], "A single local run does not establish sustained or production throughput."),
     criterion("performance.resources", "Memory and resource efficiency", 15, "unverified", valid ? [`Observed RSS delta=${benchmark.environment.rssAfter - benchmark.environment.rssBefore} bytes`] : [], "RSS is process- and host-dependent; compare repeated matched runs."),
     criterion("performance.system-profile", "HTTP, database and distributed workload profile", 10, "unverified", [], "Current benchmark covers local in-process query dispatch only."),
     criterion("performance.sustained-load", "Sustained load, saturation and soak behavior", 10, "unverified", [], "No long-duration load or saturation profile is currently measured."),
