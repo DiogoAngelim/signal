@@ -456,9 +456,9 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     Math.min(10, 3 + coverage * 7),
     Math.min(10, 2 + securityCoverage * 6),
     Math.min(10, 2 + coverage * 4 + passRate * 4),
-    Math.min(10, 2 + passRate * 8),
+    Math.min(10, 2 + passRate * 5 + coverage * 3),
     Math.min(10, 2 + passRate * 3 + coverage * 3),
-    Math.min(10, 2 + observabilityCoverage * 6)
+    Math.min(10, 2 + observabilityCoverage * 4)
   ];
   const evidenceByDimension = [
     [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions${item.failureAttribution ? `; attribution=${item.failureAttribution}` : ""})`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
