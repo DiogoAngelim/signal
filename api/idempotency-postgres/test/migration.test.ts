@@ -49,6 +49,7 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_circuit_breakers");
     expect(sql).toContain("probe_token uuid");
     expect(sql).toContain("probe_expires_at timestamptz");
+    expect(sql).toContain("probe_lease_ms integer NOT NULL");
     expect(sql).toContain("signal_circuit_breaker_probe_consistency");
     expect(sql).toContain("signal_circuit_breakers_open_due");
   });
