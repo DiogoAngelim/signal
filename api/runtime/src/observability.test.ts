@@ -75,6 +75,7 @@ describe("Signal metrics observability adapter", () => {
       operationName: "private.operation.v1",
       operationKind: "query",
       correlationId: "private-correlation-id",
+      isReplay: true,
     });
     port.emit({
       event: "execution.end",
@@ -82,6 +83,7 @@ describe("Signal metrics observability adapter", () => {
       operationKind: "query",
       durationMs: 12,
       outcome: "failed",
+      isReplay: true,
     });
     port.emit({
       event: "event.emitted",
@@ -114,6 +116,9 @@ describe("Signal metrics observability adapter", () => {
     expect(names).toContain("signal.execution.started");
     expect(names).toContain("signal.execution.failed");
     expect(names).toContain("signal.execution.duration_ms");
+    expect(
+      metrics.find((metric) => metric.name === "signal.execution.duration_ms")?.labels.execution_mode,
+    ).toBe("replay");
     expect(names).toContain("signal.events.emitted");
     expect(names).toContain("signal.subscribers.delivered");
     expect(names).toContain("signal.subscribers.failed");
