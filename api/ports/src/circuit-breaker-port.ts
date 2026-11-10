@@ -33,7 +33,11 @@ export interface DistributedCircuitBreakerPort {
     config: DistributedCircuitBreakerConfig,
     now?: Date,
   ): Promise<DistributedCircuitBreakerPermit>;
-  renewProbe(key: string, probeToken: string, probeLeaseMs: number): Promise<boolean>;
+  renewProbe(
+    key: string,
+    probeToken: string,
+    probeLeaseMs: number,
+  ): Promise<boolean>;
   recordSuccess(key: string, probeToken?: string): Promise<boolean>;
   recordFailure(
     key: string,
