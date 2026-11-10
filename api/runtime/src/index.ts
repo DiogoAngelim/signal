@@ -17,3 +17,5 @@ export * from "./runtime";
 export * from "./types";
 
 export * from "./audit-checkpoint";
+
+export * from "./replay-evidence";
