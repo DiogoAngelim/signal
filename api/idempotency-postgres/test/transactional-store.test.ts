@@ -101,6 +101,15 @@ describe("PostgreSQL transactional storage", () => {
     expect(mocks.client.release).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects invalid outbox lease durations before opening a transaction", async () => {
+    const store = createPostgresTransactionalStore({ connectionString: "postgres://example" });
+    for (const leaseMs of [999.5, 1000.5, 86_400_001]) {
+      await expect(store.claimBatch({ workerId: "worker", limit: 1, leaseMs })).rejects.toThrow(/integer between 1000 and 86400000/);
+    }
+    expect(mocks.client.query).not.toHaveBeenCalled();
+    await store.close();
+  });
+
   it("claims with SKIP LOCKED and guards acknowledgement by lease owner", async () => {
     mocks.client.query.mockResolvedValueOnce({ rowCount: null, rows: [] });
     mocks.client.query.mockResolvedValueOnce({
