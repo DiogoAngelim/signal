@@ -148,7 +148,7 @@ jobs:
       - name: Run broker and consumer crash-boundary integration
         run: |
           set -o pipefail
-          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
+          pnpm --filter @signal/idempotency-postgres exec vitest run test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts --reporter=verbose 2>&1 | tee simulation-evidence/broker-crash-integration.log
 
       - name: Run distributed coordination and audit trust-boundary simulations
         run: |
@@ -210,7 +210,7 @@ jobs:
           set -o pipefail
           for pass in 1 2 3; do
             echo "Repeatability pass ${pass}"
-            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts test/broker-crash.integration.test.ts test/network-fault.integration.test.ts test/trust-boundary.integration.test.ts --fileParallelism=false --reporter=dot
+            pnpm --filter @signal/idempotency-postgres exec vitest run test/transactional-store.integration.test.ts test/broker-crash.integration.test.ts test/worker-sigkill.integration.test.ts test/network-fault.integration.test.ts test/trust-boundary.integration.test.ts --fileParallelism=false --reporter=dot
           done 2>&1 | tee simulation-evidence/repeatability.log
 
       - name: Finalize evidence manifest
