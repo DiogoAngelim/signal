@@ -7,10 +7,15 @@ For idempotent mutations that emit events, use
 The older `createPostgresIdempotencyStore` persists idempotency records only
 and is not sufficient for mutations that emit events.
 
-Apply migrations in order:
+Apply the PostgreSQL adapter migrations in numeric order before enabling the related capabilities:
 
 1. `0000_initial.sql`
 2. `0001_transactional_outbox.sql`
+3. `0002_outbox_lease_fencing.sql`
+4. `0003_idempotency_reservation_leases.sql`
+5. `0004_distributed_circuit_breakers.sql`
+6. `0005_append_only_audit_ledger.sql`
+7. `0006_immutable_replay_evidence.sql`
 
 The runtime refuses to dispatch emitted events from an idempotent mutation
 unless the injected storage adapter implements both transactional completion
@@ -61,7 +66,19 @@ operator-owned replay procedure before enabling delivery.
 ## Delivery semantics
 
 The outbox provides **durable at-least-once delivery**, not exactly-once
-delivery. If a consumer performs its side effect and the dispatcher crashes
+delivery. Signal provides createPostgresConsumerInbox from
+`@signal/idempotency-postgres` as a transactional consumer-side deduplication
+adapter. Apply `0008_transactional_consumer_inbox.sql` and wrap the consumer's
+database writes in
+`processOnce({ tenantId, consumerName, messageId }, handler)`. The tenant ID
+must come from the trusted authenticated principal. PostgreSQL row-level
+security scopes inbox rows to that tenant; all replicas of a consumer must use
+the same consumerName and messageId namespace within the tenant. The RLS policy uses a transaction-local
+`signal.tenant_id` setting as defense in depth; a database role with arbitrary
+SQL access can set that GUC itself. This does not replace trusted application
+authorization, parameterized SQL, and least-privilege database access. The inbox
+identity and the handler's PostgreSQL side effects commit or roll back in one
+transaction. If a consumer performs its side effect and the dispatcher crashes
 before acknowledging the event, the event is delivered again. Every consumer
 that performs a non-idempotent side effect must deduplicate using the stable
 `envelope.messageId` in the same transaction as its own side effect.
@@ -80,3 +97,19 @@ history for investigation and controlled redrive.
   it does not atomically include arbitrary external side effects performed
   inside a mutation handler.
 - Do not run schema migrations automatically from request handlers.
+
+
+## Transactional consumer inbox
+
+The inbox adapter prevents duplicate deliveries from repeating database
+side-effects when the inbox claim and those side-effects share the same
+PostgreSQL transaction. If the handler throws, the inbox claim rolls back and
+the message can be retried. If a later delivery finds the same consumerName
+and messageId, the handler is skipped and the outcome is `duplicate`.
+
+This does not make third-party HTTP calls, emails, payments, or other external
+side-effects atomic with PostgreSQL. Use the destination's idempotency key or
+a durable command/outbox plus reconciliation protocol for those actions.
+Inbox retention must exceed the maximum broker redelivery and replay horizon;
+deleting inbox rows too early re-enables duplicate processing. Apply retention
+only under an explicit, reviewed policy.

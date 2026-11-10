@@ -224,6 +224,9 @@ pnpm verify:exports
 - [Quality and Assurance Standard](docs/quality-assurance.md) — invariants, determinism, evidence, statistical claims, security, and release validation
 - [Engineering and Architecture Score](docs/engineering-score-system.md) — weighted engineering scorecard, evidence levels, benchmarks, score caps, and assessment governance
 - [Developer Documentation](docs/README.md) — full developer-oriented source of truth
+- [Production SLO and Alerting](docs/operations/slo-and-alerting.md) — deployment SLIs, SLOs, alerting, and incident runbooks
+- [Audit Ledger Operations](docs/security/audit-ledger-operations.md) — append-only PostgreSQL audit storage and checkpoint trust boundaries
+- [Developer Adoption Validation](docs/developer-adoption-validation.md) — independent first-use measurement protocol
 
 ## Example App Links
 

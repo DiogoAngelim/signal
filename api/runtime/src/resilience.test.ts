@@ -1,7 +1,9 @@
 import { describe, expect, it, vi } from "vitest";
 import {
+  RetryBudgetExhaustedError,
   RetryDeadlineExceededError,
   createCircuitBreakerController,
+  createRetryBudget,
   executeWithRetry,
 } from "./resilience";
 
@@ -30,12 +32,104 @@ describe("executeWithRetry", () => {
     expect(delays).toEqual([5, 10]);
   });
 
+  it("bounds aggregate retries with a shared token-bucket budget", async () => {
+    let now = 0;
+    const budget = createRetryBudget({
+      capacity: 1,
+      refillRatePerSecond: 1,
+      clock: () => now,
+    });
+    const transient = () => Object.assign(new Error("temporary"), { code: "TEMPORARY" });
+    const first = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("first");
+    const second = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("second");
+
+    await expect(executeWithRetry(first, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).resolves.toBe("first");
+    await expect(executeWithRetry(second, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).rejects.toBeInstanceOf(RetryBudgetExhaustedError);
+    expect(second).toHaveBeenCalledOnce();
+
+    now = 1_000;
+    const third = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("third");
+    await expect(executeWithRetry(third, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).resolves.toBe("third");
+    expect(third).toHaveBeenCalledTimes(2);
+    expect((await budget.snapshot()).available).toBe(0);
+  });
+
+  it("rejects invalid retry budget configuration and non-monotonic clocks", () => {
+    expect(() => createRetryBudget({ capacity: 0 })).toThrow("capacity");
+    expect(() => createRetryBudget({ capacity: 1, refillRatePerSecond: -1 })).toThrow("refillRatePerSecond");
+    let now = 10;
+    const budget = createRetryBudget({ capacity: 1, clock: () => now });
+    now = 9;
+    expect(() => budget.tryConsume()).toThrow("monotonic");
+  });
+
   it("does not retry non-retryable errors", async () => {
     const operation = vi.fn().mockRejectedValue(new Error("invalid input"));
     await expect(executeWithRetry(operation, {
       ...policy,
       sleep: async () => {},
     })).rejects.toThrow("invalid input");
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("supports asynchronous retry budgets backed by shared infrastructure", async () => {
+    const budget = {
+      tryConsume: vi.fn().mockResolvedValue(false),
+      snapshot: vi.fn().mockResolvedValue({
+        capacity: 1,
+        available: 0,
+        refillRatePerSecond: 0,
+      }),
+    };
+    const operation = vi.fn().mockRejectedValue(
+      Object.assign(new Error("temporary"), { code: "TEMPORARY" }),
+    );
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      retryBudget: budget,
+      random: () => 0,
+      sleep: async () => {},
+    })).rejects.toBeInstanceOf(RetryBudgetExhaustedError);
+    expect(budget.tryConsume).toHaveBeenCalledOnce();
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
+  it("does not consume retry budget when the next delay would exceed the deadline", async () => {
+    let now = 0;
+    const budget = createRetryBudget({ capacity: 1, clock: () => now });
+    const operation = vi.fn().mockRejectedValue(
+      Object.assign(new Error("temporary"), { code: "TEMPORARY" }),
+    );
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      retryBudget: budget,
+      deadlineAt: 5,
+      clock: () => now,
+      random: () => 0.5,
+      sleep: async (delay) => { now += delay; },
+    })).rejects.toBeInstanceOf(RetryDeadlineExceededError);
+    expect((await budget.snapshot()).available).toBe(1);
     expect(operation).toHaveBeenCalledOnce();
   });
 

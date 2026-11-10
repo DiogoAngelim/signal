@@ -22,15 +22,68 @@ assumed, what was unknown — is essential for:
 - **Trust** — Systems that can explain their decisions earn more trust than
   systems that cannot.
 
-Replay is a design objective, not a blanket runtime guarantee. Signal currently supports
-idempotent result replay when a durable adapter has stored the completed result,
-and it provides evidence/journal and audit-chain primitives. It does not yet
-persist a complete, versioned replay envelope for every execution or provide a
-general-purpose deterministic re-execution engine. Deterministic reconstruction
-requires operation/version identifiers, canonical inputs, policy/configuration
-versions, handler artifact identity, and snapshots of all external reads. Runtime
-metadata such as message identifiers, wall-clock timestamps, and durations may
-legitimately differ.
+Replay is a supported, explicit capability, not an automatic guarantee
+for every execution. Signal provides durable idempotent result replay when a
+configured adapter is used, versioned replay-evidence records, tenant-scoped
+PostgreSQL persistence, and a deterministic replay validator. Applications
+must explicitly capture every decision-relevant external read, retain the
+matching handler artifact, and invoke replay through a pure, side-effect-free
+boundary. Signal does not automatically intercept arbitrary I/O or reissue
+external side effects. Runtime metadata such as message identifiers,
+wall-clock timestamps, and durations may legitimately differ.
+
+## Versioned replay evidence records
+
+Signal now provides an explicit replay-evidence contract and PostgreSQL
+persistence for execution records. A record binds:
+- operation name and version;
+- handler artifact SHA-256 digest and policy version;
+- canonical JSON input and its fingerprint;
+- explicitly captured external-read snapshots, each with an observation time
+  and content fingerprint;
+- normalized result and its fingerprint;
+- a fingerprint over the complete immutable evidence envelope, including tenant and execution identity;
+- execution ID and capture timestamp.
+
+Use createReplayEvidenceRecord from @signal/runtime to construct the record,
+verifyReplayEvidenceRecord before trusting it, and ReplayEvidencePort to persist
+it. The PostgreSQL implementation is createPostgresReplayEvidenceStore from
+@signal/idempotency-postgres. Migration 0006_immutable_replay_evidence.sql
+creates immutable persistence with row mutation/truncate guards, tenant-scoped
+row-level security, and an insert-only application contract. Reads and writes
+must supply the tenant identity; PostgreSQL enforces the transaction-local
+signal.tenant_id setting for each adapter operation. Derive tenantId from a
+trusted authenticated principal, never from an untrusted request payload.
+This GUC-based policy is defense in depth against accidental cross-tenant
+queries; a database role able to issue arbitrary SQL can set the GUC itself.
+Do not treat it as a substitute for trusted application authorization,
+parameterized queries, least-privilege roles, and database access isolation.
+
+replayWithEvidence verifies the record, requires exact operation, handler
+artifact, and policy identity, supplies captured external reads to the
+deterministic computation, and rejects result divergence. This supports
+reconstruction after process restart when the record and compatible handler
+artifact are retained.
+
+Capture is explicit: Signal cannot automatically observe arbitrary database
+reads, network calls, environment variables, clock access, randomness, or
+application globals. The application must record every decision-relevant
+external read at its boundary. The supplied replay computation must be pure
+and side-effect-free; the helper cannot prevent arbitrary I/O inside a callback.
+External actions must be represented as separate commands and must never be
+reissued by replay.
+
+Replay snapshots may contain sensitive application data. Capture the minimum
+fields required to reproduce the decision, redact credentials and bearer
+tokens before persistence, encrypt storage and backups, retain database row-level security and tenant
+scoping, and define retention/deletion requirements before enabling capture. A fingerprint does not anonymize the
+underlying snapshot.
+
+Exact handler artifact matching is intentionally conservative. A newer handler
+or policy must not be substituted silently. Cross-version replay requires
+retaining the original executable artifact or an independently validated
+compatibility adapter. This repository does not yet certify historical
+execution across arbitrary runtime upgrades.
 
 ## Replay Principles
 

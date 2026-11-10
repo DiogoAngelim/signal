@@ -41,6 +41,61 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("signal_idempotency_expired_reservations");
   });
 
+  it("creates immutable replay evidence storage", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0006_immutable_replay_evidence.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_replay_evidence");
+    expect(sql).toContain("tenant_id text NOT NULL");
+    expect(sql).toContain("handler_artifact_digest");
+    expect(sql).toContain("operation_version");
+    expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
+    expect(sql).toContain("FORCE ROW LEVEL SECURITY");
+    expect(sql).toContain("current_setting('signal.tenant_id', true)");
+    expect(sql).toContain("signal_replay_evidence_no_update_delete");
+    expect(sql).toContain("signal_replay_evidence_no_truncate");
+    expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
+  });
+
+  it("creates append-only audit entries and signed checkpoint storage", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0005_append_only_audit_ledger.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_audit_entries");
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_audit_checkpoints");
+    expect(sql).toContain("signal_audit_entries_no_update_delete");
+    expect(sql).toContain("signal_audit_entries_no_truncate");
+    expect(sql).toContain("signal_audit_checkpoints_no_update_delete");
+    expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
+  });
+
+  it("creates a transactional consumer inbox with a stable deduplication key", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0008_transactional_consumer_inbox.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_consumer_inbox");
+    expect(sql).toContain("tenant_id text NOT NULL");
+    expect(sql).toContain("PRIMARY KEY (tenant_id, consumer_name, message_id)");
+    expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
+    expect(sql).toContain("FORCE ROW LEVEL SECURITY");
+    expect(sql).toContain("current_setting('signal.tenant_id', true)");
+    expect(sql).toContain("processed_at timestamptz");
+  });
+
+  it("creates a shared cross-process retry token bucket", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0007_shared_retry_budgets.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_retry_budgets");
+    expect(sql).toContain("budget_key text PRIMARY KEY");
+    expect(sql).toContain("refill_rate_per_second numeric");
+    expect(sql).toContain("available numeric");
+  });
+
   it("creates durable cross-process circuit breaker state with fenced probe leases", () => {
     const sql = readFileSync(
       join(__dirname, "../src/drizzle/migrations/0004_distributed_circuit_breakers.sql"),

@@ -1,3 +1,5 @@
+import type { RetryBudgetPort } from "@signal/ports";
+
 /**
  * Resilience primitives for Signal runtime.
  *
@@ -313,6 +315,64 @@ export class RetryDeadlineExceededError extends Error {
   }
 }
 
+export class RetryBudgetExhaustedError extends Error {
+  readonly code = "RETRY_BUDGET_EXHAUSTED";
+  constructor(cause?: unknown) {
+    super("The shared retry budget is exhausted.", { cause });
+    this.name = "RetryBudgetExhaustedError";
+  }
+}
+
+export type RetryBudget = RetryBudgetPort;
+
+export interface RetryBudgetOptions {
+  readonly capacity: number;
+  /** Tokens replenished per second. Zero creates a fixed retry allowance. */
+  readonly refillRatePerSecond?: number;
+  /** Inject a monotonic clock in milliseconds for deterministic tests. */
+  readonly clock?: () => number;
+}
+
+/** In-process token bucket for bounding aggregate retry amplification. */
+export function createRetryBudget(options: RetryBudgetOptions): RetryBudget {
+  const capacity = options.capacity;
+  const refillRatePerSecond = options.refillRatePerSecond ?? 0;
+  if (!Number.isSafeInteger(capacity) || capacity < 1) {
+    throw new RangeError("Retry budget capacity must be a positive safe integer.");
+  }
+  if (!Number.isFinite(refillRatePerSecond) || refillRatePerSecond < 0) {
+    throw new RangeError("Retry budget refillRatePerSecond must be finite and non-negative.");
+  }
+  const clock = options.clock ?? (() => performance.now());
+  let available = capacity;
+  let lastRefillAt = clock();
+  if (!Number.isFinite(lastRefillAt)) throw new RangeError("Retry budget clock must be finite.");
+
+  const refill = () => {
+    const now = clock();
+    if (!Number.isFinite(now) || now < lastRefillAt) {
+      throw new RangeError("Retry budget clock must be finite and monotonic.");
+    }
+    if (refillRatePerSecond > 0) {
+      available = Math.min(capacity, available + ((now - lastRefillAt) / 1000) * refillRatePerSecond);
+    }
+    lastRefillAt = now;
+  };
+
+  return {
+    tryConsume() {
+      refill();
+      if (available < 1) return false;
+      available -= 1;
+      return true;
+    },
+    snapshot() {
+      refill();
+      return { capacity, available, refillRatePerSecond };
+    },
+  };
+}
+
 export class RetryAbortedError extends Error {
   readonly code = "RETRY_ABORTED";
   constructor(cause?: unknown) {
@@ -328,6 +388,8 @@ export interface RetryExecutionOptions extends RetryPolicy {
   readonly random?: () => number;
   readonly clock?: () => number;
   readonly sleep?: (delayMs: number, signal: AbortSignal) => Promise<void>;
+  /** Shared token-bucket budget limiting aggregate retries across operations. */
+  readonly retryBudget?: RetryBudget;
   readonly onRetry?: (input: {
     attempt: number;
     delayMs: number;
@@ -451,6 +513,9 @@ export async function executeWithRetry<T>(
         const delayMs = calculateJitteredBackoff(attempt - 1, options, random);
         if (deadlineAt !== undefined && clock() + delayMs >= deadlineAt) {
           throw new RetryDeadlineExceededError();
+        }
+        if (options.retryBudget && !(await options.retryBudget.tryConsume())) {
+          throw new RetryBudgetExhaustedError(error);
         }
         options.onRetry?.({ attempt, delayMs, error });
         await raceAbort(sleep(delayMs, controller.signal));
