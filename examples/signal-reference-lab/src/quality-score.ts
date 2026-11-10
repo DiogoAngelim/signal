@@ -120,9 +120,9 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
   const resourceScore = regression(currentRss, baselineRss, false);
   const scoreEvidence = (label: string, current: number, prior: number) => `${label}: current=${current}; baseline=${prior}`;
   return [
-    criterion("performance.baseline", "Comparable performance baseline", 35, "validated", ["Workload, runtime, OS, architecture, CPU model and CPU count match." ]),
+    criterion("performance.baseline", "Comparable performance baseline", 10, "validated", ["Workload, runtime, OS, architecture, CPU model and CPU count match." ]),
     criterion("performance.latency", "Latency distribution and tail behavior", 30, "validated", [scoreEvidence("p95 ms", benchmark.timing.p95Ms, baseline.timing.p95Ms), scoreEvidence("p99 ms", benchmark.timing.p99Ms, baseline.timing.p99Ms)]),
-    criterion("performance.throughput", "Sustained throughput and concurrency", 20, "validated", [scoreEvidence("operations/second", benchmark.timing.throughputPerSecond, baseline.timing.throughputPerSecond)]),
+    criterion("performance.throughput", "Sustained throughput and concurrency", 25, "validated", [scoreEvidence("operations/second", benchmark.timing.throughputPerSecond, baseline.timing.throughputPerSecond)]),
     criterion("performance.resources", "Memory and resource efficiency", 15, "validated", [scoreEvidence("RSS delta bytes", currentRss, baselineRss)]),
     criterion("performance.system-profile", "HTTP, database and distributed workload profile", 10, "unverified", [], "Current benchmark covers local in-process query dispatch only."),
     criterion("performance.sustained-load", "Sustained load, saturation and soak behavior", 10, "unverified", [], "No long-duration load or saturation profile is currently measured."),
@@ -176,11 +176,11 @@ export function scoreQuality(
     criterion("security.audit", "Tamper-evident audit and signed checkpoints", 14, s("audit-integrity"), ["Hash-chain verification, checkpoint signatures and tamper detection."], "External key custody and independent anchoring are not tested.", true),
     criterion("security.replay", "Replay evidence integrity and tenant scoping", 8, s("replay-evidence"), ["Content-addressed replay evidence verification."], "Full replay executor is not integrated."),
     criterion("security.persistence", "Durable security controls and database isolation", 10, s("postgres-integration"), ["PostgreSQL inbox, tenant-scoped replay storage and append-only audit ledger."], "Blocked when DATABASE_URL is unavailable."),
-    criterion("security.external-identity", "External identity-provider integration", 8, "unverified", [], "The harness verifies trusted runtime context handling but does not integrate a production identity provider."),
-    criterion("security.key-custody", "Independent cryptographic key custody and rotation", 8, "unverified", [], "Test keys are generated locally; external key custody, rotation and independent checkpoint anchoring are not tested."),
+    criterion("security.external-identity", "External identity-provider integration", 6, "unverified", [], "The harness verifies trusted runtime context handling but does not integrate a production identity provider."),
+    criterion("security.key-custody", "Independent cryptographic key custody and rotation", 6, "unverified", [], "Test keys are generated locally; external key custody, rotation and independent checkpoint anchoring are not tested."),
     criterion("security.supply-chain", "Dependency vulnerability and supply-chain assurance", 6, "unverified", [], "Repository security workflows are separate from this deterministic runtime evaluation and their artifacts are not ingested here."),
     criterion("security.static-analysis", "Static security analysis and secret scanning", 6, "unverified", [], "SAST and secret-scanning evidence is not currently ingested by this scorecard."),
-    criterion("security.confidentiality", "Data confidentiality and encryption at rest/in transit", 4, "unverified", [], "The reference suite does not certify deployment-level encryption or data-loss controls."),
+    criterion("security.confidentiality", "Data confidentiality and encryption at rest/in transit", 2, "unverified", [], "The reference suite does not certify deployment-level encryption or data-loss controls."),
   ]);
   const reliability = makePillar("reliability", "Reliability", [
     criterion("reliability.idempotency", "Idempotency under retries and duplicate delivery", 15, combineStatus(s("idempotency"), s("concurrency")), ["Duplicate and concurrent request scenarios."], "Cross-process and cross-host contention remain distinct validation gates."),
