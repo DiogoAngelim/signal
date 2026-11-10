@@ -75,10 +75,10 @@ function criterion(
 
 function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] {
   if (!benchmark) return [
-    criterion("performance.baseline", "Comparable performance baseline", 35, "unverified", [], "No benchmark evidence was supplied to the scorecard."),
-    criterion("performance.latency", "Latency distribution and tail behavior", 30, "unverified", [], "Requires repeated, integrity-checked workload samples."),
-    criterion("performance.throughput", "Sustained throughput and concurrency", 20, "unverified", [], "Requires a representative workload and comparable host."),
-    criterion("performance.resources", "Memory and resource efficiency", 15, "unverified", [], "Requires comparable resource measurements and workload."),
+    criterion("performance.baseline", "Comparable performance baseline", 10, "unverified", [], "No benchmark evidence was supplied to the scorecard."),
+    criterion("performance.latency", "Latency distribution and tail behavior", 40, "unverified", [], "Requires repeated, integrity-checked workload samples."),
+    criterion("performance.throughput", "Sustained throughput and concurrency", 30, "unverified", [], "Requires a representative workload and comparable host."),
+    criterion("performance.resources", "Memory and resource efficiency", 20, "unverified", [], "Requires comparable resource measurements and workload."),
   ];
 
   const valid = benchmark.integrity.valid &&
@@ -109,7 +109,7 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     const ratio = higherIsBetter ? current / prior : prior / current;
     return Math.max(0, Math.min(10, 8 + (ratio - 1) * 20));
   };
-  const latencyScore = regression(benchmark.timing.p95Ms, baseline.timing.p95Ms, false);
+  const latencyScore = regression(benchmark.timing.p95Ms, baseline.timing.p95Ms, false) * 0.7 + regression(benchmark.timing.p99Ms, baseline.timing.p99Ms, false) * 0.3;
   const throughputScore = regression(benchmark.timing.throughputPerSecond, baseline.timing.throughputPerSecond, true);
   const currentRss = Math.max(1, benchmark.environment.rssAfter - benchmark.environment.rssBefore);
   const baselineRss = Math.max(1, baseline.environment.rssAfter - baseline.environment.rssBefore);
