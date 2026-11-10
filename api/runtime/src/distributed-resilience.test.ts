@@ -66,30 +66,36 @@ describe("distributed runtime circuit breaker controller", () => {
     expect(calls.at(-1)?.[3]).toBe("probe-generation-2");
   });
 
-  it("does not retain a stale probe token after a denied acquisition", async () => {
-    let allowed = true;
+  it("preserves the active probe token when a concurrent acquisition is denied", async () => {
+    let attempts = 0;
+    const renewedTokens: Array<string | undefined> = [];
     const successTokens: Array<string | undefined> = [];
     const port: DistributedCircuitBreakerPort = {
       async snapshot() { return null; },
       async tryAcquire() {
-        return allowed
-          ? { allowed: true, probeToken: "stale-generation" }
+        attempts += 1;
+        return attempts === 1
+          ? { allowed: true, probeToken: "active-generation" }
           : { allowed: false };
       },
-      async renewProbe(_key, token) { return Boolean(token); },
+      async renewProbe(_key, token) {
+        renewedTokens.push(token);
+        return token === "active-generation";
+      },
       async recordSuccess(_key, token) {
         successTokens.push(token);
-        return Boolean(token);
+        return token === "active-generation";
       },
-      async recordFailure(_key, _config, token) { return Boolean(token); },
+      async recordFailure(_key, _config, token) { return token === "active-generation"; },
     };
 
     const controller = createDistributedCircuitBreakerController(port, "provider-c");
     expect(await controller.tryAcquire()).toBe(true);
-    allowed = false;
     expect(await controller.tryAcquire()).toBe(false);
-    expect(await controller.recordSuccess()).toBe(false);
-    expect(successTokens).toEqual([undefined]);
+    expect(await controller.renewProbe()).toBe(true);
+    expect(await controller.recordSuccess()).toBe(true);
+    expect(renewedTokens).toEqual(["active-generation"]);
+    expect(successTokens).toEqual(["active-generation"]);
   });
 
   it("rejects invalid circuit breaker configuration", () => {
