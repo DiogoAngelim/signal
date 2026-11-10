@@ -24,9 +24,11 @@ pnpm install
 pnpm --filter @signal/reference-lab build
 pnpm --filter @signal/reference-lab evaluate
 pnpm --filter @signal/reference-lab coverage:verify
+pnpm --filter @signal/reference-lab start
+pnpm --filter @signal/reference-lab benchmark
 ```
 
-Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`.
+Or from this directory: `pnpm lab`, `pnpm evaluate`, `pnpm coverage:verify`, `pnpm start`, `pnpm benchmark`. The web UI listens on `127.0.0.1:4179` by default. Set `PORT` to change it.
 
 ## Current capability truth
 
@@ -55,5 +57,7 @@ The scorecard uses the engineering dimensions and weights already established fo
 The app uses only `@signal/sdk-node` public exports. The harness does not mutate Signal, hide failures, or automatically change its source. It reports the exact capability evidence and limitations so subsequent Signal engineering can address real gaps.
 
 The current capability inventory spans protocol, SDK, runtime, idempotency, events, HTTP binding, PostgreSQL, outbox, inbox, resilience, replay, audit, decision, agency, memory, commitment, semantic state, kernel compatibility, observability and CLI surfaces. The executable suite covers six in-process scenarios; the rest remain explicitly unverified.
+
+A local benchmark records throughput, p50/p90/p95/p99/max latency, process RSS/heap, Node/OS/CPU metadata and workload parameters. Save a comparable baseline with `pnpm benchmark -- --out baseline.json` (or `node dist/src/cli.js benchmark --out baseline.json`) and compare it later with `pnpm compare -- baseline.json`. Comparison rejects mismatched workload or runtime/host metadata. It is a local in-process query benchmark, not a production benchmark.
 
 The next gates are durable PostgreSQL integration (including outbox/inbox and worker restart), fault injection, replay/audit verification, retry/circuit-breaker scenarios, telemetry/resource collectors, repeatable load/soak profiles, and baseline comparison pinned to Signal and harness commits. These remain unimplemented rather than simulated in this initial reference implementation.
