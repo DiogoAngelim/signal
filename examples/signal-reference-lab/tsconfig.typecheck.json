@@ -5,9 +5,23 @@
     "noEmit": true,
     "incremental": false,
     "skipLibCheck": true,
-    "types": ["node"],
-    "lib": ["ES2022"]
+    "types": [
+      "node"
+    ],
+    "lib": [
+      "ES2022"
+    ]
   },
-  "include": ["src/domain.ts", "src/signal-app.ts"],
-  "exclude": ["dist", "node_modules", "test", "src/cli.ts", "src/evaluation.ts", "src/web.ts"]
+  "include": [
+    "src/domain.ts"
+  ],
+  "exclude": [
+    "dist",
+    "node_modules",
+    "test",
+    "src/cli.ts",
+    "src/evaluation.ts",
+    "src/web.ts",
+    "src/signal-app.ts"
+  ]
 }
