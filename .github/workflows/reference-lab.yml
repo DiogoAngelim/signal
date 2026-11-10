@@ -69,6 +69,8 @@ jobs:
       - name: Build Reference Lab
         id: reference_lab_build
         run: pnpm --filter @signal/reference-lab build
+      - name: Semantic TypeScript typecheck
+        run: pnpm --filter @signal/reference-lab typecheck
       - name: Run Reference Lab tests
         run: node --test examples/signal-reference-lab/dist/test/*.test.js
       - name: Verify Reference Lab coverage
