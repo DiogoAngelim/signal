@@ -139,7 +139,7 @@ export type SignalExecutionResult<TResult = unknown> =
 
 export interface SignalConsumerDeduper {
   /** Optional read-before-handle check. Implementations should make this atomic with their own coordination when possible. */
-  hasSeen?(input: {
+  hasSeen(input: {
     consumerId: string;
     messageId: string;
     envelope: SignalEnvelope;

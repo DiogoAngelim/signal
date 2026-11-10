@@ -88,7 +88,7 @@ describe("buffered observability port", () => {
         if (fail) throw new Error("collector unavailable");
         exported.push(...events.map((event) => event.event));
       },
-    }, { capacity: 4, batchSize: 2 });
+    }, { capacity: 4, batchSize: 2, autoFlush: false });
 
     port.emit({ event: "execution.start" });
     await expect(port.flush()).rejects.toThrow("collector unavailable");

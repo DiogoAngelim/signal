@@ -195,6 +195,8 @@ export interface BufferedObservabilityPort extends ObservabilityPort {
 }
 
 export interface BufferedObservabilityOptions {
+  /** Automatically schedule a non-blocking microtask flush. Defaults to true. */
+  autoFlush?: boolean;
   /** Maximum pending events. Defaults to 5,000. */
   capacity?: number;
   /** Maximum events sent in one export call. Defaults to 100. */
@@ -218,6 +220,7 @@ export function createBufferedObservabilityPort(
   if (!exporter || typeof exporter.export !== "function") {
     throw new Error("A telemetry exporter with an export method is required.");
   }
+  const autoFlush = options.autoFlush ?? true;
   const capacity = options.capacity ?? 5_000;
   const batchSize = options.batchSize ?? 100;
   if (!Number.isSafeInteger(capacity) || capacity < 1) {
@@ -287,7 +290,7 @@ export function createBufferedObservabilityPort(
       }
       queue.push({ ...event, meta: event.meta ? { ...event.meta } : undefined });
       // Defer I/O so the synchronous runtime lifecycle hook remains bounded.
-      scheduleFlush();
+      if (autoFlush) scheduleFlush();
     },
     flush,
     async close() {
