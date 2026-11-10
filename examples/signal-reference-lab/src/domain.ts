@@ -26,7 +26,7 @@ export function assess(request: CaseRequest, now = new Date()): Assessment {
       freshness: 90,
       independence: 75,
       replication: item.verified ? 70 : 20,
-      calibration: 60,
+      calibration: 90,
       traceability: 90,
       strength: Math.round(item.confidence * 100),
       source: item.source,
@@ -37,7 +37,17 @@ export function assess(request: CaseRequest, now = new Date()): Assessment {
   });
   const confidence = signalAssessment.confidence.capped / 100;
   const risk = Math.max(0, Math.min(1, 1 - signalAssessment.evidenceQuality.quality / 100));
-  const recommendation = verified.length < 2 || signalAssessment.governance.blockers.length > 0 || confidence < 0.7
+  const commitment = evaluateCommitment({
+    decision: { id: request.id, confidence, trust: 0.85, risk, expectedUtility: 1 - risk, requestedCommitment: 0.5 },
+    resource: { id: "case-capacity", available: 1, requested: 0.5, maximum: 1 },
+    trust: { userTrust: 0.85, systemConfidence: confidence, historicalReliability: 0.75 },
+    constraints: verified.length < 2 ? [{ id: "verified-evidence-minimum", label: "At least two verified evidence sources", type: "hard", severity: "high", passed: false }] : [],
+    now: now.toISOString()
+  });
+  const semanticState = resolveSemanticState({
+    dimensions: { stability: 1 - risk, volatility: risk, stress: risk, uncertainty: 1 - confidence, coherence: signalAssessment.governance.score / 100, confidence }
+  });
+  const recommendation = verified.length < 2 || signalAssessment.governance.blockers.length > 0 || confidence < 0.7 || commitment.status !== "recommended"
     ? "investigate"
     : signalAssessment.stewardship.recommendation === "avoid" || signalAssessment.stewardship.recommendation === "reduce"
       ? "reject"
@@ -49,6 +59,8 @@ export function assess(request: CaseRequest, now = new Date()): Assessment {
     rationale: signalAssessment.explanation.join(" "),
     evidenceIds: verified.map((item) => item.id),
     assessedAt: now.toISOString(),
-    signalAssessment
+    signalAssessment,
+    commitment,
+    semanticState
   };
 }
