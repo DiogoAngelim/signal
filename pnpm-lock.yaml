@@ -278,22 +278,6 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
 
-  examples/signal-reference-lab:
-    dependencies:
-      '@signal/sdk-node':
-        specifier: workspace:*
-        version: link:../../api/sdk-node
-      zod:
-        specifier: 'catalog:'
-        version: 4.6.7
-    devDependencies:
-      '@types/node':
-        specifier: 'catalog:'
-        version: 20.19.39
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
   examples/aware:
     dependencies:
       '@signal/decision-memory':
@@ -382,6 +366,22 @@ importers:
       vitest:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@20.19.39)(happy-dom@20.9.0)(lightningcss@1.32.0)(terser@5.46.1)
+
+  examples/signal-reference-lab:
+    dependencies:
+      '@signal/sdk-node':
+        specifier: workspace:*
+        version: link:../../api/sdk-node
+      zod:
+        specifier: 'catalog:'
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: 'catalog:'
+        version: 20.19.39
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
 
   examples/stocks-optimizer:
     dependencies:
