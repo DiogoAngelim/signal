@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "buildCommand": "pnpm -w run build:library && pnpm --filter @signal/reference-lab run build && mkdir -p vercel-output && cp -R examples/signal-reference-lab/site/. vercel-output/",
+  "buildCommand": "pnpm -w run build:library && pnpm --filter @signal/reference-lab run build && mkdir -p vercel-output && cp api/reference-lab.html vercel-output/index.html",
   "installCommand": "pnpm install --frozen-lockfile",
   "headers": [
     {
