@@ -85,6 +85,7 @@ const store=createPostgresTransactionalStore({connectionString,maxConnections:10
 const cleanupPool=new Pool({connectionString,max:2,application_name:"signal-benchmark-cleanup"});
 const runPrefix=`bench-${randomUUID()}`;
 const results=[];
+let deadLetterTransition;
 try {
   for(const payloadBytes of [256,4096]){
     for(const concurrencyLevel of concurrency){
@@ -154,6 +155,8 @@ try {
         const ackLatencies=[];
         let acknowledged=0;
         let claimedTotal=0;
+        const queueAgeLatencies=[];
+        const drainStarted=performance.now();
         while(true){
           const claimStarted=performance.now();
           const claimPromise=store.claimBatch({limit:1000,workerId,leaseMs:30000});
@@ -161,6 +164,9 @@ try {
           claimLatencies.push(performance.now()-claimStarted);
           if(claimed.length===0) break;
           claimedTotal+=claimed.length;
+          for (const record of claimed) {
+            queueAgeLatencies.push(Math.max(0, Date.now() - Date.parse(record.createdAt)));
+          }
           const acknowledgementPromise=Promise.all(claimed.map(async(record)=>{
             const ackStarted=performance.now();
             const ok=await store.acknowledge({id:record.id,workerId,leaseToken:record.leaseToken});
@@ -170,13 +176,14 @@ try {
           }));
           await Promise.all([acknowledgementPromise,samplePg()]);
         }
+        const backlogDrainMs=performance.now()-drainStarted;
         if(claimedTotal!==iterations+warmup||acknowledged!==claimedTotal) throw new Error(`Outbox mismatch: claimed=${claimedTotal}, acked=${acknowledged}`);
         const dbStatsAfter=await readDatabaseStats(cleanupPool);
         const cpuMs=(cpu.user+cpu.system)/1000;
         results.push({
           run:run+1,payloadBytes,concurrency:concurrencyLevel,iterations,completed,
           wallTimeMs,throughputOpsPerSecond:iterations/(wallTimeMs/1000),latency:stats(latencies),
-          claimBatchLatency:stats(claimLatencies),acknowledgementLatency:stats(ackLatencies),
+          claimBatchLatency:stats(claimLatencies),acknowledgementLatency:stats(ackLatencies),\n          queueAgeLatency:stats(queueAgeLatencies),backlogDrainMs,backlogDrainRowsPerSecond:claimedTotal/(backlogDrainMs/1000),
           claimedOutboxRows:claimedTotal,acknowledgedOutboxRows:acknowledged,
           cpuUserMs:cpu.user/1000,cpuSystemMs:cpu.system/1000,cpuUtilizationPercent:cpuMs/wallTimeMs*100,
           heapUsedBeforeBytes:memoryBefore.heapUsed,heapUsedAfterBytes:memoryAfter.heapUsed,
@@ -198,6 +205,68 @@ try {
       }
     }
   }
+
+  const deadLetterOperation = "benchmark.deadletter.v1";
+  const deadLetterKey = `${runPrefix}-deadletter`;
+  const deadLetterMessageId = `${deadLetterKey}-event`;
+  const deadLetterReservation = await store.reserve({
+    operationName: deadLetterOperation,
+    idempotencyKey: deadLetterKey,
+    payloadFingerprint: createHash("sha256").update(deadLetterKey).digest("hex"),
+  });
+  if (deadLetterReservation.state !== "reserved" || !deadLetterReservation.record?.reservationToken) {
+    throw new Error("Dead-letter benchmark reservation failed");
+  }
+  await store.completeWithEvents({
+    operationName: deadLetterOperation,
+    idempotencyKey: deadLetterKey,
+    payloadFingerprint: createHash("sha256").update(deadLetterKey).digest("hex"),
+    reservationToken: deadLetterReservation.record.reservationToken,
+    result: { ok: true },
+    messageId: `${deadLetterKey}-mutation`,
+    events: [createSignalEnvelope({
+      kind: "event",
+      name: "benchmark.outbox.deadletter.v1",
+      messageId: deadLetterMessageId,
+      payload: { benchmark: true },
+    })],
+  });
+  const deadLetterWorker = `${runPrefix}-deadletter-worker`;
+  const claimStarted = performance.now();
+  const deadLetterClaims = await store.claimBatch({ limit: 1, workerId: deadLetterWorker, leaseMs: 30_000 });
+  const deadLetterClaimLatencyMs = performance.now() - claimStarted;
+  const deadLetterClaim = deadLetterClaims.find((record) => record.envelope.messageId === deadLetterMessageId);
+  if (!deadLetterClaim) throw new Error("Dead-letter benchmark could not claim its outbox event");
+  const retryStarted = performance.now();
+  const retryOutcome = await store.retry({
+    id: deadLetterClaim.id,
+    workerId: deadLetterWorker,
+    leaseToken: deadLetterClaim.leaseToken,
+    availableAt: new Date().toISOString(),
+    error: "Benchmark forced dead-letter transition",
+    maxAttempts: 1,
+  });
+  const retryLatencyMs = performance.now() - retryStarted;
+  const persistedDeadLetter = await cleanupPool.query(
+    "SELECT status FROM signal_outbox WHERE message_id = $1",
+    [deadLetterMessageId],
+  );
+  if (retryOutcome !== "dead-lettered" || persistedDeadLetter.rows[0]?.status !== "dead-letter") {
+    throw new Error("Dead-letter benchmark did not persist the expected terminal state");
+  }
+  deadLetterTransition = {
+    claimLatencyMs: deadLetterClaimLatencyMs,
+    retryTransitionLatencyMs: retryLatencyMs,
+    retryOutcome,
+    persistedStatus: persistedDeadLetter.rows[0].status,
+    deadLetteredRows: 1,
+    forcedDeadLetterRate: 1,
+  };
+  await cleanupPool.query("DELETE FROM signal_outbox WHERE message_id = $1", [deadLetterMessageId]);
+  await cleanupPool.query(
+    "DELETE FROM signal_idempotency_records WHERE operation_name = $1 AND idempotency_key = $2",
+    [deadLetterOperation, deadLetterKey],
+  );
 } finally {
   await store.close();
   await cleanupPool.end();
@@ -206,13 +275,13 @@ function keyLike(prefix){return `${prefix}%`;}
 
 const report={
   schemaVersion:1,benchmark:"signal-postgres-idempotency-transactional-outbox",
-  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement. Samples pg_stat_activity connection/active/lock-wait/query-duration observations, pg_stat_database commit/rollback/buffer/deadlock deltas, and an EXPLAIN ANALYZE BUFFERS plan for the transactional outbox claim query (executed inside a rolled-back transaction). CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
+  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement; records queue age and backlog drain; and forces one bounded dead-letter transition. Samples pg_stat_activity connection/active/lock-wait/query-duration observations, pg_stat_database commit/rollback/buffer/deadlock deltas, and an EXPLAIN ANALYZE BUFFERS plan for the transactional outbox claim query (executed inside a rolled-back transaction). CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
   generatedAt:new Date().toISOString(),commit:process.env.GITHUB_SHA??process.env.SOURCE_COMMIT??"unrecorded-local-run",
   runtime:{node:process.version,platform:process.platform,arch:process.arch,cpuModel:os.cpus()[0]?.model??"unknown",logicalCpus:os.cpus().length},
   database:{engine:"PostgreSQL",version:"16",poolMaxConnections:10},
-  configuration:{iterations,runs,concurrency,payloadBytes:[256,4096]},results,
+  configuration:{iterations,runs,concurrency,payloadBytes:[256,4096]},results,deadLetterTransition,
 };
 await mkdir(output.split("/").slice(0,-1).join("/")||".",{recursive:true});
 await writeFile(output,JSON.stringify(report,null,2));
-for(const r of results) process.stdout.write(`payload=${r.payloadBytes} concurrency=${r.concurrency} run=${r.run} commitThroughput=${r.throughputOpsPerSecond.toFixed(0)} ops/s p50=${r.latency.p50Ms.toFixed(3)}ms p95=${r.latency.p95Ms.toFixed(3)}ms p99=${r.latency.p99Ms.toFixed(3)}ms claimP95=${r.claimBatchLatency.p95Ms.toFixed(3)}ms ackP95=${r.acknowledgementLatency.p95Ms.toFixed(3)}ms\n`);
-process.stdout.write(`Wrote ${output}\n`);
+for(const r of results) process.stdout.write(`payload=${r.payloadBytes} concurrency=${r.concurrency} run=${r.run} commitThroughput=${r.throughputOpsPerSecond.toFixed(0)} ops/s p50=${r.latency.p50Ms.toFixed(3)}ms p95=${r.latency.p95Ms.toFixed(3)}ms p99=${r.latency.p99Ms.toFixed(3)}ms claimP95=${r.claimBatchLatency.p95Ms.toFixed(3)}ms ackP95=${r.acknowledgementLatency.p95Ms.toFixed(3)}ms queueAgeP95=${r.queueAgeLatency.p95Ms.toFixed(3)}ms backlogDrain=${r.backlogDrainRowsPerSecond.toFixed(0)} rows/s\n`);
+process.stdout.write(`deadLetter retryP95=${deadLetterTransition.retryTransitionLatencyMs.toFixed(3)}ms status=${deadLetterTransition.persistedStatus}\n`);\nprocess.stdout.write(`Wrote ${output}\n`);
