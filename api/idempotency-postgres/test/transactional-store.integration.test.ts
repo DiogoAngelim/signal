@@ -227,6 +227,72 @@ integration("PostgreSQL transactional outbox integration", () => {
     expect(workerA[0].envelope.messageId).not.toBe(workerB[0].envelope.messageId);
   });
 
+  it("rejects acknowledgement and retry after an outbox lease expires", async () => {
+    const operationName = "integration.expired-lease-fencing.v1";
+    const idempotencyKey = `expired-lease-${Date.now()}`;
+    const reservation = await store.reserve({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-expired-lease",
+    });
+    await store.completeWithEvents({
+      operationName,
+      idempotencyKey,
+      payloadFingerprint: "fingerprint-expired-lease",
+      reservationToken: reservation.record!.reservationToken!,
+      result: { ok: true },
+      events: [{
+        protocol: "signal.v1",
+        kind: "event",
+        name: "integration.expired-lease-fencing.v1",
+        messageId: `expired-lease-event-${idempotencyKey}`,
+        timestamp: new Date().toISOString(),
+        payload: {},
+      }],
+    });
+
+    const firstBatch = await store.claimBatch({
+      workerId: "expired-lease-worker-a",
+      limit: 100,
+      leaseMs: 30_000,
+    });
+    const first = firstBatch.find((item) => item.envelope.messageId === `expired-lease-event-${idempotencyKey}`);
+    expect(first).toBeDefined();
+
+    await admin.query(
+      "UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE id = $1",
+      [first!.id],
+    );
+
+    expect(await store.acknowledge({
+      id: first!.id,
+      workerId: "expired-lease-worker-a",
+      leaseToken: first!.leaseToken,
+    })).toBe(false);
+    expect(await store.retry({
+      id: first!.id,
+      workerId: "expired-lease-worker-a",
+      leaseToken: first!.leaseToken,
+      availableAt: new Date().toISOString(),
+      error: "expired worker must not reschedule",
+      maxAttempts: 5,
+    })).toBe("lease-lost");
+
+    const secondBatch = await store.claimBatch({
+      workerId: "expired-lease-worker-b",
+      limit: 100,
+      leaseMs: 30_000,
+    });
+    const second = secondBatch.find((item) => item.envelope.messageId === `expired-lease-event-${idempotencyKey}`);
+    expect(second).toBeDefined();
+    expect(second!.leaseToken).not.toBe(first!.leaseToken);
+    expect(await store.acknowledge({
+      id: second!.id,
+      workerId: "expired-lease-worker-b",
+      leaseToken: second!.leaseToken,
+    })).toBe(true);
+  });
+
   it("recovers expired leases and dead-letters after the attempt limit", async () => {
     const operationName = "integration.lease.v1";
     const idempotencyKey = `lease-${Date.now()}`;
