@@ -2,6 +2,7 @@ import type { SignalAuth } from "@signal/protocol";
 import rateLimit from "@fastify/rate-limit";
 import type { SignalRuntime } from "@signal/sdk-node";
 import type { FastifyInstance, FastifyRequest } from "fastify";
+type RateLimitPluginOptions = NonNullable<Parameters<typeof rateLimit>[1]>;
 import { handleCapabilitiesRequest } from "./capabilities-route";
 import { handleMutationRequest, handleQueryRequest } from "./handlers";
 
@@ -13,6 +14,13 @@ export interface SignalHttpRateLimitOptions {
 export interface SignalHttpRateLimits {
   query?: SignalHttpRateLimitOptions;
   mutation?: SignalHttpRateLimitOptions;
+  /** Shared custom store constructor for multi-instance deployments. */
+  store?: RateLimitPluginOptions["store"];
+  /** ioredis-compatible client for the plugin built-in distributed store. */
+  redis?: RateLimitPluginOptions["redis"];
+  nameSpace?: string;
+  keyGenerator?: RateLimitPluginOptions["keyGenerator"];
+  skipOnError?: boolean;
 }
 
 function resolveRateLimit(
@@ -48,12 +56,21 @@ export function registerSignalHttpRoutes(
   const queryRateLimit = resolveRateLimit(options.rateLimits?.query, 120);
   const mutationRateLimit = resolveRateLimit(options.rateLimits?.mutation, 60);
 
-  // Limits are per-process by default. Multi-replica deployments must supply
-  // a shared Redis store or enforce equivalent limits at a trusted edge.
+  if (options.rateLimits?.store && options.rateLimits?.redis) {
+    throw new RangeError("Configure either a custom rate-limit store or Redis, not both.");
+  }
+
+  // The plugin defaults to a process-local store. Supply a shared Redis client
+  // or custom store constructor when multiple instances must share counters.
   app.register(rateLimit, {
     global: false,
     max: 1_000,
     timeWindow: 60_000,
+    ...(options.rateLimits?.store ? { store: options.rateLimits.store } : {}),
+    ...(options.rateLimits?.redis ? { redis: options.rateLimits.redis } : {}),
+    ...(options.rateLimits?.nameSpace ? { nameSpace: options.rateLimits.nameSpace } : {}),
+    ...(options.rateLimits?.keyGenerator ? { keyGenerator: options.rateLimits.keyGenerator } : {}),
+    skipOnError: options.rateLimits?.skipOnError ?? false,
     errorResponseBuilder: (_request, context) => ({
       ok: false,
       error: {
@@ -61,7 +78,7 @@ export function registerSignalHttpRoutes(
         message: "Request rate limit exceeded.",
         category: "rate_limit",
         retryable: true,
-        details: { retryAfterSeconds: context.ttlInSeconds },
+        details: { retryAfterSeconds: Math.ceil(context.ttl / 1000) },
       },
     }),
   });
