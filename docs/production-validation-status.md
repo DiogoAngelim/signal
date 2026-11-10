@@ -11,7 +11,7 @@ This document is the release gate for Signal itself. A passing package build or 
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
 - Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key. The PostgreSQL audit-ledger adapter persists contiguous entries and checkpoints, serializes append operations, and uses append-only triggers plus default privilege revocation.
 - The runtime public entrypoint exports resilience, audit-chain, outbox, and versioned replay-evidence primitives.
-- The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
+- The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction. A separate PostgreSQL consumer inbox atomically deduplicates at-least-once deliveries with the consumer's own PostgreSQL side effects.
 - The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
 - The runtime refuses to dispatch emitted events for an idempotent mutation when the storage adapter lacks the transactional outbox capability.
 - The in-memory adapter implements the same contract for deterministic tests; it is not durable.
@@ -22,7 +22,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | Concern | Current guarantee | Production limitation |
 |---|---|---|
 | Replay | Idempotency replay returns a stored result; explicit replay evidence can persist versioned inputs, policy/handler identity, captured external reads, and result fingerprints; replayWithEvidence verifies compatibility and result equivalence | Every runtime execution is not automatically captured; applications must explicitly snapshot all decision-relevant reads and supply a pure handler; cross-version historical execution and external side-effect reproduction are not certified |
-| Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery | Migration must be applied; worker must run continuously; consumer deduplication and external side-effect idempotency remain mandatory |
+| Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery; transactional consumer inbox commits deduplication identity with consumer PostgreSQL side effects | Apply migrations 0001/0002/0008 and run workers; third-party side effects still require destination idempotency or reconciliation |
 | Idempotency | PostgreSQL and in-memory adapters support expiring reservation leases, renewal, atomic reclaim, and stale-owner fencing | Cross-region consistency and external side-effect idempotency remain adapter-specific |
 | Audit chain | Supplied entries can be checked for internal hash-chain consistency | A chain is not immutable if an attacker can rewrite the full history and trusted head |
 | In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |
@@ -43,7 +43,7 @@ Do not label Signal production-certified until the following evidence exists:
    - [x] Provide a PostgreSQL dispatcher with lease/claim, retry, dead-letter, and acknowledgement semantics.
    - [x] Add PostgreSQL integration tests for atomic commit/rollback, lease recovery, acknowledgement ownership, and dead-lettering (executed in CI when database service is available).
    - [x] Run a real RabbitMQ child-process SIGKILL simulation after publish and before acknowledgement; reclaim the lease, republish, and verify consumer inbox deduplication in CI. This validates the tested boundary, not every possible instruction-level crash point.
-   - [ ] Require consumer idempotency for at-least-once delivery. Do not claim exactly-once external side effects.
+   - [x] Provide a PostgreSQL transactional consumer inbox that commits the deduplication key with consumer database side effects; test rollback, redelivery, and concurrent independent adapters.\n   - [ ] Require destination idempotency or reconciliation for third-party side effects. Do not claim exactly-once external side effects.
 
 2. **Replay completeness**
    - [x] Define a versioned replay evidence envelope binding operation/version, handler artifact digest, policy version, canonical input, external-read snapshots, and result fingerprints.
