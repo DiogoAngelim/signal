@@ -59,7 +59,7 @@ const capabilities: Capability[] = [
 
 ];
 
-export async function runEvaluation(options: { benchmark?: BenchmarkReport & { baseline?: BenchmarkReport } } = {}): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityScore: QualityScorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
+export async function runEvaluation(options: { benchmark?: BenchmarkReport & { baseline?: BenchmarkReport }; includePostgres?: boolean } = {}): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityScore: QualityScorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
   const results: ScenarioResult[] = [];
   const capabilityResults = capabilities.map((item) => ({ ...item, scenarios: [...item.scenarios] }));
   const run = async (id: string, title: string, fn: (assert: (condition: unknown, message: string) => void) => Promise<void>) => {
@@ -207,7 +207,7 @@ export async function runEvaluation(options: { benchmark?: BenchmarkReport & { b
     const authorized = await runtime.mutation<{ action: string }, { accepted: boolean }>("lab.authorization.probe.v1", { action: "write" }, { idempotencyKey: "authorized", auth: { actor: { id: "operator", roles: ["lab:write"] } } });
     a(authorized.ok && authorized.result.accepted, "authorized actor should execute mutation");
   });
-  if (process.env.DATABASE_URL) {
+  if (process.env.DATABASE_URL && options.includePostgres !== false) {
     await run("postgres-integration", "PostgreSQL adapters preserve transactional delivery and shared coordination", async (a) => {
       const connectionString = process.env.DATABASE_URL as string;
       const suffix = randomUUID();
@@ -337,7 +337,7 @@ export async function runEvaluation(options: { benchmark?: BenchmarkReport & { b
       }
     });
   } else {
-    results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", target: "signal", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
+    results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", target: "signal", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["PostgreSQL adapter integration was not run in this evaluation; schema-mutating production database tests are intentionally disabled."] });
   }
   await run("agency-learning", "Agency calibration, learning and self-diagnosis require adequate outcome evidence", async (a) => {
     const pipeline = createAgencyPipeline({
