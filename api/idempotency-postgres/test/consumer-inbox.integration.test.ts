@@ -13,6 +13,8 @@ integration("PostgreSQL transactional consumer inbox", () => {
   let second: ReturnType<typeof createPostgresConsumerInbox>;
   const tenantId = "tenant-inbox-" + randomUUID();
   const consumerName = "inbox-test-" + randomUUID();
+  let roleName: string;
+  let scopedConnectionString: string;
 
   beforeAll(async () => {
     const migration = await readFile(
@@ -26,12 +28,26 @@ integration("PostgreSQL transactional consumer inbox", () => {
         created_at timestamptz NOT NULL DEFAULT clock_timestamp()
       )
     `);
+    const suffix = randomUUID().replaceAll("-", "");
+    roleName = "signal_inbox_test_" + suffix;
+    const password = randomUUID().replaceAll("-", "");
+    await admin.query(`CREATE ROLE "${roleName}" LOGIN PASSWORD '${password}'`);
+    const databaseName = decodeURIComponent(new URL(connectionString!).pathname.slice(1));
+    const quotedDatabaseName = '"' + databaseName.replaceAll('"', '""') + '"';
+    await admin.query(`GRANT CONNECT ON DATABASE ${quotedDatabaseName} TO "${roleName}"`);
+    await admin.query(`GRANT USAGE ON SCHEMA public TO "${roleName}"`);
+    await admin.query(`GRANT INSERT ON signal_consumer_inbox TO "${roleName}"`);
+    await admin.query(`GRANT INSERT ON signal_inbox_test_side_effects TO "${roleName}"`);
+    const scopedUrl = new URL(connectionString!);
+    scopedUrl.username = roleName;
+    scopedUrl.password = password;
+    scopedConnectionString = scopedUrl.toString();
     first = createPostgresConsumerInbox({
-      connectionString: connectionString!,
+      connectionString: scopedConnectionString,
       applicationName: "signal-consumer-inbox-integration-a",
     });
     second = createPostgresConsumerInbox({
-      connectionString: connectionString!,
+      connectionString: scopedConnectionString,
       applicationName: "signal-consumer-inbox-integration-b",
     });
   });
@@ -40,13 +56,17 @@ integration("PostgreSQL transactional consumer inbox", () => {
     if (first) await first.close();
     if (second) await second.close();
     await admin.query("DELETE FROM signal_consumer_inbox WHERE tenant_id = $1 AND consumer_name = $2", [tenantId, consumerName]);
-    await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", [consumerName + ":%"]);
+    await admin.query("DELETE FROM signal_inbox_test_side_effects WHERE effect_key LIKE $1", [tenantId + ":" + consumerName + ":%"]);
+    if (roleName) {
+      await admin.query(`DROP OWNED BY "${roleName}"`);
+      await admin.query(`DROP ROLE "${roleName}"`);
+    }
     await admin.end();
   });
 
   it("commits inbox identity with database side effects and suppresses redelivery", async () => {
     const messageId = "message-" + randomUUID();
-    const effectKey = consumerName + ":" + messageId;
+    const effectKey = tenantId + ":" + consumerName + ":" + messageId;
     const handler = vi.fn(async (transaction: PoolClient) => {
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
@@ -92,7 +112,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
   it("admits exactly one handler across concurrent independent adapters", async () => {
     const messageId = "concurrent-" + randomUUID();
     const effectKey = consumerName + ":" + messageId;
-    const handler = vi.fn(async (transaction) => {
+    const handler = vi.fn(async (transaction: PoolClient) => {
       await transaction.query("SELECT pg_sleep(0.05)");
       await transaction.query(
         "INSERT INTO signal_inbox_test_side_effects (effect_key) VALUES ($1)",
@@ -100,8 +120,8 @@ integration("PostgreSQL transactional consumer inbox", () => {
       );
     });
     const outcomes = await Promise.all([
-      first.processOnce({ consumerName, messageId }, handler),
-      second.processOnce({ consumerName, messageId }, handler),
+      first.processOnce({ tenantId, consumerName, messageId }, handler),
+      second.processOnce({ tenantId, consumerName, messageId }, handler),
     ]);
     expect(outcomes.filter((outcome) => outcome.status === "processed")).toHaveLength(1);
     expect(outcomes.filter((outcome) => outcome.status === "duplicate")).toHaveLength(1);
