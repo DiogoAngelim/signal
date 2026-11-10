@@ -72,7 +72,7 @@ describe("executeWithRetry", () => {
       sleep: async () => {},
     })).resolves.toBe("third");
     expect(third).toHaveBeenCalledTimes(2);
-    expect(budget.snapshot().available).toBe(0);
+    expect((await budget.snapshot()).available).toBe(0);
   });
 
   it("rejects invalid retry budget configuration and non-monotonic clocks", () => {
@@ -129,7 +129,7 @@ describe("executeWithRetry", () => {
       random: () => 0.5,
       sleep: async (delay) => { now += delay; },
     })).rejects.toBeInstanceOf(RetryDeadlineExceededError);
-    expect(budget.snapshot().available).toBe(1);
+    expect((await budget.snapshot()).available).toBe(1);
     expect(operation).toHaveBeenCalledOnce();
   });
 
