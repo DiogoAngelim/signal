@@ -29,7 +29,9 @@ export function createDistributedCircuitBreakerController(
   },
 ): DistributedCircuitBreakerController {
   if (!port) throw new Error("A distributed circuit breaker port is required.");
-  if (!key.trim()) throw new RangeError("Circuit breaker key is required.");
+  if (!key.trim() || key.length > 512) {
+    throw new RangeError("Circuit breaker key must contain 1-512 characters.");
+  }
   if (!Number.isSafeInteger(config.threshold) || config.threshold < 1) {
     throw new RangeError("Circuit breaker threshold must be a positive integer.");
   }
