@@ -1,6 +1,7 @@
 import { randomUUID } from "node:crypto";
 import { spawn } from "node:child_process";
 import { once } from "node:events";
+import { createRequire } from "node:module";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { createPostgresTransactionalStore } from "../src/transactional-store";
@@ -10,6 +11,7 @@ const brokerUrl = process.env.SIGNAL_RABBITMQ_MANAGEMENT_URL;
 const brokerUser = process.env.SIGNAL_RABBITMQ_USER ?? "signal";
 const brokerPassword = process.env.SIGNAL_RABBITMQ_PASSWORD ?? "signal-simulation-only";
 const queueName = "signal-production-simulation";
+const pgModulePath = createRequire(new URL("../package.json", import.meta.url)).resolve("pg");
 const integration = describe.skipIf(!connectionString || !brokerUrl);
 
 async function publish(envelope: unknown, messageId: string): Promise<void> {
@@ -88,7 +90,7 @@ integration("real worker process SIGKILL boundary", () => {
     });
 
     const childScript = `
-      const { Pool } = require("pg");
+      const { Pool } = require(process.env.SIGNAL_PG_MODULE_PATH);
       const { randomUUID } = require("node:crypto");
       (async () => {
         const pool = new Pool({ connectionString: process.env.SIGNAL_TEST_DATABASE_URL });
@@ -129,6 +131,7 @@ integration("real worker process SIGKILL boundary", () => {
       cwd: process.cwd(),
       env: {
         ...process.env,
+        SIGNAL_PG_MODULE_PATH: pgModulePath,
         SIGNAL_CHILD_WORKER_ID: workerId,
         SIGNAL_CHILD_MESSAGE_ID: messageId,
         SIGNAL_SIMULATION_QUEUE: queueName,
@@ -203,7 +206,7 @@ integration("real worker process SIGKILL boundary", () => {
         authorization: `Basic ${Buffer.from(`${brokerUser}:${brokerPassword}`).toString("base64")}`,
         "content-type": "application/json",
       },
-      body: JSON.stringify({ count: 20, ackmode: "ack_requeue_false", encoding: "auto", truncate: 50000 }),
+      body: JSON.stringify({ count: 100, ackmode: "ack_requeue_false", encoding: "auto", truncate: 50000 }),
     });
     const messages = await deliveries.json() as Array<{ payload: string }>;
     const duplicates = messages.filter((item) => {
