@@ -11,11 +11,11 @@ let parsed=0;
 for(const block of blocks){
   const severity=block.match(/│\s*(critical|high|moderate|low)\s*│/i)?.[1]?.toLowerCase();
   const packageName=block.match(/│ Package\s+│\s+([^│]+?)\s+│/)?.[1]?.trim();
-  const path=block.match(/│ Paths\s+│\s+([^│]+?)\s+│/)?.[1]?.trim();
-  if(!severity||!packageName||!path) continue;
+  const corePath=block.match(/(?:api|packages|server)__[^\\s│]+/)?.[0];
+  if(!severity||!packageName) continue;
   parsed+=1;
-  if(/^(api|packages|server)__/.test(path) && ["critical","high"].includes(severity)){
-    findings.push({severity,packageName,path});
+  if(corePath && ["critical","high"].includes(severity)){
+    findings.push({severity,packageName,path:corePath});
   }
 }
 if(parsed===0 && /vulnerabilities found/i.test(output)){
