@@ -132,13 +132,16 @@ export function createReplayEvidenceRecord(input: ReplayEvidenceInput): ReplayEv
 export function verifyReplayEvidenceRecord(record: ReplayEvidenceRecord): boolean {
   try {
     if (
+      !record ||
       record.schemaVersion !== 1 ||
-      !record.tenantId ||
-      !record.executionId ||
-      !record.operationName ||
-      !record.operationVersion ||
-      !record.policyVersion ||
-      !Number.isFinite(Date.parse(record.capturedAt))
+      typeof record.tenantId !== "string" || !record.tenantId.trim() ||
+      typeof record.executionId !== "string" || !record.executionId.trim() ||
+      typeof record.operationName !== "string" || !record.operationName.trim() ||
+      typeof record.operationVersion !== "string" || !record.operationVersion.trim() ||
+      typeof record.policyVersion !== "string" || !record.policyVersion.trim() ||
+      typeof record.capturedAt !== "string" ||
+      !Number.isFinite(Date.parse(record.capturedAt)) ||
+      !Array.isArray(record.externalReads)
     ) return false;
     requireDigest(record.handlerArtifactDigest, "handlerArtifactDigest");
     requireDigest(record.inputFingerprint, "inputFingerprint");
@@ -147,7 +150,14 @@ export function verifyReplayEvidenceRecord(record: ReplayEvidenceRecord): boolea
     if (fingerprint(record.result) !== record.resultFingerprint) return false;
     const keys = new Set<string>();
     for (const read of record.externalReads) {
-      if (!read.key || keys.has(read.key) || !Number.isFinite(Date.parse(read.observedAt))) return false;
+      if (
+        !read ||
+        typeof read.key !== "string" ||
+        !read.key.trim() ||
+        keys.has(read.key) ||
+        typeof read.observedAt !== "string" ||
+        !Number.isFinite(Date.parse(read.observedAt))
+      ) return false;
       keys.add(read.key);
       requireDigest(read.valueFingerprint, "external read fingerprint");
       if (fingerprint(read.value) !== read.valueFingerprint) return false;
