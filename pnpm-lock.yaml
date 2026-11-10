@@ -60,7 +60,7 @@ overrides:
   node-fetch@<2.7.0: 2.7.0
   form-data@>=4.0.0 <4.0.6: 4.0.6
   axios@<1.20.0: 1.20.0
-  node-forge@<=1.4.0: 1.4.1
+  node-forge@<=1.4.2: 1.4.3
   follow-redirects@<1.16.2: 1.16.2
   body-parser@<2.4.0: 2.4.0
   zod@<4.6.6: 4.6.6
@@ -2591,8 +2591,8 @@ packages:
       encoding:
         optional: true
 
-  node-forge@1.4.1:
-    resolution: {integrity: sha512-w5/MfWaeMrpR/5ba6fZyAUTLSuE6aYz7H/3cYrqwZEmf5eQS3IaaLgJt4MBv7HglGFWmV22K8h4U18RJQmw/ow==}
+  node-forge@1.4.3:
+    resolution: {integrity: sha512-P6wzfh6t70avmV8FrVEAd/36sOPJQ+hkaJVX1Laap9J/77m7M0eyozDvc8SwnDf4P7MP94gwbAAo0rg3YVXT+g==}
     engines: {node: '>= 6.13.0'}
 
   node-releases@2.0.63:
@@ -4989,14 +4989,14 @@ snapshots:
     dependencies:
       whatwg-url: 5.0.0
 
-  node-forge@1.4.1: {}
+  node-forge@1.4.3: {}
 
   node-releases@2.0.63: {}
 
   nubank-api@3.1.1(uuid@11.1.1):
     dependencies:
       axios: 1.20.0
-      node-forge: 1.4.1
+      node-forge: 1.4.3
       uuid: 11.1.1
     transitivePeerDependencies:
       - debug
