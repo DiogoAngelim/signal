@@ -99,8 +99,15 @@ try {
   }
   publishWallTimeMs = performance.now() - publishStarted;
 
-  const queueAfterPublish = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
-  queueDepthAtPublishCompletion = Number(queueAfterPublish.messages_ready ?? 0);
+  const queueReadyStarted = performance.now();
+  let queueAfterPublish;
+  for (let attempt = 0; attempt < 50; attempt += 1) {
+    queueAfterPublish = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
+    queueDepthAtPublishCompletion = Number(queueAfterPublish.messages_ready ?? 0);
+    if (queueDepthAtPublishCompletion === messages) break;
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+  const queueReadyWaitMs = performance.now() - queueReadyStarted;
   if (queueDepthAtPublishCompletion !== messages) {
     throw new Error(`Expected ${messages} ready messages, found ${queueDepthAtPublishCompletion}`);
   }
@@ -167,6 +174,7 @@ try {
       publishWallTimeMs,
       publishMessagesPerSecond: messages / (publishWallTimeMs / 1000),
       queueDepthAtPublishCompletion,
+      queueReadyWaitMs,
       consumedMessages: consumed,
       deliveryAge: stats(deliveryLatencies),
       backlogDrainMs,
