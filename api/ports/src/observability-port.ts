@@ -25,7 +25,8 @@ export type RuntimeLifecycleEvent =
   | "error.occurred"
   | "subscriber.delivered"
   | "subscriber.failed"
-  | "subscriber.deduped";
+  | "subscriber.deduped"
+  | "subscriber.coalesced";
 
 /**
  * Context provided with each observability event.
