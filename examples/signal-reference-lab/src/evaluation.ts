@@ -406,9 +406,11 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       item.scenarios = ["replay-evidence", "postgres-integration"];
       item.evidence = "Content-addressed record verification and tenant-scoped PostgreSQL replay evidence persistence are exercised."; 
     }
-    if (item.id === "memory.lifecycle" && postgresPassed) {
-      item.scenarios = ["lifecycle", "postgres-integration"];
-      item.evidence = "In-memory lifecycle plus NeonPostgresAdapter decision/review persistence and retrieval are exercised."; 
+    if (item.id === "memory.lifecycle") {
+      item.scenarios = postgresPassed ? ["lifecycle", "postgres-integration"] : ["lifecycle"];
+      item.evidence = postgresPassed
+        ? "In-memory lifecycle plus NeonPostgresAdapter decision/review persistence and retrieval are exercised."
+        : "In-memory decision records and reviews are exercised; PostgreSQL persistence remains unverified."; 
     }
   }
   const cliPassed = results.some((item) => item.id === "signal-cli" && item.status === "passed");
@@ -417,6 +419,14 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     cliCapability.status = cliPassed ? "exercised" : "not-verified";
     cliCapability.scenarios = cliPassed ? ["signal-cli"] : [];
     cliCapability.evidence = cliPassed ? "The standalone Signal CLI verify command passed against the checked-in proof state." : "The standalone Signal CLI binary was not built or did not pass verification.";
+  }
+  for (const item of capabilityResults) {
+    if (item.status === "not-verified" || item.status === "not-applicable") continue;
+    const observed = item.scenarios.map((id) => results.find((result) => result.id === id)).filter((result): result is ScenarioResult => Boolean(result));
+    const passedScenarios = observed.filter((result) => result.status === "passed").length;
+    const nonPassingScenarios = observed.filter((result) => result.status !== "passed").length;
+    if (observed.length === 0 || passedScenarios === 0) item.status = "not-verified";
+    else if (nonPassingScenarios > 0) item.status = "partial";
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
