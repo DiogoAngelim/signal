@@ -22,7 +22,7 @@ This document is the release gate for Signal itself. A passing package build or 
 |---|---|---|
 | Replay | Same idempotency key and fingerprint can return the stored result | External state and side effects are not recreated |
 | Event delivery | PostgreSQL adapter atomically persists result + outbox records; dispatcher provides leased at-least-once delivery | Migration must be applied; worker must run continuously; consumer deduplication and external side-effect idempotency remain mandatory |
-| Idempotency | StoragePort can reserve, complete, and fail an operation | Pending-record lease expiry/recovery and cross-region consistency are adapter-specific |
+| Idempotency | PostgreSQL and in-memory adapters support expiring reservation leases, renewal, atomic reclaim, and stale-owner fencing | Cross-region consistency and external side-effect idempotency remain adapter-specific |
 | Audit chain | Supplied entries can be checked for internal hash-chain consistency | A chain is not immutable if an attacker can rewrite the full history and trusted head |
 | In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |
 | Distributed circuit breaker | PostgreSQL-backed shared state, atomic half-open lease, renewable UUID token, and stale-owner fencing | Multi-region database availability and coordination-database outage behavior are not certified |
@@ -58,9 +58,12 @@ Do not label Signal production-certified until the following evidence exists:
    - [ ] Test full-history rewrite and checkpoint substitution attacks against the deployed checkpoint store.
 
 4. **Distributed resilience**
-   - Use a shared coordination mechanism if one circuit-breaker state must span replicas.
-   - Define retry budgets, total deadlines, cancellation behavior, and per-operation retryability.
-   - Verify that retries cannot repeat non-idempotent side effects.
+   - [x] Implement permit-scoped in-memory circuit-breaker outcomes with stale-generation fencing and renewable half-open probe leases.
+   - [x] Implement PostgreSQL-backed distributed breaker coordination with expiring probe tokens and fencing across independent adapters.
+   - [x] Test single-probe admission, lease renewal/expiry, stale-owner rejection, and configuration consistency.
+   - [ ] Validate multi-region database availability, coordination-store outages, and failover under deployment-specific conditions.
+   - [ ] Define retry budgets, total deadlines, cancellation behavior, and per-operation retryability.
+   - [ ] Verify that retries cannot repeat non-idempotent side effects.
 
 5. **Statistical and learning governance**
    - [x] Exclude missing and duplicate trace IDs from calibration/drift/learning cohorts and expose exclusion counts.
@@ -76,10 +79,10 @@ Do not label Signal production-certified until the following evidence exists:
    - Prove telemetry exporter failure cannot take down decision execution.
 
 7. **Load, chaos, and recovery validation**
-   - Publish reproducible benchmark scripts, workload distributions, environment details, and raw results.
-   - Test sustained load, bursts, concurrency races, memory pressure, database outage, network partitions, process termination, and recovery.
-   - Set budgets from measured production requirements rather than inherited estimates.
-   - Verify backup restore and disaster-recovery objectives.
+   - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, and PostgreSQL idempotency/outbox.
+   - [x] Exercise bounded concurrency, half-open races, PostgreSQL failure/recovery, Toxiproxy network faults, RabbitMQ delivery ambiguity, process termination, and database backup/restore in CI simulations.
+   - [ ] Measure sustained production load, long-duration memory trends, managed-database contention, and deployment-specific recovery objectives.
+   - [ ] Set production budgets from measured service requirements rather than CI runner estimates.
 
 ## Current completion boundary
 
