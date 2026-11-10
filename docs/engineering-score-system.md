@@ -308,6 +308,13 @@ every measurement.
 - Correctness of retry-after and rate-limit response headers.
 - Shared-store consistency and failover behavior when a distributed store is configured.
 
+### In-memory circuit-breaker permit safety
+- Stale closed-state permits are rejected after the breaker generation changes.
+- Only the current half-open probe permit can close or reopen the breaker.
+- Probe lease renewal, expiry, and late-completion fencing are verified.
+- Closed-state permit acquisition and outcome p50/p95/p99 and throughput are measured across concurrency levels.
+- Sampled peak heap/RSS and CPU are recorded under the same workload.
+
 ### Distributed circuit-breaker coordination
 - Half-open probe grants per eligible cooldown cycle; the required invariant is exactly one.
 - Stale probe-token completion rejection after lease expiry and takeover.
