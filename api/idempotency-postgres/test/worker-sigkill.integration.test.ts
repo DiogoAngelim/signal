@@ -37,6 +37,16 @@ integration("real worker process SIGKILL boundary", () => {
   const store = createPostgresTransactionalStore({ connectionString: connectionString! });
 
   beforeAll(async () => {
+    const queueResponse = await fetch(new URL(`api/queues/%2F/${queueName}`, brokerUrl), {
+      method: "PUT",
+      headers: {
+        authorization: `Basic ${Buffer.from(`${brokerUser}:${brokerPassword}`).toString("base64")}`,
+        "content-type": "application/json",
+      },
+      body: JSON.stringify({ durable: true, auto_delete: false, arguments: {} }),
+    });
+    if (!queueResponse.ok) throw new Error(`RabbitMQ queue setup failed: ${await queueResponse.text()}`);
+
     const migrationDirectory = new URL("../src/drizzle/migrations/", import.meta.url);
     const { readFile } = await import("node:fs/promises");
     await admin.query(await readFile(new URL("0000_initial.sql", migrationDirectory), "utf8"));
