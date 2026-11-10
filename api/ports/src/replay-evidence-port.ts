@@ -34,5 +34,8 @@ export interface ReplayEvidencePort {
   /** Persist immutable evidence. Repeating the same execution ID and content is idempotent. */
   save(record: ReplayEvidenceRecord): Promise<void>;
   /** Load one immutable execution record, or null when it does not exist. */
-  get(input: { readonly tenantId: string; readonly executionId: string }): Promise<ReplayEvidenceRecord | null>;
+  get(input: {
+    readonly tenantId: string;
+    readonly executionId: string;
+  }): Promise<ReplayEvidenceRecord | null>;
 }
