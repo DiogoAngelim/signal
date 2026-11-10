@@ -85,16 +85,22 @@ integration("PostgreSQL immutable replay evidence store", () => {
     expect(await restartedStore.get({ tenantId, executionId })).toEqual(record);
     await restartedStore.close();
 
-    const conflictingBase = {
-      ...record,
+    const conflicting = createReplayEvidenceRecord({
+      tenantId,
+      executionId,
+      operationName: "decision.assess.v1",
+      operationVersion: "1",
+      handlerArtifactDigest: "a".repeat(64),
+      policyVersion: "policy-1",
+      canonicalInput: { amount: 25, currency: "USD" },
+      externalReads: [{
+        key: "risk-score:customer-1",
+        value: { score: 0.12 },
+        observedAt: "2026-11-10T10:00:00.000Z",
+      }],
       result: { accepted: false },
-      resultFingerprint: fingerprint({ accepted: false }),
-    };
-    const { recordFingerprint: _originalFingerprint, ...conflictingUnsigned } = conflictingBase;
-    const conflicting = {
-      ...conflictingUnsigned,
-      recordFingerprint: fingerprint(conflictingUnsigned),
-    };
+      capturedAt: "2026-11-10T10:00:01.000Z",
+    });
     await expect(store.save(conflicting)).rejects.toThrow("different content");
 
     const mutation = await admin.query(
