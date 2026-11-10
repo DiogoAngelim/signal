@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@signal/sdk-node": "workspace:*",
+    "@signal/binding-http": "workspace:*",
     "@signal/agency": "workspace:*",
     "@signal/decision": "workspace:*",
     "@signal/decision-memory": "workspace:*",
