@@ -4,7 +4,6 @@ import { readdir, readFile } from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
-const require=createRequire(import.meta.url);
 const dbRequire=createRequire(new URL("../api/idempotency-postgres/package.json",import.meta.url));
 const {Pool}=dbRequire("pg");
 const connectionString=process.env.SIGNAL_TEST_DATABASE_URL??process.env.DATABASE_URL;
