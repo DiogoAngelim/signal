@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - "examples/signal-reference-lab/**"
+      - "signal-cli/**"
       - "api/**"
       - "packages/**"
       - "pnpm-lock.yaml"
@@ -53,6 +54,12 @@ jobs:
           for migration in api/idempotency-postgres/src/drizzle/migrations/*.sql; do
             psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
           done
+      - name: Build and verify Signal CLI
+        run: |
+          npm ci --prefix signal-cli
+          npm run build --prefix signal-cli
+          npm run verify --prefix signal-cli
+          echo "SIGNAL_CLI_READY=1" >> "$GITHUB_ENV"
       - run: pnpm --filter @signal/reference-lab... build
       - run: pnpm --filter @signal/reference-lab test
       - run: pnpm --filter @signal/reference-lab coverage:verify
