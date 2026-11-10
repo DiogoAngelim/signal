@@ -69,10 +69,13 @@ The outbox provides **durable at-least-once delivery**, not exactly-once
 delivery. Signal provides createPostgresConsumerInbox from
 `@signal/idempotency-postgres` as a transactional consumer-side deduplication
 adapter. Apply `0008_transactional_consumer_inbox.sql` and wrap the consumer's
-database writes in `processOnce({ consumerName, messageId }, handler)`. The
-inbox identity and the handler's PostgreSQL side effects commit or roll back
-in one transaction. All replicas of a consumer must use the same consumerName
-and messageId namespace. If a consumer performs its side effect and the dispatcher crashes
+database writes in
+`processOnce({ tenantId, consumerName, messageId }, handler)`. The tenant ID
+must come from the trusted authenticated principal. PostgreSQL row-level
+security scopes inbox rows to that tenant; all replicas of a consumer must use
+the same consumerName and messageId namespace within the tenant. The inbox
+identity and the handler's PostgreSQL side effects commit or roll back in one
+transaction. If a consumer performs its side effect and the dispatcher crashes
 before acknowledging the event, the event is delivered again. Every consumer
 that performs a non-idempotent side effect must deduplicate using the stable
 `envelope.messageId` in the same transaction as its own side effect.
