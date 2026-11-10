@@ -63,6 +63,19 @@ describe("Prometheus metrics recorder", () => {
     expect(recorder.droppedSeriesCount()).toBe(1);
   });
 
+  it("counts every rendered histogram series against the cardinality cap", () => {
+    const recorder = createPrometheusMetricsRecorder({
+      maxSeries: 4,
+      histogramBucketsMs: [10, 100],
+    });
+    recorder.timing("signal.execution.duration_ms", 5, {
+      operation_kind: "query",
+      execution_mode: "live",
+    });
+    expect(recorder.seriesCount()).toBe(0);
+    expect(recorder.droppedSeriesCount()).toBe(1);
+  });
+
   it("validates histogram bucket configuration", () => {
     expect(() => createPrometheusMetricsRecorder({
       histogramBucketsMs: [10, 10],
