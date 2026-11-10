@@ -3,18 +3,81 @@ import { createHash } from "node:crypto";
 import { Pool, type PoolClient } from "pg";
 
 function stableJson(value: unknown): string {
-  if (value === null || typeof value !== "object") {
-    const encoded = JSON.stringify(value);
-    if (encoded === undefined) throw new Error("Replay evidence must contain JSON values only.");
-    return encoded;
+  if (value === null || typeof value === "string" || typeof value === "boolean") {
+    return JSON.stringify(value);
+  }
+  if (typeof value === "number") {
+    if (!Number.isFinite(value)) throw new TypeError("Replay evidence requires finite JSON numbers.");
+    return Object.is(value, -0) ? "0" : JSON.stringify(value);
   }
   if (Array.isArray(value)) return "[" + value.map(stableJson).join(",") + "]";
-  const record = value as Record<string, unknown>;
-  return "{" + Object.keys(record).sort().map((key) => JSON.stringify(key) + ":" + stableJson(record[key])).join(",") + "}";
+  if (typeof value === "object") {
+    const prototype = Object.getPrototypeOf(value);
+    if (prototype !== Object.prototype && prototype !== null) {
+      throw new TypeError("Replay evidence supports plain JSON objects only.");
+    }
+    const record = value as Record<string, unknown>;
+    return "{" + Object.keys(record).sort().map((key) => {
+      const descriptor = Object.getOwnPropertyDescriptor(record, key);
+      if (!descriptor || !("value" in descriptor) || descriptor.value === undefined) {
+        throw new TypeError("Replay evidence does not support accessors or undefined values.");
+      }
+      return JSON.stringify(key) + ":" + stableJson(descriptor.value);
+    }).join(",") + "}";
+  }
+  throw new TypeError("Replay evidence contains a non-JSON value.");
 }
 
 function fingerprintJson(value: unknown): string {
   return createHash("sha256").update(stableJson(value)).digest("hex");
+}
+
+function isNonEmptyString(value: unknown): value is string {
+  return typeof value === "string" && value.trim().length > 0;
+}
+
+function isDigest(value: unknown): value is string {
+  return typeof value === "string" && /^[a-f0-9]{64}$/.test(value);
+}
+
+function isValidRecord(value: unknown): value is ReplayEvidenceRecord {
+  try {
+    if (typeof value !== "object" || value === null) return false;
+    const record = value as ReplayEvidenceRecord;
+    if (
+      record.schemaVersion !== 1 ||
+      !isNonEmptyString(record.tenantId) ||
+      !isNonEmptyString(record.executionId) ||
+      !isNonEmptyString(record.operationName) ||
+      !isNonEmptyString(record.operationVersion) ||
+      !isDigest(record.handlerArtifactDigest) ||
+      !isNonEmptyString(record.policyVersion) ||
+      !isDigest(record.inputFingerprint) ||
+      !isDigest(record.resultFingerprint) ||
+      typeof record.capturedAt !== "string" ||
+      !Number.isFinite(Date.parse(record.capturedAt)) ||
+      !Array.isArray(record.externalReads) ||
+      fingerprintJson(record.canonicalInput) !== record.inputFingerprint ||
+      fingerprintJson(record.result) !== record.resultFingerprint
+    ) return false;
+
+    const keys = new Set<string>();
+    for (const read of record.externalReads) {
+      if (
+        typeof read !== "object" || read === null ||
+        !isNonEmptyString(read.key) ||
+        keys.has(read.key) ||
+        !isDigest(read.valueFingerprint) ||
+        typeof read.observedAt !== "string" ||
+        !Number.isFinite(Date.parse(read.observedAt)) ||
+        fingerprintJson(read.value) !== read.valueFingerprint
+      ) return false;
+      keys.add(read.key);
+    }
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 async function withTenant<T>(
@@ -22,7 +85,7 @@ async function withTenant<T>(
   tenantId: string,
   operation: (client: PoolClient) => Promise<T>,
 ): Promise<T> {
-  if (!tenantId.trim()) throw new Error("tenantId is required.");
+  if (!isNonEmptyString(tenantId)) throw new Error("tenantId is required.");
   const client = await pool.connect();
   try {
     await client.query("BEGIN");
@@ -61,25 +124,7 @@ export function createPostgresReplayEvidenceStore(
 
   return {
     async save(record: ReplayEvidenceRecord): Promise<void> {
-      if (
-        record.schemaVersion !== 1 ||
-        !record.tenantId.trim() ||
-        !record.executionId.trim() ||
-        !record.operationName.trim() ||
-        !record.operationVersion.trim() ||
-        !/^[a-f0-9]{64}$/.test(record.handlerArtifactDigest) ||
-        !record.policyVersion.trim() ||
-        !/^[a-f0-9]{64}$/.test(record.inputFingerprint) ||
-        !/^[a-f0-9]{64}$/.test(record.resultFingerprint) ||
-        !Number.isFinite(Date.parse(record.capturedAt)) ||
-        fingerprintJson(record.canonicalInput) !== record.inputFingerprint ||
-        fingerprintJson(record.result) !== record.resultFingerprint ||
-        record.externalReads.some((read) =>
-          !/^[a-f0-9]{64}$/.test(read.valueFingerprint) ||
-          fingerprintJson(read.value) !== read.valueFingerprint ||
-          !Number.isFinite(Date.parse(read.observedAt)),
-        )
-      ) {
+      if (!isValidRecord(record)) {
         throw new Error("Invalid replay evidence record or content fingerprint.");
       }
 
@@ -103,24 +148,33 @@ export function createPostgresReplayEvidenceStore(
         );
         if (inserted.rowCount === 1) return;
 
-        const existing = await client.query<{ record: ReplayEvidenceRecord }>(
+        const existing = await client.query<{ record: unknown }>(
           "SELECT record FROM signal_replay_evidence WHERE tenant_id = $1 AND execution_id = $2",
           [record.tenantId, record.executionId],
         );
-        if (!existing.rows[0] || stableJson(existing.rows[0].record) !== stableJson(record)) {
-          throw new Error("Replay evidence execution ID already exists with different content.");
+        if (
+          !existing.rows[0] ||
+          !isValidRecord(existing.rows[0].record) ||
+          stableJson(existing.rows[0].record) !== stableJson(record)
+        ) {
+          throw new Error("Replay evidence execution ID already exists with different or invalid content.");
         }
       });
     },
 
     async get(input): Promise<ReplayEvidenceRecord | null> {
-      if (!input.executionId.trim()) throw new Error("executionId is required.");
+      if (!isNonEmptyString(input.executionId)) throw new Error("executionId is required.");
       return withTenant(pool, input.tenantId, async (client) => {
-        const result = await client.query<{ record: ReplayEvidenceRecord }>(
+        const result = await client.query<{ record: unknown }>(
           "SELECT record FROM signal_replay_evidence WHERE tenant_id = $1 AND execution_id = $2",
           [input.tenantId, input.executionId],
         );
-        return result.rows[0]?.record ?? null;
+        const record = result.rows[0]?.record;
+        if (record === undefined) return null;
+        if (!isValidRecord(record) || record.tenantId !== input.tenantId || record.executionId !== input.executionId) {
+          throw new Error("Persisted replay evidence failed tenant, schema, or content-integrity verification.");
+        }
+        return record;
       });
     },
 
