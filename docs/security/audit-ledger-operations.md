@@ -27,7 +27,8 @@ anchoring.
 Apply migrations in numeric order through 0005_append_only_audit_ledger.sql
 for the audit ledger. If using the replay evidence store, also apply
 0006_immutable_replay_evidence.sql before granting access to
-signal_replay_evidence. Run migrations as a dedicated schema owner, not as the
+signal_replay_evidence. Apply 0007_shared_retry_budgets.sql before using the
+PostgreSQL retry-budget adapter. Run migrations as a dedicated schema owner, not as the
 application runtime role. Do not let application processes execute DDL.
 
 ## Least-privilege application role
@@ -53,7 +54,7 @@ read-only audit, and checkpoint anchoring.
 
 ## Runtime wiring
 
-    import { createPostgresAuditLedger } from "@signal/idempotency-postgres";
+    import { createPostgresAuditLedger, createPostgresRetryBudget } from "@signal/idempotency-postgres";
     import { verifyAuditChainEntry, verifyAuditCheckpoint } from "@signal/runtime";
 
     const ledger = createPostgresAuditLedger({
@@ -76,6 +77,15 @@ latestCheckpoint verifies the stored signature through the configured
 trusted-key callback before returning a checkpoint. The caller must still
 verify the checkpoint against an independently retained chain head and trust
 anchor. Close the adapter during graceful shutdown.
+
+For retries that must be budgeted across replicas, use
+createPostgresRetryBudget with a stable shared budgetKey, capacity, and refill
+rate. Apply migration 0007 first and inject the returned adapter into
+executeWithRetry as retryBudget. All replicas sharing a fleet-wide allowance
+must use the same key and coordination database. This performs a database
+round trip for each retry; choose a low-latency coordination database and
+define a fail-closed response for its outage. Close the budget adapter during
+graceful shutdown.
 
 The adapter verifies each returned entry's schema and content hash, sequence,
 and linkage to the preceding persisted entry (including the predecessor for
