@@ -22,7 +22,10 @@ export type RuntimeLifecycleEvent =
   | "idempotency.hit"
   | "idempotency.reserved"
   | "idempotency.conflict"
-  | "error.occurred";
+  | "error.occurred"
+  | "subscriber.delivered"
+  | "subscriber.failed"
+  | "subscriber.deduped";
 
 /**
  * Context provided with each observability event.
