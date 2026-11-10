@@ -75,6 +75,7 @@ export function registerSignalHttpRoutes(
       ...(options.rateLimits?.keyGenerator ? { keyGenerator: options.rateLimits.keyGenerator } : {}),
       skipOnError: options.rateLimits?.skipOnError ?? false,
       errorResponseBuilder: (_request, context) => ({
+        statusCode: 429,
         ok: false,
         error: {
           code: "RATE_LIMIT_EXCEEDED",
