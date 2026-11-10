@@ -55,6 +55,14 @@ jobs:
           pnpm --filter @signal/binding-http test
           pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false
           pnpm --filter @signal/reference-server typecheck
+      - name: Build, test, and typecheck affected example applications
+        run: |
+          pnpm --filter @signal/aware build
+          pnpm --filter @signal/aware test
+          pnpm --filter @signal/aware typecheck
+          pnpm --filter @signal/liquidity-manager build
+          pnpm --filter @signal/liquidity-manager test
+          pnpm --filter @signal/liquidity-manager typecheck
       - name: Verify dependency audit parser fixtures
         run: node scripts/check-core-audit.test.mjs
       - name: Collect full production dependency audit
