@@ -5,7 +5,7 @@ This document is the release gate for Signal itself. A passing package build or 
 ## Source-level controls implemented
 
 - Retry delay is capped exponential backoff; full jitter is available with an injectable random source.
-- Retry and circuit-breaker configuration is validated. Retry execution supports bounded attempts, capped exponential backoff, full jitter, absolute deadlines, caller cancellation, and an injectable shared token-bucket retry budget that limits aggregate retry amplification.
+- Retry and circuit-breaker configuration is validated. Retry execution supports bounded attempts, capped exponential backoff, full jitter, absolute deadlines, caller cancellation, and an injectable retry-budget port. The in-memory token bucket supports single-process deployments; the PostgreSQL adapter provides atomic cross-process consumption for replicas sharing one budget key.
 - The in-memory circuit-breaker controller issues opaque, generation-scoped permits; stale outcomes cannot close a newer breaker generation, and half-open probe leases can be renewed or reclaimed after expiry.
 - The PostgreSQL distributed circuit-breaker adapter coordinates a single half-open probe across independent adapter instances with expiring UUID fencing tokens.
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
@@ -28,7 +28,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |
 | Distributed circuit breaker | PostgreSQL-backed shared state, atomic half-open lease, renewable UUID token, and stale-owner fencing | Multi-region database availability and coordination-database outage behavior are not certified |
 | HTTP abuse limits | Independent query/mutation quotas, structured HTTP 429 responses, configurable shared Redis/custom store | Default store is process-local; actual Redis/network failover and trusted proxy identity require deployment validation |
-| Retry | Capped exponential backoff, full jitter, bounded attempt count, absolute deadline, caller cancellation, per-operation retryable error codes, and shared in-process token-bucket retry budget | The budget is process-local, not coordinated across replicas; operations must honor AbortSignal; deadlines cannot undo committed side effects; destination idempotency remains mandatory |
+| Retry | Capped exponential backoff, full jitter, bounded attempt count, absolute deadline, caller cancellation, per-operation retryable error codes, in-process token bucket, and PostgreSQL atomic shared token bucket | PostgreSQL coordination adds a database round trip per retry; the coordination database must remain available; operations must honor AbortSignal; deadlines cannot undo committed side effects; destination idempotency remains mandatory |
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
 | Observability | Runtime emits start/completion/error lifecycle events; failed query, mutation, and event executions include duration and error code; unknown, ambiguous, and unsupported runtime commands emit timed error observations. Subscriber handlers emit delivered/failed outcomes with duration and sanitized error codes; replay-safe subscriptions emit separate deduplication and in-flight coalescing observations. A built-in low-cardinality metrics adapter maps lifecycle events to execution, event, subscriber, and error counters plus duration samples, separating live/replay/unspecified execution modes and bounded error sources; a bounded in-memory recorder and bounded asynchronous exporter buffer expose dropped-event and export-failure counters. Metric labels exclude operation names, request identifiers, payloads, and error codes. | The buffer is process-local and best-effort; it does not provide durable delivery, aggregation, cardinality enforcement, alerting, or retention guarantees. Subscriber deduplication observations cover replay-safe subscriptions only. A deployment must supply and validate its exporter, backend, labels, sampling, retention, and alert policies. |
@@ -90,7 +90,7 @@ Do not label Signal production-certified until the following evidence exists:
 
 ## Current completion boundary
 
-Signal now provides source-level retry budgets, versioned replay-evidence records,
+Signal now provides process-local and PostgreSQL-coordinated retry budgets, versioned replay-evidence records,
 immutable PostgreSQL replay persistence, deterministic replay validation,
 append-only PostgreSQL audit storage, signed checkpoint primitives, a bounded
 observability exporter, and queue-health metrics. The core packages and
@@ -107,8 +107,7 @@ custody, and independently administered trust registries remain deployment
 requirements. Replay capture is explicit: each consuming application must
 capture all decision-relevant external reads and retain compatible historical
 handler artifacts. The runtime does not automatically capture arbitrary
-external I/O. Retry budgets are process-local; fleet-wide coordination remains
-deployment-specific.
+external I/O. PostgreSQL retry budgets can coordinate replicas sharing one database and budget key; the adapter fails closed when the coordination store is unavailable. Cross-region coordination latency and availability remain deployment-specific.
 
 The RabbitMQ benchmark uses the ephemeral broker management API; it is not an
 application AMQP client benchmark or production broker certification. The new
