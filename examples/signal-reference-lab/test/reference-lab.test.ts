@@ -13,6 +13,8 @@ test("reference lab executes lifecycle and safety scenarios", async () => {
   assert.equal(postgres?.status, process.env.DATABASE_URL ? "passed" : "blocked");
   const cli = report.results.find((item) => item.id === "signal-cli");
   assert.equal(cli?.status, cliReady ? "passed" : "blocked");
+  assert.equal(report.capabilities.find((item) => item.id === "postgres.transactions")?.status, process.env.DATABASE_URL ? "exercised" : "not-verified");
+  assert.equal(report.capabilities.find((item) => item.id === "cli.signal-verification")?.status, cliReady ? "exercised" : "not-verified");
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
 });
 
