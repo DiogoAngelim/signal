@@ -1,0 +1,36 @@
+name: Signal Reference Lab
+on:
+  pull_request:
+    paths:
+      - "examples/signal-reference-lab/**"
+      - "api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+      - ".github/workflows/reference-lab.yml"
+  push:
+    branches: [main]
+    paths:
+      - "examples/signal-reference-lab/**"
+      - "api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+jobs:
+  reference-lab:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @signal/reference-lab... build
+      - run: pnpm --filter @signal/reference-lab test
+      - run: pnpm --filter @signal/reference-lab coverage:verify
