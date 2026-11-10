@@ -14,7 +14,7 @@ The workflow exercises:
 - `@signal/semantic-state`: generic-state lexicon interpretation;
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
 
-The evaluation harness runs thirteen deterministic scenarios:
+The evaluation harness runs fourteen deterministic scenarios:
 - end-to-end request, evidence, assessment, decision, approved action and outcome;
 - evidence hard-stop and action authorization;
 - tenant isolation;
@@ -23,7 +23,8 @@ The evaluation harness runs thirteen deterministic scenarios:
 - audit-chain integrity and signed checkpoint verification;
 - replay-evidence integrity;
 - retry-budget and circuit-breaker recovery;
-- PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger.
+- PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger;
+- bounded Prometheus counters and latency histograms.
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
 
