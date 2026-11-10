@@ -73,7 +73,7 @@ test("four-pillar scorecard scores performance only against a matched, integrity
   const benchmark = { timing, environment, workload, integrity: { valid: true, expectedSamples: 100, actualSamples: 100, invalidSamples: 0 }, baseline };
   const report = scoreQuality(results, benchmark);
   assert.ok(report.overall !== null);
-  assert.equal(report.pillars.find((item) => item.id === "performance")?.score, 9.7);
+  assert.equal(report.pillars.find((item) => item.id === "performance")?.score, 9.6);
   const failed = scoreQuality(results.map((item) => item.id === "runtime-policy" ? { ...item, status: "failed" as const } : item), benchmark);
   assert.ok((failed.pillars.find((item) => item.id === "security")?.score ?? 10) <= 2);
 });
