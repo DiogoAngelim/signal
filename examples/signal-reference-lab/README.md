@@ -31,7 +31,7 @@ The evaluation harness runs sixteen deterministic scenarios:
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
 
-It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references. With `DATABASE_URL` configured, the PostgreSQL scenario also exercises durable idempotency/outbox, inbox deduplication, shared retry budgets, distributed circuit breakers, decision-memory persistence, replay-evidence storage and append-only audit checkpoints. Without a database, that scenario is explicitly marked blocked and those capabilities are not credited.
+It emits machine-readable scenario results, separate Signal/integration/reference-app quality gates, capability status, a weighted Signal engineering scorecard and evidence references. With `DATABASE_URL` configured, the PostgreSQL scenario also exercises durable idempotency/outbox, inbox deduplication, shared retry budgets, distributed circuit breakers, decision-memory persistence, replay-evidence storage and append-only audit checkpoints. Without a database, that scenario is explicitly marked blocked and those capabilities are not credited.
 
 ## Run
 
@@ -100,7 +100,7 @@ A capability is not credited merely because a package exists. Each status must b
 
 The scorecard uses the engineering dimensions and weights established for Signal: functional correctness 18%, reliability/resilience 16%, performance/resources 12%, architecture 14%, security/integrity 12%, maintainability 10%, testing 8%, developer experience 6%, and operability 4%. Each dimension includes evidence and confidence. Capability status contributes 1.0 for exercised, 0.5 for partial and 0 for unverified; blocked scenarios do not count as passes. Performance remains neutral until production-like measurement; operability is bounded by observed telemetry coverage. Missing measurements are not treated as proof of either zero cost or excellent performance.
 
-The score is for the reference integration and its harness, not a certification score for the Signal product. Application defects, harness defects, infrastructure constraints and Signal package defects must be attributed separately.
+The score measures Signal engineering capabilities demonstrated through the reference lab; it is not a product certification or production-readiness claim. Signal-targeted scenarios drive the score. Reference-app and integration quality gates are reported separately, and failures are not automatically attributed to Signal.
 
 ## Boundaries and next integration gates
 
