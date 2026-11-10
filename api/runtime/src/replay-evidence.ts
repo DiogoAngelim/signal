@@ -36,6 +36,7 @@ export interface ReplayEvidenceInput {
 }
 
 export interface ReplayCompatibilityIdentity {
+  readonly tenantId: string;
   readonly operationName: string;
   readonly operationVersion: string;
   readonly handlerArtifactDigest: string;
@@ -172,6 +173,7 @@ export async function replayWithEvidence<TResult extends ReplayJsonValue>(
     throw new ReplayEvidenceIntegrityError("Replay evidence failed structural or digest verification.");
   }
   if (
+    identity.tenantId !== record.tenantId ||
     identity.operationName !== record.operationName ||
     identity.operationVersion !== record.operationVersion ||
     identity.handlerArtifactDigest !== record.handlerArtifactDigest ||
