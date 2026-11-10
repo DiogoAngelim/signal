@@ -124,6 +124,8 @@ export interface SignalRuntimeOptions {
   runtimeName?: string;
   /** Execution mode (live, replay, audit) */
   mode?: RuntimeMode;
+  /** Require a trusted auth context and an authorize policy on every mutation. */
+  requireMutationAuthorization?: boolean;
   /** Bindings configuration for capabilities */
   bindings?: SignalCapabilities["bindings"];
 }
@@ -154,6 +156,7 @@ export class SignalRuntime implements SignalBinding {
   readonly mode: RuntimeMode;
   readonly isReplay: boolean;
   private readonly bindings: SignalCapabilities["bindings"];
+  private readonly requireMutationAuthorization: boolean;
   private readonly subscriptions: Array<{
     name: string;
     consumerId?: string;
@@ -172,6 +175,7 @@ export class SignalRuntime implements SignalBinding {
     this.observabilityPort = options.observabilityPort;
     this.runtimeName = options.runtimeName ?? "signal-node-reference";
     this.mode = options.mode ?? "live";
+    this.requireMutationAuthorization = options.requireMutationAuthorization ?? false;
     this.isReplay = this.mode === "replay" || this.mode === "audit";
     this.bindings = options.bindings ?? {
       inProcess: true,
@@ -313,6 +317,7 @@ export class SignalRuntime implements SignalBinding {
         meta: request.meta,
       }),
       request.idempotencyKey,
+      this.requireMutationAuthorization,
     );
 
     const durationMs = Date.now() - startedAt;

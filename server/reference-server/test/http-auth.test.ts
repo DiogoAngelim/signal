@@ -21,7 +21,7 @@ describe("reference HTTP authentication resolver", () => {
     } as never)).toEqual({
       actor: { id: "ops_alice", type: "operator", roles: ["payments"] },
       subject: "tenant:tenant_acme",
-      scopes: ["payment:capture", "payment:read", "tenant:tenant_acme"],
+      scopes: ["payment:capture", "payment:read", "posts:publish", "tenant:tenant_acme"],
     });
   });
 });

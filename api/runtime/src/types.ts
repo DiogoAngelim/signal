@@ -93,6 +93,10 @@ export interface SignalOperationDefinition<
     input: TInput,
     context: SignalExecutionContext,
   ): Promise<TResult> | TResult;
+  authorize?(
+    input: TInput,
+    context: SignalExecutionContext,
+  ): Promise<void> | void;
   idempotency?: "required" | "optional" | "none";
   description?: string;
   inputSchemaId?: string;
@@ -110,10 +114,6 @@ export interface SignalMutationDefinition<TInput = unknown, TResult = unknown>
   extends SignalOperationDefinition<TInput, TResult> {
   kind: "mutation";
   idempotency: "required" | "optional" | "none";
-  authorize?(
-    input: TInput,
-    context: SignalExecutionContext,
-  ): Promise<void> | void;
 }
 
 export interface SignalEventDefinition<TInput = unknown, TResult = unknown>
