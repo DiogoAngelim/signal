@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createAuditChainEntry, verifyChain } from "./audit-chain";
+import { createAuditChainEntry, verifyAuditChainEntry, verifyChain } from "./audit-chain";
 
 describe("audit chain verification", () => {
   it("verifies a correctly linked sequence", () => {
@@ -44,6 +44,17 @@ describe("audit chain verification", () => {
     expect(verifyChain([{ ...entry, hash: "not-a-hash" }])).toBe(false);
     expect(verifyChain([{ ...entry, timestamp: "not-a-date" }])).toBe(false);
     expect(verifyChain([{ ...entry, operationName: "changed" }])).toBe(false);
+  });
+
+  it("verifies a single entry hash independently of its chain position", () => {
+    const entry = createAuditChainEntry(null, {
+      operationName: "operation.v1",
+      operationKind: "mutation",
+      messageId: "message-single",
+      outcome: "completed",
+    });
+    expect(verifyAuditChainEntry(entry)).toBe(true);
+    expect(verifyAuditChainEntry({ ...entry, outcome: "failed" })).toBe(false);
   });
 
   it("treats an empty chain as valid", () => {
