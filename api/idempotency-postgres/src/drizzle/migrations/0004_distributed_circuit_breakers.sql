@@ -7,6 +7,7 @@ CREATE TABLE IF NOT EXISTS signal_circuit_breakers (
     CHECK (state IN ('closed', 'open', 'half-open')),
   threshold integer NOT NULL CHECK (threshold > 0),
   reset_timeout_ms integer NOT NULL CHECK (reset_timeout_ms >= 0),
+  probe_lease_ms integer NOT NULL CHECK (probe_lease_ms >= 1000),
   probe_token uuid,
   probe_expires_at timestamptz,
   updated_at timestamptz NOT NULL DEFAULT now(),
