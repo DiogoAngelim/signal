@@ -1,5 +1,7 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
-import { resolve } from "node:path";
+import { join, resolve } from "node:path";
+import { tmpdir } from "node:os";
+import { cp, mkdtemp, rm } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { createAuditChainEntry, verifyChain, verifyAuditChainEntry, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
 import { z } from "zod";
@@ -376,16 +378,23 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   if (process.env.SIGNAL_CLI_READY === "1") {
     await run("signal-cli", "Signal CLI verify, replay, test, build and audit commands preserve proof integrity", async (a) => {
       const cliDirectory = resolve(process.cwd(), "../../signal-cli");
-      const commands: Array<{ args: string[]; expected: string }> = [
-        { args: ["verify"], expected: "verified successfully" },
-        { args: ["replay"], expected: "no mismatches detected" },
-        { args: ["test", "--command", "node -e \"process.exit(0)\""], expected: "Test wrapper completed successfully" },
-        { args: ["build", "--command", "node -e \"process.exit(0)\"", "--output", "reference-lab-no-output"], expected: "Build wrapper completed successfully" },
-        { args: ["audit"], expected: "Overall:            PASS" },
-      ];
-      for (const command of commands) {
-        const output = execFileSync(process.execPath, ["dist/cli/index.js", ...command.args], { cwd: cliDirectory, encoding: "utf8" });
-        a(output.includes(command.expected), "Signal CLI command should report success: " + command.args[0]);
+      const isolatedDirectory = await mkdtemp(join(tmpdir(), "signal-reference-cli-"));
+      try {
+        await cp(resolve(cliDirectory, "dist"), resolve(isolatedDirectory, "dist"), { recursive: true });
+        await cp(resolve(cliDirectory, ".signal"), resolve(isolatedDirectory, ".signal"), { recursive: true });
+        const commands: Array<{ args: string[]; expected: string }> = [
+          { args: ["verify"], expected: "verified successfully" },
+          { args: ["replay"], expected: "no mismatches detected" },
+          { args: ["test", "--command", "node -e \"process.exit(0)\""], expected: "Test wrapper completed successfully" },
+          { args: ["build", "--command", "node -e \"process.exit(0)\"", "--output", "reference-lab-no-output"], expected: "Build wrapper completed successfully" },
+          { args: ["audit"], expected: "Overall:            PASS" },
+        ];
+        for (const command of commands) {
+          const output = execFileSync(process.execPath, ["dist/cli/index.js", ...command.args], { cwd: isolatedDirectory, encoding: "utf8" });
+          a(output.includes(command.expected), "Signal CLI command should report success: " + command.args[0]);
+        }
+      } finally {
+        await rm(isolatedDirectory, { recursive: true, force: true });
       }
     });
   } else {
