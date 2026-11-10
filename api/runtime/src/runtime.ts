@@ -216,13 +216,70 @@ export class SignalRuntime implements SignalBinding {
       description: options.description,
     });
 
+    const observedHandler = async (envelope: SignalEnvelope): Promise<void> => {
+      const startedAt = Date.now();
+      try {
+        await handler(envelope);
+        this.emitObservation({
+          event: "subscriber.delivered",
+          operationName: name,
+          operationKind: "event",
+          messageId: envelope.messageId,
+          correlationId: envelope.context?.correlationId,
+          traceId: envelope.context?.traceId,
+          durationMs: Math.max(0, Date.now() - startedAt),
+          outcome: "completed",
+          isReplay: this.isReplay,
+        });
+      } catch (error) {
+        const failure = toSignalFailure(
+          error,
+          "INTERNAL_ERROR",
+          "Subscriber handler failed",
+        );
+        const context = {
+          operationName: name,
+          operationKind: "event",
+          messageId: envelope.messageId,
+          correlationId: envelope.context?.correlationId,
+          traceId: envelope.context?.traceId,
+          durationMs: Math.max(0, Date.now() - startedAt),
+          outcome: "failed",
+          isReplay: this.isReplay,
+        };
+        this.emitObservation({
+          event: "subscriber.failed",
+          ...context,
+          meta: { errorCode: failure.code },
+        });
+        this.emitObservation({
+          event: "error.occurred",
+          ...context,
+          meta: { errorCode: failure.code, source: "subscriber" },
+        });
+        throw error;
+      }
+    };
+
     const subscriber =
       options.replaySafe || options.deduper
-        ? createReplaySafeSubscriber(handler, {
+        ? createReplaySafeSubscriber(observedHandler, {
             consumerId: options.consumerId,
             deduper: options.deduper,
+            onDeduplicated: (envelope, reason) => {
+              this.emitObservation({
+                event: reason === "in-flight" ? "subscriber.coalesced" : "subscriber.deduped",
+                operationName: name,
+                operationKind: "event",
+                messageId: envelope.messageId,
+                correlationId: envelope.context?.correlationId,
+                traceId: envelope.context?.traceId,
+                outcome: reason,
+                isReplay: this.isReplay,
+              });
+            },
           })
-        : handler;
+        : observedHandler;
 
     return this.eventPort.subscribe(name, subscriber);
   }
@@ -275,6 +332,14 @@ export class SignalRuntime implements SignalBinding {
         outcome: "completed",
         isReplay: this.isReplay,
       });
+    } else {
+      this.emitExecutionFailure(
+        name,
+        "query",
+        startedAt,
+        request,
+        result.error.code,
+      );
     }
 
     return result;
@@ -335,6 +400,14 @@ export class SignalRuntime implements SignalBinding {
         outcome: "completed",
         isReplay: this.isReplay,
       });
+    } else {
+      this.emitExecutionFailure(
+        name,
+        "mutation",
+        startedAt,
+        request,
+        result.error.code,
+      );
     }
 
     return result;
@@ -355,9 +428,11 @@ export class SignalRuntime implements SignalBinding {
       });
     }
 
+    const startedAt = Date.now();
     const kinds = this.findRegisteredKinds(name);
 
     if (kinds.length === 0) {
+      this.emitCommandFailure(name, "unknown", startedAt, "OPERATION_NOT_FOUND");
       return createExecuteFailure(
         "OPERATION_NOT_FOUND",
         `Unknown operation: ${name}`,
@@ -368,6 +443,7 @@ export class SignalRuntime implements SignalBinding {
     }
 
     if (kinds.length > 1) {
+      this.emitCommandFailure(name, "ambiguous", startedAt, "AMBIGUOUS_OPERATION_KIND");
       return createExecuteFailure(
         "AMBIGUOUS_OPERATION_KIND",
         `Operation kind is ambiguous for ${name}; pass options.kind to run it explicitly.`,
@@ -392,6 +468,7 @@ export class SignalRuntime implements SignalBinding {
   async execute<TData = unknown>(
     input: SignalExecuteInput,
   ): Promise<SignalExecuteResult<TData>> {
+    const startedAt = Date.now();
     const request = toExecuteRequest(input.context, input.meta);
 
     switch (input.kind) {
@@ -435,18 +512,6 @@ export class SignalRuntime implements SignalBinding {
             normalizedRequest,
           );
 
-          this.emitObservation({
-            event: "event.emitted",
-            operationName: input.name,
-            operationKind: "event",
-            messageId: envelope.messageId,
-            correlationId: normalizedRequest.correlationId,
-            traceId: normalizedRequest.traceId,
-            durationMs: Date.now() - startedAt,
-            outcome: "completed",
-            isReplay: this.isReplay,
-          });
-
           return {
             ok: true,
             data: envelope as TData,
@@ -463,26 +528,33 @@ export class SignalRuntime implements SignalBinding {
             ),
           };
         } catch (error) {
-          if (error instanceof ZodError) {
-            return toExecuteFailure(
-              toSignalFailure(
-                {
-                  code: "VALIDATION_ERROR",
-                  message: error.message,
-                  details: { issues: error.issues },
-                },
-                "VALIDATION_ERROR",
-                "Event payload validation failed",
-              ),
-            );
-          }
+          const failure =
+            error instanceof ZodError
+              ? toSignalFailure(
+                  {
+                    code: "VALIDATION_ERROR",
+                    message: error.message,
+                    details: { issues: error.issues },
+                  },
+                  "VALIDATION_ERROR",
+                  "Event payload validation failed",
+                )
+              : toSignalFailure(
+                  error,
+                  "INTERNAL_ERROR",
+                  "Event publish failed",
+                );
 
-          return toExecuteFailure(
-            toSignalFailure(error, "INTERNAL_ERROR", "Event publish failed"),
-          );
+          return toExecuteFailure(failure);
         }
       }
       default:
+        this.emitCommandFailure(
+          input.name,
+          String(input.kind),
+          startedAt,
+          "UNSUPPORTED_OPERATION_KIND",
+        );
         return createExecuteFailure(
           "UNSUPPORTED_OPERATION_KIND",
           `Unsupported operation kind: ${String(input.kind)}`,
@@ -494,31 +566,82 @@ export class SignalRuntime implements SignalBinding {
     }
   }
 
-  publish<TPayload>(
+  async publish<TPayload>(
     name: string,
     payload: TPayload,
     request: Partial<SignalExecutionContext["request"]> = {},
   ): Promise<SignalEnvelope<TPayload>> {
-    return dispatchEvent(
-      this.registry,
-      this.eventPort,
-      name,
-      payload,
-      createDefaultContext({
+    const startedAt = Date.now();
+    this.emitObservation({
+      event: "execution.start",
+      operationName: name,
+      operationKind: "event",
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      isReplay: this.isReplay,
+    });
+
+    try {
+      const envelope = await dispatchEvent(
+        this.registry,
+        this.eventPort,
+        name,
+        payload,
+        createDefaultContext({
+          correlationId: request.correlationId,
+          causationId: request.causationId,
+          traceId: request.traceId,
+          trace: request.trace,
+          idempotencyKey: request.idempotencyKey,
+          deadlineAt: request.deadlineAt,
+          abortSignal: request.abortSignal,
+          delivery: request.delivery,
+          source: request.source,
+          auth: request.auth,
+          meta: request.meta,
+        }),
+        request.meta,
+      );
+      const durationMs = Math.max(0, Date.now() - startedAt);
+      this.emitObservation({
+        event: "execution.end",
+        operationName: name,
+        operationKind: "event",
+        messageId: envelope.messageId,
         correlationId: request.correlationId,
-        causationId: request.causationId,
         traceId: request.traceId,
-        trace: request.trace,
-        idempotencyKey: request.idempotencyKey,
-        deadlineAt: request.deadlineAt,
-        abortSignal: request.abortSignal,
-        delivery: request.delivery,
-        source: request.source,
-        auth: request.auth,
-        meta: request.meta,
-      }),
-      request.meta,
-    );
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
+      this.emitObservation({
+        event: "event.emitted",
+        operationName: name,
+        operationKind: "event",
+        messageId: envelope.messageId,
+        correlationId: request.correlationId,
+        traceId: request.traceId,
+        durationMs,
+        outcome: "completed",
+        isReplay: this.isReplay,
+      });
+      return envelope;
+    } catch (error) {
+      const failure =
+        error instanceof ZodError
+          ? toSignalFailure(
+              {
+                code: "VALIDATION_ERROR",
+                message: error.message,
+                details: { issues: error.issues },
+              },
+              "VALIDATION_ERROR",
+              "Event payload validation failed",
+            )
+          : toSignalFailure(error, "INTERNAL_ERROR", "Event publish failed");
+      this.emitExecutionFailure(name, "event", startedAt, request, failure.code);
+      throw error;
+    }
   }
 
   capabilities(): SignalCapabilities {
@@ -536,6 +659,52 @@ export class SignalRuntime implements SignalBinding {
 
   lock(): void {
     this.registry.lock();
+  }
+
+  private emitCommandFailure(
+    operationName: string,
+    operationKind: string,
+    startedAt: number,
+    errorCode: string,
+  ): void {
+    this.emitObservation({
+      event: "error.occurred",
+      operationName,
+      operationKind,
+      durationMs: Math.max(0, Date.now() - startedAt),
+      outcome: "failed",
+      isReplay: this.isReplay,
+      meta: { errorCode, source: "command-dispatch" },
+    });
+  }
+
+  private emitExecutionFailure(
+    operationName: string,
+    operationKind: string,
+    startedAt: number,
+    request: Partial<SignalExecutionContext["request"]>,
+    errorCode: string,
+  ): void {
+    const durationMs = Math.max(0, Date.now() - startedAt);
+    const context = {
+      operationName,
+      operationKind,
+      correlationId: request.correlationId,
+      traceId: request.traceId,
+      durationMs,
+      outcome: "failed",
+      isReplay: this.isReplay,
+    };
+
+    this.emitObservation({
+      event: "execution.end",
+      ...context,
+    });
+    this.emitObservation({
+      event: "error.occurred",
+      ...context,
+      meta: { errorCode },
+    });
   }
 
   private emitObservation(event: ObservabilityContext): void {

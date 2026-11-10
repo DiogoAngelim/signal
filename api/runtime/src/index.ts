@@ -7,6 +7,7 @@ export * from "./event";
 export * from "./hash";
 export * from "./idempotency";
 export * from "./mutation";
+export * from "./observability";
 export * from "./outbox";
 export * from "./perception";
 export * from "./query";

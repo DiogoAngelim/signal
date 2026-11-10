@@ -102,6 +102,111 @@ export interface SignalMetricsRecorder {
   ): void;
 }
 
+/**
+ * Adapts runtime lifecycle observations into bounded, low-cardinality metrics.
+ * Operation names, request identifiers, error messages, and payload data are
+ * deliberately excluded from metric labels.
+ */
+export function createSignalMetricsObservabilityPort(
+  recorder: SignalMetricsRecorder,
+): ObservabilityPort {
+  if (
+    !recorder ||
+    typeof recorder.increment !== "function" ||
+    typeof recorder.timing !== "function"
+  ) {
+    throw new Error("A compatible Signal metrics recorder is required.");
+  }
+
+  const operationKind = (value?: string): string => {
+    if (value === "query" || value === "mutation" || value === "event") {
+      return value;
+    }
+    return "other";
+  };
+
+  return {
+    emit(event) {
+      const labels = {
+        operation_kind: operationKind(event.operationKind),
+        execution_mode:
+          event.isReplay === true
+            ? "replay"
+            : event.isReplay === false
+              ? "live"
+              : "unspecified",
+      };
+      try {
+        switch (event.event) {
+          case "execution.start":
+            recorder.increment("signal.execution.started", 1, labels);
+            break;
+          case "execution.end": {
+            const outcome =
+              event.outcome === "failed"
+                ? "failed"
+                : event.outcome === "replayed"
+                  ? "replayed"
+                  : "completed";
+            recorder.increment(`signal.execution.${outcome}`, 1, labels);
+            if (typeof event.durationMs === "number" && Number.isFinite(event.durationMs)) {
+              recorder.timing("signal.execution.duration_ms", event.durationMs, {
+                ...labels,
+                outcome,
+              });
+            }
+            break;
+          }
+          case "event.emitted":
+            recorder.increment("signal.events.emitted", 1, labels);
+            break;
+          case "subscriber.delivered":
+            recorder.increment("signal.subscribers.delivered", 1, labels);
+            if (typeof event.durationMs === "number" && Number.isFinite(event.durationMs)) {
+              recorder.timing("signal.subscribers.duration_ms", event.durationMs, {
+                ...labels,
+                outcome: "delivered",
+              });
+            }
+            break;
+          case "subscriber.failed":
+            recorder.increment("signal.subscribers.failed", 1, labels);
+            if (typeof event.durationMs === "number" && Number.isFinite(event.durationMs)) {
+              recorder.timing("signal.subscribers.duration_ms", event.durationMs, {
+                ...labels,
+                outcome: "failed",
+              });
+            }
+            break;
+          case "subscriber.deduped":
+            recorder.increment("signal.subscribers.deduplicated", 1, labels);
+            break;
+          case "subscriber.coalesced":
+            recorder.increment("signal.subscribers.coalesced", 1, labels);
+            break;
+          case "error.occurred": {
+            const source =
+              event.meta?.source === "command-dispatch" ||
+              event.meta?.source === "subscriber"
+                ? event.meta.source
+                : "runtime";
+            const errorLabels = { ...labels, source };
+            recorder.increment("signal.errors", 1, errorLabels);
+            if (typeof event.durationMs === "number" && Number.isFinite(event.durationMs)) {
+              recorder.timing("signal.errors.duration_ms", event.durationMs, errorLabels);
+            }
+            break;
+          }
+          default:
+            break;
+        }
+      } catch {
+        // A metrics backend must never change the runtime result.
+      }
+    },
+  };
+}
+
 export interface InMemoryMetricsRecorderOptions {
   /** Maximum number of metric samples retained in memory. Defaults to 10,000. */
   readonly maxMetrics?: number;

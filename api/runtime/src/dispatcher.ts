@@ -50,6 +50,7 @@ export function createReplaySafeSubscriber(
   options: {
     consumerId?: string;
     deduper?: SignalConsumerDeduper;
+    onDeduplicated?: (envelope: SignalEnvelope, reason: "in-flight" | "already-seen") => void;
   } = {},
 ): (envelope: SignalEnvelope) => Promise<void> {
   const consumerId = options.consumerId ?? "signal-replay-safe-consumer";
@@ -60,6 +61,11 @@ export function createReplaySafeSubscriber(
     const key = `${consumerId}:${envelope.messageId}`;
     const current = inFlight.get(key);
     if (current) {
+      try {
+        options.onDeduplicated?.(envelope, "in-flight");
+      } catch {
+        // Instrumentation must never alter delivery behavior.
+      }
       return current;
     }
 
@@ -70,6 +76,11 @@ export function createReplaySafeSubscriber(
         envelope,
       };
       if (deduper.hasSeen && await deduper.hasSeen(dedupeInput)) {
+        try {
+          options.onDeduplicated?.(envelope, "already-seen");
+        } catch {
+          // Instrumentation must never alter delivery behavior.
+        }
         return;
       }
 

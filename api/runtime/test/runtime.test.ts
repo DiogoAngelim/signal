@@ -1208,4 +1208,307 @@ describe("runtime", () => {
       ),
     ).toThrow("Signal registry is locked");
   });
+
+
+
+
+  it("measures unknown and unsupported runtime command rejections", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "observed.ambiguous.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+    runtime.registerEvent(
+      defineEvent({
+        name: "observed.ambiguous.v1",
+        kind: "event",
+        inputSchema: z.object({}),
+        resultSchema: z.object({}),
+        handler: (payload) => payload,
+      }),
+    );
+
+    const unknown = await runtime.run("observed.unknown.v1", {});
+    const ambiguous = await runtime.run("observed.ambiguous.v1", {});
+    const unsupported = await runtime.execute({
+      kind: "unsupported" as never,
+      name: "observed.unsupported.v1",
+      payload: {},
+    });
+
+    expect(unknown.ok).toBe(false);
+    expect(ambiguous.ok).toBe(false);
+    expect(unsupported.ok).toBe(false);
+    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(3);
+    expect(observations.map((item) => item.meta?.errorCode)).toEqual([
+      "OPERATION_NOT_FOUND",
+      "AMBIGUOUS_OPERATION_KIND",
+      "UNSUPPORTED_OPERATION_KIND",
+    ]);
+    expect(observations.every((item) => (item.durationMs ?? -1) >= 0)).toBe(true);
+  });
+
+  it("measures direct event publishing success and failure", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      operationKind?: string;
+      outcome?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    runtime.registerEvent(
+      defineEvent({
+        name: "observed.publish.v1",
+        kind: "event",
+        inputSchema: z.object({ value: z.string() }),
+        resultSchema: z.object({ value: z.string() }),
+        handler: (payload) => payload,
+      }),
+    );
+
+    const envelope = await runtime.publish("observed.publish.v1", { value: "ok" });
+    await expect(runtime.publish("observed.missing.v1", {})).rejects.toMatchObject({
+      code: "UNSUPPORTED_OPERATION",
+    });
+
+    expect(envelope.name).toBe("observed.publish.v1");
+    expect(observations.filter((item) => item.event === "execution.start")).toHaveLength(2);
+    expect(observations.filter((item) => item.event === "execution.end" && item.outcome === "completed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "execution.end" && item.outcome === "failed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "event.emitted")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(1);
+    expect(observations.every((item) => item.operationKind === "event")).toBe(true);
+    expect(observations.filter((item) => item.durationMs !== undefined).every((item) => item.durationMs! >= 0)).toBe(true);
+  });
+
+  it("measures concurrent replay-safe deliveries as coalesced rather than deduped", async () => {
+    const observations: Array<{ event: string }> = [];
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({
+      eventPort,
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    let signalStarted!: () => void;
+    let releaseHandler!: () => void;
+    let handlerCalls = 0;
+    const started = new Promise<void>((resolve) => {
+      signalStarted = resolve;
+    });
+    const gate = new Promise<void>((resolve) => {
+      releaseHandler = resolve;
+    });
+
+    runtime.subscribe(
+      "observed.concurrent.v1",
+      async () => {
+        handlerCalls += 1;
+        signalStarted();
+        await gate;
+      },
+      { replaySafe: true, consumerId: "concurrent-observability-test" },
+    );
+
+    const envelope = ensureEnvelope({
+      kind: "event",
+      name: "observed.concurrent.v1",
+      payload: { value: "one" },
+    });
+    const first = eventPort.dispatch(envelope);
+    await started;
+    const second = eventPort.dispatch(envelope);
+    releaseHandler();
+    await Promise.all([first, second]);
+
+    expect(handlerCalls).toBe(1);
+    expect(observations.filter((item) => item.event === "subscriber.delivered")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.coalesced")).toHaveLength(1);
+    expect(observations.some((item) => item.event === "subscriber.deduped")).toBe(false);
+  });
+
+  it("emits completion and error observations for failed query, mutation, and event executions", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      operationKind?: string;
+      outcome?: string;
+      durationMs?: number;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const runtime = new SignalRuntime({
+      eventPort: createInProcessDispatcher(),
+      storagePort: createMemoryIdempotencyStore(),
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+
+    runtime.registerQuery(
+      defineQuery({
+        name: "observed.query.failure.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => {
+          throw new Error("query failure");
+        },
+      }),
+    );
+    runtime.registerMutation(
+      defineMutation({
+        name: "observed.mutation.failure.v1",
+        kind: "mutation",
+        idempotency: "required",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => {
+          throw new Error("mutation failure");
+        },
+      }),
+    );
+    const eventRuntime = new SignalRuntime({
+      eventPort: {
+        dispatch: async () => {
+          throw new Error("broker unavailable");
+        },
+        subscribe: () => () => undefined,
+      },
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    eventRuntime.registerEvent(
+      defineEvent({
+        name: "observed.event.failure.v1",
+        kind: "event",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: (payload) => payload,
+      }),
+    );
+
+    const query = await runtime.query("observed.query.failure.v1", {});
+    const mutation = await runtime.mutation(
+      "observed.mutation.failure.v1",
+      {},
+      { idempotencyKey: "observed-failure-1" },
+    );
+    const event = await eventRuntime.execute({
+      kind: "event",
+      name: "observed.event.failure.v1",
+      payload: {},
+    });
+
+    expect(query.ok).toBe(false);
+    expect(mutation.ok).toBe(false);
+    expect(event.ok).toBe(false);
+
+    for (const [operationName, operationKind] of [
+      ["observed.query.failure.v1", "query"],
+      ["observed.mutation.failure.v1", "mutation"],
+      ["observed.event.failure.v1", "event"],
+    ]) {
+      const completion = observations.find(
+        (item) =>
+          item.event === "execution.end" &&
+          item.operationName === operationName,
+      );
+      const failure = observations.find(
+        (item) =>
+          item.event === "error.occurred" &&
+          item.operationName === operationName,
+      );
+
+      expect(completion).toMatchObject({
+        operationKind,
+        outcome: "failed",
+      });
+      expect(completion?.durationMs).toEqual(expect.any(Number));
+      expect(completion?.durationMs).toBeGreaterThanOrEqual(0);
+      expect(failure).toMatchObject({
+        operationKind,
+        outcome: "failed",
+        meta: { errorCode: expect.any(String) },
+      });
+    }
+  });
+
+  it("measures subscriber success, failure, retry, and replay deduplication", async () => {
+    const observations: Array<{
+      event: string;
+      operationName?: string;
+      durationMs?: number;
+      outcome?: string;
+      meta?: Record<string, unknown>;
+    }> = [];
+    const eventPort = createInProcessDispatcher();
+    const runtime = new SignalRuntime({
+      eventPort,
+      observabilityPort: {
+        emit: (observation) => observations.push(observation),
+      },
+    });
+    let attempts = 0;
+
+    runtime.subscribe(
+      "observed.subscriber.v1",
+      async () => {
+        attempts += 1;
+        if (attempts === 1) throw new Error("private subscriber detail");
+      },
+      { replaySafe: true, consumerId: "observability-test" },
+    );
+
+    const envelope = ensureEnvelope({
+      kind: "event",
+      name: "observed.subscriber.v1",
+      payload: { value: "one" },
+    });
+
+    await expect(eventPort.dispatch(envelope)).rejects.toThrow(
+      "private subscriber detail",
+    );
+    await eventPort.dispatch(envelope);
+    await eventPort.dispatch(envelope);
+
+    expect(attempts).toBe(2);
+    expect(observations.filter((item) => item.event === "subscriber.failed")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.delivered")).toHaveLength(1);
+    expect(observations.filter((item) => item.event === "subscriber.deduped")).toHaveLength(1);
+    const failed = observations.find((item) => item.event === "subscriber.failed");
+    expect(failed).toMatchObject({
+      operationName: "observed.subscriber.v1",
+      outcome: "failed",
+      meta: { errorCode: expect.any(String) },
+    });
+    expect(failed?.durationMs).toEqual(expect.any(Number));
+    expect(JSON.stringify(observations)).not.toContain("private subscriber detail");
+  });
+
+
 });
