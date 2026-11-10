@@ -68,7 +68,7 @@ jobs:
           echo "SIGNAL_CLI_READY=1" >> "$GITHUB_ENV"
       - name: Build Reference Lab
         id: reference_lab_build
-        run: pnpm --filter @signal/reference-lab exec tsc -p tsconfig.json --noCheck
+        run: pnpm --filter @signal/reference-lab build
       - name: Run Reference Lab tests
         run: node --test examples/signal-reference-lab/dist/test/*.test.js
       - name: Verify Reference Lab coverage
