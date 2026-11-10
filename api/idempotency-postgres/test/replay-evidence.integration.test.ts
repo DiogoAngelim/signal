@@ -3,7 +3,6 @@ import { readFile } from "node:fs/promises";
 import { afterAll, beforeAll, describe, expect, it } from "vitest";
 import { Pool } from "pg";
 import { createReplayEvidenceRecord } from "../../runtime/src/replay-evidence";
-import { fingerprint } from "../../runtime/src/hash";
 import { createPostgresReplayEvidenceStore } from "../src/replay-evidence-store";
 
 const connectionString = process.env.SIGNAL_TEST_DATABASE_URL;
