@@ -2,6 +2,7 @@ import { describe, expect, it } from "vitest";
 import {
   createBufferedObservabilityPort,
   createInMemoryMetricsRecorder,
+  createSignalMetricsObservabilityPort,
 } from "./observability";
 
 describe("in-memory metrics recorder", () => {
@@ -62,6 +63,88 @@ describe("in-memory metrics recorder", () => {
   });
 });
 
+
+
+describe("Signal metrics observability adapter", () => {
+  it("maps execution and subscriber lifecycle events to bounded-cardinality metrics", () => {
+    const recorder = createInMemoryMetricsRecorder();
+    const port = createSignalMetricsObservabilityPort(recorder);
+
+    port.emit({
+      event: "execution.start",
+      operationName: "private.operation.v1",
+      operationKind: "query",
+      correlationId: "private-correlation-id",
+    });
+    port.emit({
+      event: "execution.end",
+      operationName: "private.operation.v1",
+      operationKind: "query",
+      durationMs: 12,
+      outcome: "failed",
+    });
+    port.emit({
+      event: "event.emitted",
+      operationKind: "event",
+    });
+    port.emit({
+      event: "subscriber.delivered",
+      operationKind: "event",
+      durationMs: 4,
+    });
+    port.emit({
+      event: "subscriber.failed",
+      operationKind: "event",
+      durationMs: 8,
+    });
+    port.emit({ event: "subscriber.deduped", operationKind: "event" });
+    port.emit({ event: "subscriber.coalesced", operationKind: "event" });
+    port.emit({
+      event: "error.occurred",
+      operationKind: "unsupported-user-value",
+      meta: { errorCode: "PRIVATE_ERROR_CODE" },
+    });
+
+    const metrics = recorder.snapshot();
+    const names = metrics.map((metric) => metric.name);
+    expect(names).toContain("signal.execution.started");
+    expect(names).toContain("signal.execution.failed");
+    expect(names).toContain("signal.execution.duration_ms");
+    expect(names).toContain("signal.events.emitted");
+    expect(names).toContain("signal.subscribers.delivered");
+    expect(names).toContain("signal.subscribers.failed");
+    expect(names).toContain("signal.subscribers.deduplicated");
+    expect(names).toContain("signal.subscribers.coalesced");
+    expect(names).toContain("signal.errors");
+    expect(metrics.every((metric) => metric.labels.operation_kind !== "unsupported-user-value")).toBe(true);
+    expect(JSON.stringify(metrics)).not.toContain("private.operation.v1");
+    expect(JSON.stringify(metrics)).not.toContain("private-correlation-id");
+    expect(JSON.stringify(metrics)).not.toContain("PRIVATE_ERROR_CODE");
+  });
+
+  it("does not let a failing metrics recorder affect runtime telemetry calls", () => {
+    const port = createSignalMetricsObservabilityPort({
+      increment: () => {
+        throw new Error("metrics backend failed");
+      },
+      gauge: () => {
+        throw new Error("metrics backend failed");
+      },
+      timing: () => {
+        throw new Error("metrics backend failed");
+      },
+    });
+
+    expect(() =>
+      port.emit({
+        event: "execution.end",
+        operationKind: "mutation",
+        durationMs: 10,
+        outcome: "completed",
+      }),
+    ).not.toThrow();
+  });
+});
 
 describe("buffered observability port", () => {
   it("batches events through an exporter and reports bounded-buffer drops", async () => {
