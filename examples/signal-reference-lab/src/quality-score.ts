@@ -159,7 +159,6 @@ export function scoreQuality(
   benchmark?: BenchmarkEvidence,
 ): QualityScorecard {
   const s = (id: string) => scenarioStatus(results, [id]);
-  const c = (id: string) => capabilityStatus(inventory, [id]);
   const correctness = makePillar("correctness", "Correctness", [
     criterion("correctness.contracts", "Input contracts and invalid-input handling", 15, s("invalid-input"), ["Signal rejects malformed operation input."], undefined, true),
     criterion("correctness.lifecycle", "End-to-end operation and state transitions", 20, s("lifecycle"), ["Request, evidence, assessment, decision, action and outcome lifecycle."], undefined, true),
@@ -187,7 +186,7 @@ export function scoreQuality(
   const performance = makePillar("performance", "Performance", performanceCriteria(benchmark));
   const pillars = [correctness, security, performance, reliability];
   const scored = pillars.filter((item) => item.score !== null);
-  const overall = scored.length === pillars.length
+  const overall = scored.length === pillars.length && pillars.every((item) => item.coverage >= 0.55)
     ? Number((scored.reduce((sum, item) => sum + (item.score as number) * item.weight, 0) / 100).toFixed(2))
     : null;
   const overallConfidence = pillars.every((item) => item.confidence === "high") ? "high" : pillars.some((item) => item.confidence === "low") ? "low" : "medium";
