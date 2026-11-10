@@ -6,6 +6,7 @@ describe("distributed runtime circuit breaker controller", () => {
   it("delegates state and forwards the exact probe generation token", async () => {
     const calls: unknown[][] = [];
     let permit: DistributedCircuitBreakerPermit = { allowed: true, probeToken: "probe-generation-1" };
+    let failNextSuccess = false;
     const port: DistributedCircuitBreakerPort = {
       async snapshot(key) {
         calls.push(["snapshot", key]);
@@ -29,6 +30,10 @@ describe("distributed runtime circuit breaker controller", () => {
       },
       async recordSuccess(key, token) {
         calls.push(["recordSuccess", key, token]);
+        if (failNextSuccess) {
+          failNextSuccess = false;
+          throw new Error("temporary database failure");
+        }
         return token === "probe-generation-1";
       },
       async recordFailure(key, config, token, now) {
@@ -44,6 +49,8 @@ describe("distributed runtime circuit breaker controller", () => {
     expect(await controller.tryAcquire()).toBe(false);
     expect(await controller.renewProbe()).toBe(true);
     expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", "probe-generation-1", 15000]);
+    failNextSuccess = true;
+    await expect(controller.recordSuccess()).rejects.toThrow("temporary database failure");
     expect(await controller.recordSuccess()).toBe(true);
     expect(calls.at(-1)).toEqual(["recordSuccess", "provider-a", "probe-generation-1"]);
 
