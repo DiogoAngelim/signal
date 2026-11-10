@@ -51,6 +51,14 @@ integration("PostgreSQL immutable replay evidence store", () => {
     await store.save(record);
     expect(await store.get(executionId)).toEqual(record);
 
+    // A new adapter/pool instance models recovery after the original process exits.
+    const restartedStore = createPostgresReplayEvidenceStore({
+      connectionString: connectionString!,
+      applicationName: "signal-replay-evidence-restart-test",
+    });
+    expect(await restartedStore.get(executionId)).toEqual(record);
+    await restartedStore.close();
+
     const conflicting = {
       ...record,
       result: { accepted: false },
