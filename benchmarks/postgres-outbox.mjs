@@ -29,6 +29,39 @@ async function readDatabaseStats(pool) {
   `);
   return result.rows[0];
 }
+async function captureOutboxClaimPlan(pool, workerId) {
+  const client = await pool.connect();
+  try {
+    await client.query("BEGIN");
+    const result = await client.query(`
+      EXPLAIN (ANALYZE, BUFFERS, FORMAT JSON)
+      WITH candidates AS (
+        SELECT id FROM signal_outbox
+        WHERE (status = 'pending' AND available_at <= now())
+           OR (status = 'processing' AND locked_until <= now())
+        ORDER BY created_at, id
+        FOR UPDATE SKIP LOCKED
+        LIMIT $1
+      )
+      UPDATE signal_outbox AS outbox
+      SET status = 'processing', locked_by = $2,
+          locked_until = now() + ($3 * interval '1 millisecond'),
+          lease_token = gen_random_uuid(),
+          attempts = outbox.attempts + 1
+      FROM candidates
+      WHERE outbox.id = candidates.id
+      RETURNING outbox.id
+    `, [1000, workerId, 30_000]);
+    const plan = result.rows[0]?.["QUERY PLAN"]?.[0] ?? null;
+    await client.query("ROLLBACK");
+    return plan;
+  } catch (error) {
+    try { await client.query("ROLLBACK"); } catch {}
+    throw error;
+  } finally {
+    client.release();
+  }
+}
 async function observeAdapterConnections(pool) {
   const result = await pool.query(`
     SELECT
@@ -111,6 +144,7 @@ try {
         const memoryAfter=process.memoryUsage();
         if(completed!==iterations) throw new Error(`Expected ${iterations} commits, got ${completed}`);
 
+        const outboxClaimQueryPlan=await captureOutboxClaimPlan(cleanupPool,workerId);
         const claimLatencies=[];
         const ackLatencies=[];
         let acknowledged=0;
@@ -144,6 +178,7 @@ try {
           rssBeforeBytes:memoryBefore.rss,rssAfterBytes:memoryAfter.rss,rssDeltaBytes:memoryAfter.rss-memoryBefore.rss,
           poolMaxConnections:10,
           postgresObservation:pgObserved,
+          queryPlans:{outboxClaim:outboxClaimQueryPlan},
           databaseStatsDelta:{
             transactionsCommitted:Number(dbStatsAfter.xact_commit)-Number(dbStatsBefore.xact_commit),
             transactionsRolledBack:Number(dbStatsAfter.xact_rollback)-Number(dbStatsBefore.xact_rollback),
@@ -165,7 +200,7 @@ function keyLike(prefix){return `${prefix}%`;}
 
 const report={
   schemaVersion:1,benchmark:"signal-postgres-idempotency-transactional-outbox",
-  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement. Samples pg_stat_activity connection/active/lock-wait/query-duration observations and pg_stat_database commit/rollback/buffer/deadlock deltas. CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
+  scope:"PostgreSQL idempotency reservation + transactional completion with one outbox event, then batch claim and acknowledgement. Samples pg_stat_activity connection/active/lock-wait/query-duration observations, pg_stat_database commit/rollback/buffer/deadlock deltas, and an EXPLAIN ANALYZE BUFFERS plan for the transactional outbox claim query (executed inside a rolled-back transaction). CI PostgreSQL 16 service; excludes managed database network, production data volume, replicas, broker transport, and production pool contention.",
   generatedAt:new Date().toISOString(),commit:process.env.GITHUB_SHA??process.env.SOURCE_COMMIT??"unrecorded-local-run",
   runtime:{node:process.version,platform:process.platform,arch:process.arch,cpuModel:os.cpus()[0]?.model??"unknown",logicalCpus:os.cpus().length},
   database:{engine:"PostgreSQL",version:"16",poolMaxConnections:10},
