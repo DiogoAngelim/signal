@@ -4,8 +4,8 @@
   "private": true,
   "type": "commonjs",
   "scripts": {
-    "build": "tsc -p tsconfig.signal-decision.json && tsc -p tsconfig.json",
-    "start": "pnpm run build && node dist/index.js",
+    "build": "node init && tsc -p tsconfig.signal-decision.json && tsc -p tsconfig.json",
+    "start": "node init && pnpm run build && node dist/index.js",
     "test": "pnpm run build && tsc -p tsconfig.test.json --noEmit false --outDir dist/test-run && node --test dist/test-run/test/triage.test.js",
     "typecheck": "pnpm run build && tsc -p tsconfig.test.json --noEmit"
   },
