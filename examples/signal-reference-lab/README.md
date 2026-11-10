@@ -14,7 +14,19 @@ The workflow exercises:
 - `@signal/semantic-state`: generic-state lexicon interpretation;
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
 
-The evaluation harness runs eleven deterministic scenarios: full lifecycle including approval-gated action execution, evidence hard-stop, tenant isolation, repeat submission, concurrent duplicate submission, and invalid input, HTTP binding, audit integrity, replay-evidence integrity, retry/circuit-breaker resilience, runtime authorization enforcement, and invalid input. It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
+The evaluation harness runs eleven deterministic scenarios:
+- end-to-end request, evidence, assessment, decision, approved action and outcome;
+- evidence hard-stop and action authorization;
+- tenant isolation;
+- repeated and concurrent idempotent submission;
+- HTTP binding dispatch and forged-auth rejection;
+- audit-chain integrity and signed checkpoint verification;
+- replay-evidence integrity;
+- retry-budget and circuit-breaker recovery;
+- runtime authentication and authorization policy enforcement;
+- malformed-input rejection.
+
+It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
 
 ## Run
 
