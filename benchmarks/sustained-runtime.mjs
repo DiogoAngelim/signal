@@ -146,4 +146,4 @@ process.stdout.write([
   `heapSlope=${report.result.sampledHeapGrowthBytesPerSecond?.toFixed(0) ?? "n/a"} B/s`,
   `rssSlope=${report.result.sampledRssGrowthBytesPerSecond?.toFixed(0) ?? "n/a"} B/s`,
   `output=${output}`,
-].join(" ") + "\\n");
+].join(" ") + "\n");
