@@ -44,10 +44,10 @@ jobs:
       - name: Apply patched dependency resolutions
         id: remediation
         continue-on-error: true
-        run: pnpm audit --fix=update
+        run: pnpm audit --fix
       - name: Validate patched workspace
         run: |
-          pnpm install --frozen-lockfile
+          pnpm install --no-frozen-lockfile
           pnpm build:library
           pnpm --filter @signal/runtime test
           pnpm --filter @signal/binding-http test
