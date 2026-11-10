@@ -47,8 +47,12 @@ describe("postgres idempotency migration", () => {
       "utf8",
     );
     expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_replay_evidence");
+    expect(sql).toContain("tenant_id text NOT NULL");
     expect(sql).toContain("handler_artifact_digest");
     expect(sql).toContain("operation_version");
+    expect(sql).toContain("ENABLE ROW LEVEL SECURITY");
+    expect(sql).toContain("FORCE ROW LEVEL SECURITY");
+    expect(sql).toContain("current_setting('signal.tenant_id', true)");
     expect(sql).toContain("signal_replay_evidence_no_update_delete");
     expect(sql).toContain("signal_replay_evidence_no_truncate");
     expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
