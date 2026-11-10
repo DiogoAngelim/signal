@@ -42,6 +42,7 @@ persistence for execution records. A record binds:
 - explicitly captured external-read snapshots, each with an observation time
   and content fingerprint;
 - normalized result and its fingerprint;
+- a fingerprint over the complete immutable evidence envelope, including tenant and execution identity;
 - execution ID and capture timestamp.
 
 Use createReplayEvidenceRecord from @signal/runtime to construct the record,
