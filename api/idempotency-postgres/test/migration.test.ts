@@ -71,6 +71,17 @@ describe("postgres idempotency migration", () => {
     expect(sql).toContain("REVOKE UPDATE, DELETE, TRUNCATE");
   });
 
+  it("creates a shared cross-process retry token bucket", () => {
+    const sql = readFileSync(
+      join(__dirname, "../src/drizzle/migrations/0007_shared_retry_budgets.sql"),
+      "utf8",
+    );
+    expect(sql).toContain("CREATE TABLE IF NOT EXISTS signal_retry_budgets");
+    expect(sql).toContain("budget_key text PRIMARY KEY");
+    expect(sql).toContain("refill_rate_per_second numeric");
+    expect(sql).toContain("available numeric");
+  });
+
   it("creates durable cross-process circuit breaker state with fenced probe leases", () => {
     const sql = readFileSync(
       join(__dirname, "../src/drizzle/migrations/0004_distributed_circuit_breakers.sql"),
