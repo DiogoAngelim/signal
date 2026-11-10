@@ -251,6 +251,22 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         });
         const duplicate = await inbox.processOnce(inboxInput, async () => { effects += 1; return 99; });
         a(processed.status === "processed" && processed.result === 1 && duplicate.status === "duplicate" && effects === 1, "transactional inbox should commit the consumer effect once and suppress duplicates");
+        const rollbackInput = { ...inboxInput, messageId: `rollback-${suffix}` };
+        let rollbackAttempts = 0;
+        try {
+          await inbox.processOnce(rollbackInput, async (client) => {
+            rollbackAttempts += 1;
+            await client.query("INSERT INTO signal_reference_lab_consumer_effects (test_id, tenant_id) VALUES ($1, $2)", [`rollback-${suffix}`, inboxInput.tenantId]);
+            throw new Error("injected consumer failure");
+          });
+        } catch { /* expected: inbox claim and effect must roll back together */ }
+        const recovered = await inbox.processOnce(rollbackInput, async (client) => {
+          rollbackAttempts += 1;
+          await client.query("INSERT INTO signal_reference_lab_consumer_effects (test_id, tenant_id) VALUES ($1, $2)", [`rollback-${suffix}`, inboxInput.tenantId]);
+          const count = await client.query<{ count: string }>("SELECT count(*)::text AS count FROM signal_reference_lab_consumer_effects WHERE test_id = $1", [`rollback-${suffix}`]);
+          return Number(count.rows[0]?.count ?? 0);
+        });
+        a(recovered.status === "processed" && recovered.result === 1 && rollbackAttempts === 2, "failed consumer transaction must roll back both inbox claim and effect so retry can safely process once");
 
         a(await retryBudget.tryConsume(), "shared retry budget should grant its available token");
         a(!(await retryBudget.tryConsume()), "shared retry budget should reject after exhaustion");
@@ -282,6 +298,8 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
         await replayStore.save(replayRecord);
         const replayLoaded = await replayStore.get({ tenantId: replayRecord.tenantId, executionId: replayRecord.executionId });
         a(Boolean(replayLoaded) && verifyReplayEvidenceRecord(replayLoaded!), "PostgreSQL replay evidence should persist and verify");
+        const crossTenantReplay = await replayStore.get({ tenantId: `other-${suffix}`, executionId: replayRecord.executionId });
+        a(crossTenantReplay === null, "replay evidence must remain isolated across tenant scopes");
 
         const existingAudit = await auditLedger.readEntries({ limit: 10000 });
         auditHistory = existingAudit;
