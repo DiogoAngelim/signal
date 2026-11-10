@@ -34,18 +34,12 @@ function database(): Pool {
 
 async function ensureSchema() {
   schemaReady ??= (async () => {
-    await database().query(`
-      CREATE TABLE IF NOT EXISTS reference_lab_auth_attempts (
-        ip_hash text PRIMARY KEY,
-        window_started_at timestamptz NOT NULL DEFAULT now(),
-        attempts integer NOT NULL DEFAULT 0
-      );
-      CREATE TABLE IF NOT EXISTS reference_lab_state (
-        id text PRIMARY KEY CHECK (id = 'main'),
-        payload jsonb NOT NULL,
-        updated_at timestamptz NOT NULL DEFAULT now()
-      )
-    `);
+    const result = await database().query(
+      "SELECT to_regclass('public.reference_lab_state') AS state_table, to_regclass('public.reference_lab_auth_attempts') AS auth_table",
+    );
+    if (!result.rows[0]?.state_table || !result.rows[0]?.auth_table) {
+      throw new Error("Reference Lab database schema is not initialized.");
+    }
   })();
   return schemaReady;
 }
