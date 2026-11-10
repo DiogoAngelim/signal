@@ -1,7 +1,8 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
 import { join, resolve } from "node:path";
 import { tmpdir } from "node:os";
-import { cp, mkdtemp, rm } from "node:fs/promises";
+import { cp, existsSync, mkdtemp, rm } from "node:fs";
+import { mkdtemp as mkdtempAsync, rm as rmAsync, cp as cpAsync } from "node:fs/promises";
 import { execFileSync } from "node:child_process";
 import { createAuditChainEntry, verifyChain, verifyAuditChainEntry, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
 import { z } from "zod";
@@ -377,11 +378,13 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   });
   if (process.env.SIGNAL_CLI_READY === "1") {
     await run("signal-cli", "Signal CLI verify, replay, test, build and audit commands preserve proof integrity", async (a) => {
-      const cliDirectory = resolve(process.cwd(), "../../signal-cli");
-      const isolatedDirectory = await mkdtemp(join(tmpdir(), "signal-reference-cli-"));
+      const cliCandidates = [resolve(process.cwd(), "signal-cli"), resolve(process.cwd(), "../../signal-cli")];
+      const cliDirectory = cliCandidates.find((candidate) => existsSync(resolve(candidate, "dist/cli/index.js")) && existsSync(resolve(candidate, ".signal")));
+      if (!cliDirectory) throw new Error("Built Signal CLI artifacts and proof state were not found in expected workspace locations.");
+      const isolatedDirectory = await mkdtempAsync(join(tmpdir(), "signal-reference-cli-"));
       try {
-        await cp(resolve(cliDirectory, "dist"), resolve(isolatedDirectory, "dist"), { recursive: true });
-        await cp(resolve(cliDirectory, ".signal"), resolve(isolatedDirectory, ".signal"), { recursive: true });
+        await cpAsync(resolve(cliDirectory, "dist"), resolve(isolatedDirectory, "dist"), { recursive: true });
+        await cpAsync(resolve(cliDirectory, ".signal"), resolve(isolatedDirectory, ".signal"), { recursive: true });
         const commands: Array<{ args: string[]; expected: string }> = [
           { args: ["verify"], expected: "verified successfully" },
           { args: ["replay"], expected: "no mismatches detected" },
@@ -394,7 +397,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
           a(output.includes(command.expected), "Signal CLI command should report success: " + command.args[0]);
         }
       } finally {
-        await rm(isolatedDirectory, { recursive: true, force: true });
+        await rmAsync(isolatedDirectory, { recursive: true, force: true });
       }
     });
   } else {
