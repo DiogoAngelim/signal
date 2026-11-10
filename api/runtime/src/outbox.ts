@@ -34,8 +34,8 @@ export async function dispatchOutboxBatch(
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) {
     throw new RangeError("limit must be an integer between 1 and 1000.");
   }
-  if (!Number.isFinite(leaseMs) || leaseMs < 1000) {
-    throw new RangeError("leaseMs must be at least 1000 milliseconds.");
+  if (!Number.isSafeInteger(leaseMs) || leaseMs < 1000 || leaseMs > 86_400_000) {
+    throw new RangeError("leaseMs must be an integer between 1000 and 86400000 milliseconds.");
   }
   if (!Number.isSafeInteger(maxAttempts) || maxAttempts < 1) {
     throw new RangeError("maxAttempts must be a positive safe integer.");
