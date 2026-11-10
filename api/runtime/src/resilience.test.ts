@@ -93,6 +93,24 @@ describe("executeWithRetry", () => {
     expect(operation).toHaveBeenCalledOnce();
   });
 
+  it("does not consume retry budget when the next delay would exceed the deadline", async () => {
+    let now = 0;
+    const budget = createRetryBudget({ capacity: 1, clock: () => now });
+    const operation = vi.fn().mockRejectedValue(
+      Object.assign(new Error("temporary"), { code: "TEMPORARY" }),
+    );
+    await expect(executeWithRetry(operation, {
+      ...policy,
+      retryBudget: budget,
+      deadlineAt: 5,
+      clock: () => now,
+      random: () => 0.5,
+      sleep: async (delay) => { now += delay; },
+    })).rejects.toBeInstanceOf(RetryDeadlineExceededError);
+    expect(budget.snapshot().available).toBe(1);
+    expect(operation).toHaveBeenCalledOnce();
+  });
+
   it("rejects before executing when the deadline has expired", async () => {
     const operation = vi.fn();
     await expect(executeWithRetry(operation, {
