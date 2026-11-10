@@ -189,7 +189,7 @@ try {
           claimBatchLatency:stats(claimLatencies),acknowledgementLatency:stats(ackLatencies),
           queueAgeLatency:stats(queueAgeLatencies),backlogDrainMs,backlogDrainRowsPerSecond:claimedTotal/(backlogDrainMs/1000),
           claimedOutboxRows:claimedTotal,acknowledgedOutboxRows:acknowledged,
-          cpuUserMs:cpu.user/1000,cpuSystemMs:cpu.system/1000,cpuUtilizationPercent:cpuMs/wallTimeMs*100,
+          cpuUserMs:cpu.user/1000,cpuSystemMs:cpu.system/1000,cpuCoresUsed:cpuMs/wallTimeMs,cpuUtilizationPercent:cpuMs/(wallTimeMs*os.cpus().length)*100,
           heapUsedBeforeBytes:memoryBefore.heapUsed,heapUsedAfterBytes:memoryAfter.heapUsed,
           heapUsedDeltaBytes:memoryAfter.heapUsed-memoryBefore.heapUsed,
           rssBeforeBytes:memoryBefore.rss,rssAfterBytes:memoryAfter.rss,rssDeltaBytes:memoryAfter.rss-memoryBefore.rss,
