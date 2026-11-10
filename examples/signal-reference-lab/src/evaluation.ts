@@ -1,3 +1,5 @@
+import { generateKeyPairSync } from "node:crypto";
+import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry } from "@signal/sdk-node";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
@@ -17,10 +19,10 @@ const capabilities: Capability[] = [
   { id: "postgres.transactions", area: "PostgreSQL", capability: "Database transactions, migrations, locks and persistence", status: "not-verified", scenarios: [], evidence: "No PostgreSQL adapter or database is configured." },
   { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "not-verified", scenarios: [], evidence: "Default in-process dispatcher only; no durable worker is started." },
   { id: "inbox.transactionality", area: "Inbox", capability: "Transactional consumer inbox and effect deduplication", status: "not-verified", scenarios: [], evidence: "Subscriber callback deduplicates in process only." },
-  { id: "resilience.retry-budgets", area: "Resilience", capability: "Retry policies, budgets and backoff behavior", status: "not-verified", scenarios: [], evidence: "No retry fault adapter is wired." },
-  { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker state, half-open recovery and distributed coordination", status: "not-verified", scenarios: [], evidence: "No downstream provider or breaker integration is configured." },
-  { id: "replay.evidence", area: "Replay", capability: "Replay evidence capture, deterministic reconstruction and compatibility", status: "not-verified", scenarios: [], evidence: "The process-local event journal is not a replay evidence store." },
-  { id: "audit.chain-checkpoints", area: "Audit", capability: "Hash-chain integrity, checkpoints and tamper detection", status: "not-verified", scenarios: [], evidence: "No audit chain or checkpoint verifier is used." },
+  { id: "resilience.retry-budgets", area: "Resilience", capability: "Retry policies, budgets and bounded retry execution", status: "exercised", scenarios: ["resilience"], evidence: "executeWithRetry is exercised with a deterministic retry budget and transient failure." },
+  { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker open/half-open probe and recovery", status: "exercised", scenarios: ["resilience"], evidence: "Permit-scoped circuit breaker transitions are tested with an injected clock.", limitation: "Distributed breaker coordination and real provider failures remain unverified." },
+  { id: "replay.evidence", area: "Replay", capability: "Content-addressed replay evidence creation and integrity verification", status: "partial", scenarios: ["replay-evidence"], evidence: "Replay evidence records and digest verification are exercised.", limitation: "A complete historical replay executor and cross-version compatibility workflow are not yet integrated." },
+  { id: "audit.chain-checkpoints", area: "Audit", capability: "Hash-chain integrity, signed checkpoints and tamper detection", status: "exercised", scenarios: ["audit-integrity"], evidence: "Audit chain verification, Ed25519 checkpoint signing and chain anchoring are exercised." },
   { id: "decision.assessment", area: "Decision", capability: "Evidence lineage, uncertainty assessment and hard-stop policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "packages/decision assessDecisionEvidence is used to calculate evidence quality, confidence, governance and stewardship" },
   { id: "decision.accountability", area: "Decision", capability: "Decision rationale and accountable actor traceability", status: "exercised", scenarios: ["lifecycle"], evidence: "Decision record stores actor, rationale and timestamp" },
   { id: "decision.outcomes", area: "Outcomes", capability: "Outcome capture linked to a recorded decision", status: "exercised", scenarios: ["lifecycle"], evidence: "Outcome operation requires a prior decision", limitation: "The review is recorded, but statistically calibrated policy adaptation is not claimed." },
@@ -112,6 +114,41 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     } finally {
       await server.close();
     }
+  });
+  await run("audit-integrity", "Audit chain and signed checkpoint detect tampering", async (a) => {
+    const first = createAuditChainEntry(null, { operationName: "lab.request.submit.v1", operationKind: "mutation", messageId: "message-1", outcome: "completed" });
+    const second = createAuditChainEntry(first, { operationName: "lab.decision.record.v1", operationKind: "mutation", messageId: "message-2", outcome: "completed" });
+    const chain = [first, second];
+    a(verifyChain(chain), "well-formed audit chain should verify");
+    a(!verifyChain([first, { ...second, operationName: "tampered.operation" }]), "modified audit entry should fail chain verification");
+    const keys = generateKeyPairSync("ed25519");
+    const privateKey = keys.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+    const publicKey = keys.publicKey.export({ type: "spki", format: "pem" }).toString();
+    const checkpoint = signAuditCheckpoint(chain, { keyId: "reference-lab-key", privateKey });
+    a(verifyAuditCheckpoint(checkpoint, publicKey, "reference-lab-key"), "checkpoint signature should verify against its public key");
+    a(verifyCheckpointAgainstChain(checkpoint, chain), "checkpoint should anchor the supplied chain head");
+  });
+  await run("replay-evidence", "Replay evidence record integrity is content-addressed", async (a) => {
+    const record = createReplayEvidenceRecord({ tenantId: "tenant-a", executionId: "execution-1", operationName: "lab.request.get.v1", operationVersion: "v1", handlerArtifactDigest: "a".repeat(64), policyVersion: "policy-v1", canonicalInput: { requestId: "case-1" }, externalReads: [{ key: "risk-source", value: { score: 0.2 }, observedAt: new Date().toISOString() }], result: { allowed: true } });
+    a(verifyReplayEvidenceRecord(record), "valid replay evidence should verify");
+    a(!verifyReplayEvidenceRecord({ ...record, result: { allowed: false } }), "tampered replay result should fail integrity verification");
+  });
+  await run("resilience", "Retry budget and circuit breaker recover deterministically", async (a) => {
+    let attempts = 0;
+    const budget = createRetryBudget({ capacity: 1 });
+    const value = await executeWithRetry(async () => { attempts++; if (attempts === 1) throw Object.assign(new Error("temporary upstream failure"), { code: "TRANSIENT" }); return "recovered"; }, { maxAttempts: 2, backoffMs: 0, maxBackoffMs: 0, retryableCodes: new Set(["TRANSIENT"]), retryBudget: budget, random: () => 0, sleep: async () => {} });
+    a(value === "recovered" && attempts === 2, "retry should recover after one transient failure");
+    a(budget.snapshot().available === 0, "retry should consume one shared retry token");
+    let clock = 0;
+    const breaker = createCircuitBreakerController(2, 1000, () => clock, 1000);
+    const firstPermit = breaker.acquire(0); a(Boolean(firstPermit), "closed breaker should admit a request");
+    if (firstPermit) breaker.recordFailure(firstPermit, 0);
+    const secondPermit = breaker.acquire(1); if (secondPermit) breaker.recordFailure(secondPermit, 1);
+    a(breaker.snapshot().state === "open", "threshold failures should open the breaker");
+    a(breaker.acquire(500) === null, "open breaker should reject before reset timeout");
+    const probe = breaker.acquire(1001); a(Boolean(probe), "breaker should admit one half-open probe after reset");
+    if (probe) breaker.recordSuccess(probe, 1002);
+    a(breaker.snapshot().state === "closed", "successful probe should close the breaker");
   });
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
