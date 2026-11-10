@@ -28,7 +28,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | In-memory circuit breaker | Permit-scoped outcomes, one half-open probe, stale-generation fencing, and renewable probe lease per controller instance | Process-local only; not shared across replicas |
 | Distributed circuit breaker | PostgreSQL-backed shared state, atomic half-open lease, renewable UUID token, and stale-owner fencing | Multi-region database availability and coordination-database outage behavior are not certified |
 | HTTP abuse limits | Independent query/mutation quotas, structured HTTP 429 responses, configurable shared Redis/custom store | Default store is process-local; actual Redis/network failover and trusted proxy identity require deployment validation |
-| Retry | Capped exponential backoff and optional full jitter | Retry ownership, retry budgets, deadline propagation, and idempotent side effects remain caller/adapter responsibilities |
+| Retry | Capped exponential backoff, full jitter, bounded attempt count, absolute deadline, caller cancellation, per-operation retryable error codes, and shared in-process token-bucket retry budget | The budget is process-local, not coordinated across replicas; operations must honor AbortSignal; deadlines cannot undo committed side effects; destination idempotency remains mandatory |
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
 | Observability | Runtime emits start/completion/error lifecycle events; failed query, mutation, and event executions include duration and error code; unknown, ambiguous, and unsupported runtime commands emit timed error observations. Subscriber handlers emit delivered/failed outcomes with duration and sanitized error codes; replay-safe subscriptions emit separate deduplication and in-flight coalescing observations. A built-in low-cardinality metrics adapter maps lifecycle events to execution, event, subscriber, and error counters plus duration samples, separating live/replay/unspecified execution modes and bounded error sources; a bounded in-memory recorder and bounded asynchronous exporter buffer expose dropped-event and export-failure counters. Metric labels exclude operation names, request identifiers, payloads, and error codes. | The buffer is process-local and best-effort; it does not provide durable delivery, aggregation, cardinality enforcement, alerting, or retention guarantees. Subscriber deduplication observations cover replay-safe subscriptions only. A deployment must supply and validate its exporter, backend, labels, sampling, retention, and alert policies. |
@@ -90,9 +90,34 @@ Do not label Signal production-certified until the following evidence exists:
 
 ## Current completion boundary
 
-The transactional outbox, source-level statistical safeguards, signed audit-checkpoint primitives, and queue-health metrics are implemented in this branch. The PostgreSQL adapter is exercised by a disposable PostgreSQL service in CI. The transactional outbox is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.
+Signal now provides source-level retry budgets, versioned replay-evidence records,
+immutable PostgreSQL replay persistence, deterministic replay validation,
+append-only PostgreSQL audit storage, signed checkpoint primitives, a bounded
+observability exporter, and queue-health metrics. The core packages and
+PostgreSQL adapters are exercised by CI integration tests and simulations.
+The transactional outbox and replay evidence stores are not active in any
+deployment merely because they exist in the repository. Operators must apply
+the complete ordered migration sequence, instantiate the relevant adapters,
+run persistent workers where required, and configure the corresponding
+application capture and side-effect boundaries.
 
-The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. The PostgreSQL audit ledger is a source capability; it is not independently tamper-proof against database owners and is not externally anchored until a deployment connects an independently administered checkpoint store and managed signing-key custody. The RabbitMQ benchmark uses the ephemeral broker management API; it is not an application AMQP client benchmark or production broker certification. The sustained-runtime benchmark script is a repeatable source artifact but has not yet produced controlled long-duration evidence. Source-only changes cannot truthfully certify those controls.
+The PostgreSQL audit ledger is not independently tamper-proof against database
+owners or superusers. External checkpoint anchoring, managed signing-key
+custody, and independently administered trust registries remain deployment
+requirements. Replay capture is explicit: each consuming application must
+capture all decision-relevant external reads and retain compatible historical
+handler artifacts. The runtime does not automatically capture arbitrary
+external I/O. Retry budgets are process-local; fleet-wide coordination remains
+deployment-specific.
+
+The RabbitMQ benchmark uses the ephemeral broker management API; it is not an
+application AMQP client benchmark or production broker certification. The new
+sustained-runtime benchmark is wired into engineering-measurement CI, but
+controlled long-duration and production hardware evidence remain separate.
+The remaining checklist items are intentionally incomplete where real
+infrastructure, representative production data, independently protected
+secrets/storage, human adoption studies, or deployment measurements are
+required. Source-only changes cannot truthfully certify those controls.
 
 ## Certification rule
 
