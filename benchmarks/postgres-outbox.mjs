@@ -120,7 +120,7 @@ try {
         const sampleEvery=Math.max(1,Math.floor(transactionBatches/20));
         for(let offset=0;offset<iterations;offset+=concurrencyLevel){
           const size=Math.min(concurrencyLevel,iterations-offset);
-          await Promise.all(Array.from({length:size},async(_,j)=>{
+          const batchPromise=Promise.all(Array.from({length:size},async(_,j)=>{
             const index=offset+j;
             const key=`${runPrefix}-${payloadBytes}-${concurrencyLevel}-${run}-${index}`;
             const fingerprint=createHash("sha256").update(key).digest("hex");
@@ -136,7 +136,11 @@ try {
             latencies.push(performance.now()-opStarted);
             completed+=1;
           }));
-          if ((Math.floor(offset/concurrencyLevel)+1)%sampleEvery===0) await samplePg();
+          if ((Math.floor(offset/concurrencyLevel)+1)%sampleEvery===0) {
+            await Promise.all([batchPromise, samplePg()]);
+          } else {
+            await batchPromise;
+          }
         }
         await samplePg();
         const wallTimeMs=performance.now()-started;
@@ -151,18 +155,19 @@ try {
         let claimedTotal=0;
         while(true){
           const claimStarted=performance.now();
-          const claimed=await store.claimBatch({limit:1000,workerId,leaseMs:30000});
+          const claimPromise=store.claimBatch({limit:1000,workerId,leaseMs:30000});
+          const [claimed]=await Promise.all([claimPromise,samplePg()]);
           claimLatencies.push(performance.now()-claimStarted);
           if(claimed.length===0) break;
           claimedTotal+=claimed.length;
-          await Promise.all(claimed.map(async(record)=>{
+          const acknowledgementPromise=Promise.all(claimed.map(async(record)=>{
             const ackStarted=performance.now();
             const ok=await store.acknowledge({id:record.id,workerId,leaseToken:record.leaseToken});
             ackLatencies.push(performance.now()-ackStarted);
             if(!ok) throw new Error("Outbox acknowledgement lost its lease");
             acknowledged+=1;
           }));
-          await samplePg();
+          await Promise.all([acknowledgementPromise,samplePg()]);
         }
         if(claimedTotal!==iterations+warmup||acknowledged!==claimedTotal) throw new Error(`Outbox mismatch: claimed=${claimedTotal}, acked=${acknowledged}`);
         const dbStatsAfter=await readDatabaseStats(cleanupPool);
