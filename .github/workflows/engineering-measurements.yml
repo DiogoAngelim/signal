@@ -56,8 +56,8 @@ jobs:
           cache-dependency-path: pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm build:library
-      - name: Apply database migrations
-        run: pnpm db:migrate
+      - name: Apply PostgreSQL adapter migrations
+        run: node benchmarks/prepare-postgres.mjs
       - name: Measure runtime event dispatch
         run: node benchmarks/runtime-dispatch.mjs --iterations 3000 --runs 3 --concurrency 1,16,64 --output benchmark-results/runtime-dispatch.json
         env:

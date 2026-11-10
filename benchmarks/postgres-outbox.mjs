@@ -103,7 +103,7 @@ try {
           rssBeforeBytes:memoryBefore.rss,rssAfterBytes:memoryAfter.rss,rssDeltaBytes:memoryAfter.rss-memoryBefore.rss,
           poolMaxConnections:10,
         });
-        await cleanupPool.query("DELETE FROM signal_outbox WHERE message_id LIKE $1",[keyLike(runPrefix,payloadBytes,concurrencyLevel,run)]);
+        await cleanupPool.query("DELETE FROM signal_outbox WHERE message_id LIKE $1",[keyLike(runPrefix)]);
         await cleanupPool.query("DELETE FROM signal_idempotency_records WHERE operation_name=$1 AND idempotency_key LIKE $2",[operationName,keyLike(runPrefix,payloadBytes,concurrencyLevel,run)]);
       }
     }
@@ -112,7 +112,7 @@ try {
   await store.close();
   await cleanupPool.end();
 }
-function keyLike(prefix,payloadBytes,concurrencyLevel,run){return `${prefix}-${payloadBytes}-${concurrencyLevel}-${run}-%`;}
+function keyLike(prefix){return `${prefix}%`;}
 
 const report={
   schemaVersion:1,benchmark:"signal-postgres-idempotency-transactional-outbox",

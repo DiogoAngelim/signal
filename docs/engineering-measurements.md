@@ -19,7 +19,7 @@ deployment or external operator-controlled infrastructure.
 
 ## Measurement interpretation
 
-The dispatch benchmark includes envelope creation and one in-process subscriber. The HTTP benchmark uses Fastify injection rather than a TCP socket and exercises server-side auth resolution and query authorization. The PostgreSQL benchmark runs against an ephemeral PostgreSQL 16 service and exercises the actual idempotency/outbox adapter. These are controlled CI measurements; they do not measure managed-database network latency, real broker delivery, multi-replica contention, or production resource limits. Compare
+The dispatch benchmark includes envelope creation and one in-process subscriber. The HTTP benchmark uses Fastify injection rather than a TCP socket and exercises server-side auth resolution and query authorization. The PostgreSQL benchmark applies the adapter SQL migrations and runs against an ephemeral PostgreSQL 16 service, exercising the actual idempotency/outbox adapter. Run `node benchmarks/prepare-postgres.mjs` before `node benchmarks/postgres-outbox.mjs` when measuring locally. These are controlled CI measurements; they do not measure managed-database network latency, real broker delivery, multi-replica contention, or production resource limits. Compare
 results only across equivalent runner hardware, Node versions, build modes,
 and workload configurations. The CI runner is a repeatable regression
 environment, not a production capacity oracle.

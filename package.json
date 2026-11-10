@@ -42,7 +42,7 @@
     "verify:exports:library": "node ./scripts/verify-package-entrypoints.mjs --library",
     "bench:runtime": "pnpm build:library && node benchmarks/runtime-dispatch.mjs",
     "bench:http": "pnpm build:library && node benchmarks/http-binding.mjs",
-    "bench:postgres": "pnpm build:library && node benchmarks/postgres-outbox.mjs"
+    "bench:postgres": "pnpm build:library && node benchmarks/prepare-postgres.mjs && node benchmarks/postgres-outbox.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
