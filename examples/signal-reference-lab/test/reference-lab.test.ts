@@ -15,6 +15,8 @@ test("scorecard keeps unverified capabilities explicit", () => {
   const report = scoreEngineering([], [{ id: "db", area: "Persistence", capability: "Postgres", status: "not-verified", scenarios: [], evidence: "not configured" }]);
   assert.ok(report.interpretation.includes("not a certification"));
   assert.ok(report.dimensions.some((dimension) => dimension.confidence === "low"));
+  const covered = scoreEngineering([], [{ id: "db", area: "Persistence", capability: "Postgres", status: "exercised", scenarios: ["db"], evidence: "integration test" }]);
+  assert.ok(covered.dimensions.find((dimension) => dimension.name === "Architecture/design")!.score > report.dimensions.find((dimension) => dimension.name === "Architecture/design")!.score);
 });
 
 test("benchmark emits reproducible workload and percentile metadata", async () => {
