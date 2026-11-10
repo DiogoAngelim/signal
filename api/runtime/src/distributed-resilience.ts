@@ -7,6 +7,7 @@ import type {
 export interface DistributedCircuitBreakerController {
   snapshot(): Promise<DistributedCircuitBreakerSnapshot | null>;
   tryAcquire(now?: Date): Promise<boolean>;
+  renewProbe(): Promise<boolean>;
   recordSuccess(): Promise<boolean>;
   recordFailure(now?: Date): Promise<boolean>;
 }
@@ -37,6 +38,11 @@ export function createDistributedCircuitBreakerController(
       const permit = await port.tryAcquire(key, config, now);
       probeToken = permit.probeToken;
       return permit.allowed;
+    },
+    async renewProbe() {
+      return probeToken
+        ? port.renewProbe(key, probeToken, config.probeLeaseMs)
+        : false;
     },
     async recordSuccess() {
       const token = probeToken;
