@@ -84,7 +84,9 @@ describe("distributed runtime circuit breaker controller", () => {
 describe("executeWithDistributedCircuitBreaker", () => {
   it("records success and returns the dependency result", async () => {
     const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
       tryAcquire: vi.fn().mockResolvedValue(true),
+      renewProbe: vi.fn().mockResolvedValue(true),
       recordSuccess: vi.fn().mockResolvedValue(true),
       recordFailure: vi.fn().mockResolvedValue(true),
     };
@@ -113,7 +115,9 @@ describe("executeWithDistributedCircuitBreaker", () => {
 
   it("rejects when the shared breaker denies a permit", async () => {
     const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
       tryAcquire: vi.fn().mockResolvedValue(false),
+      renewProbe: vi.fn().mockResolvedValue(false),
       recordSuccess: vi.fn(),
       recordFailure: vi.fn(),
     };

@@ -311,14 +311,16 @@ export async function executeWithRetry<T>(
   const sleep = options.sleep ?? abortableSleep;
   const raceAbort = async <TResult>(promise: Promise<TResult>): Promise<TResult> => {
     if (controller.signal.aborted) throw abortReason(controller.signal);
+    let onAbort: (() => void) | undefined;
     const aborted = new Promise<never>((_resolve, reject) => {
-      controller.signal.addEventListener(
-        "abort",
-        () => reject(abortReason(controller.signal)),
-        { once: true },
-      );
+      onAbort = () => reject(abortReason(controller.signal));
+      controller.signal.addEventListener("abort", onAbort, { once: true });
     });
-    return Promise.race([promise, aborted]);
+    try {
+      return await Promise.race([promise, aborted]);
+    } finally {
+      if (onAbort) controller.signal.removeEventListener("abort", onAbort);
+    }
   };
 
   try {
