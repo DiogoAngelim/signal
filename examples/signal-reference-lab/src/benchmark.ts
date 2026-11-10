@@ -1,10 +1,13 @@
+import { cpus, release } from "node:os";
 import { createReferenceLab } from "./signal-app.js";
 
 export type BenchmarkReport = {
   kind: "local-in-process-query";
   workload: { operation: string; iterations: number; concurrency: number; warmup: number };
-  environment: { node: string; platform: string; arch: string; cpus: number; rssBefore: number; rssAfter: number; heapUsedBefore: number; heapUsedAfter: number };
+  environment: { node: string; platform: string; osRelease: string; arch: string; cpuModel: string; cpus: number; rssBefore: number; rssAfter: number; heapUsedBefore: number; heapUsedAfter: number };
   timing: { totalMs: number; throughputPerSecond: number; p50Ms: number; p90Ms: number; p95Ms: number; p99Ms: number; maxMs: number; minMs: number };
+  samplesMs: number[];
+  integrity: { valid: boolean; expectedSamples: number; actualSamples: number; invalidSamples: number };
   limitations: string[];
 };
 
@@ -33,13 +36,18 @@ export async function runBenchmark(input: { iterations?: number; concurrency?: n
   await Promise.all(workers);
   const totalMs = performance.now() - started;
   const memoryAfter = process.memoryUsage();
+  const invalidSamples = samples.filter((value) => !Number.isFinite(value) || value < 0).length;
+  const integrity = { valid: samples.length === iterations && invalidSamples === 0, expectedSamples: iterations, actualSamples: samples.length, invalidSamples };
+  if (!integrity.valid) throw new Error("Benchmark measurement integrity failed: sample count or values are invalid.");
   const sorted = [...samples].sort((a, b) => a - b);
   const percentile = (p: number) => sorted[Math.min(sorted.length - 1, Math.ceil(sorted.length * p) - 1)] ?? 0;
   return {
     kind: "local-in-process-query",
     workload: { operation: "lab.request.get.v1", iterations, concurrency, warmup },
-    environment: { node: process.version, platform: process.platform, arch: process.arch, cpus: (await import("node:os")).cpus().length, rssBefore: memoryBefore.rss, rssAfter: memoryAfter.rss, heapUsedBefore: memoryBefore.heapUsed, heapUsedAfter: memoryAfter.heapUsed },
+    environment: { node: process.version, platform: process.platform, osRelease: release(), arch: process.arch, cpuModel: cpus()[0]?.model ?? "unknown", cpus: cpus().length, rssBefore: memoryBefore.rss, rssAfter: memoryAfter.rss, heapUsedBefore: memoryBefore.heapUsed, heapUsedAfter: memoryAfter.heapUsed },
     timing: { totalMs: round(totalMs), throughputPerSecond: round(iterations / (totalMs / 1000)), p50Ms: round(percentile(0.5)), p90Ms: round(percentile(0.9)), p95Ms: round(percentile(0.95)), p99Ms: round(percentile(0.99)), maxMs: round(sorted.at(-1) ?? 0), minMs: round(sorted[0] ?? 0) },
+    samplesMs: [...samples],
+    integrity,
     limitations: ["Measures only the in-process query path with the default memory idempotency store.", "Not a PostgreSQL, HTTP, distributed, production, or end-to-end throughput benchmark.", "Run on equivalent hardware, Node version, build and workload before comparing results."]
   };
 }
