@@ -51,8 +51,6 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Build standalone Signal CLI
-        run: npm ci --prefix signal-cli && npm run build --prefix signal-cli
       - name: Apply Signal PostgreSQL migrations
         run: |
           for migration in api/idempotency-postgres/src/drizzle/migrations/*.sql; do
