@@ -103,7 +103,7 @@ try {
   // immediate snapshot, but never wait for it before measuring message age.
   const queueStatsAtPublishCompletion = await request(`api/queues/%2F/${encodeURIComponent(queueName)}`);
   const queueDepthObservedAtPublishCompletion = Number(queueStatsAtPublishCompletion.messages_ready ?? 0);
-  queueDepthAtPublishCompletion = publishLatencies.length;
+  queueDepthAtPublishCompletion = queueDepthObservedAtPublishCompletion;
 
   const drainStarted = performance.now();
   let emptyPolls = 0;
@@ -186,8 +186,8 @@ try {
       publishWallTimeMs,
       publishMessagesPerSecond: messages / (publishWallTimeMs / 1000),
       queueDepthAtPublishCompletion,
-      queueDepthObservedAtPublishCompletion,
-      queueStatsVisibilityLagMessages: Math.max(0, queueDepthAtPublishCompletion - queueDepthObservedAtPublishCompletion),
+      confirmedRoutedMessagesAtPublishCompletion: publishLatencies.length,
+      queueStatsVisibilityLagMessages: Math.max(0, publishLatencies.length - queueDepthObservedAtPublishCompletion),
       consumedMessages: consumed,
       deliveryAge: stats(deliveryLatencies),
       backlogDrainMs,
