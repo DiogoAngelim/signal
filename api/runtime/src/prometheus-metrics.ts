@@ -184,6 +184,7 @@ export function createPrometheusMetricsRecorder(
     name: string,
     key: string,
     factory: () => T,
+    seriesWeight = 1,
   ): T | undefined => {
     let family = collection.get(name);
     if (!family) {
