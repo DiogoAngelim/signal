@@ -73,7 +73,10 @@ database writes in
 `processOnce({ tenantId, consumerName, messageId }, handler)`. The tenant ID
 must come from the trusted authenticated principal. PostgreSQL row-level
 security scopes inbox rows to that tenant; all replicas of a consumer must use
-the same consumerName and messageId namespace within the tenant. The inbox
+the same consumerName and messageId namespace within the tenant. The RLS policy uses a transaction-local
+`signal.tenant_id` setting as defense in depth; a database role with arbitrary
+SQL access can set that GUC itself. This does not replace trusted application
+authorization, parameterized SQL, and least-privilege database access. The inbox
 identity and the handler's PostgreSQL side effects commit or roll back in one
 transaction. If a consumer performs its side effect and the dispatcher crashes
 before acknowledging the event, the event is delivered again. Every consumer
