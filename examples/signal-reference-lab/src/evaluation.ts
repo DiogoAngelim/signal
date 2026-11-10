@@ -1,4 +1,6 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
+import { execFileSync } from "node:child_process";
+import { resolve } from "node:path";
 import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
 import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
@@ -312,6 +314,15 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     await orchestrator.disposePlugin(plugin.id);
     a(!orchestrator.registeredPlugins.includes(plugin.id), "kernel should dispose and unregister the plugin");
   });
+  if (process.env.SIGNAL_CLI_READY === "1") {
+    await run("signal-cli", "Signal verification CLI validates its phase chain and stored artifacts", async (a) => {
+      const cliDirectory = resolve(process.cwd(), "../../signal-cli");
+      const output = execFileSync(process.execPath, ["dist/cli/index.js", "verify"], { cwd: cliDirectory, encoding: "utf8" });
+      a(true, "Signal CLI verify exited successfully: " + output.slice(0, 240));
+    });
+  } else {
+    results.push({ id: "signal-cli", title: "Signal CLI verification", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["SIGNAL_CLI_READY is not set; the separate Signal CLI build/verify gate was not run."] });
+  }
   await run("observability-metrics", "Prometheus metrics render bounded execution telemetry", async (a) => {
     const metrics = createPrometheusMetricsRecorder({ maxSeries: 100 });
     metrics.increment("signal.execution.started");
