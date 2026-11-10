@@ -54,6 +54,7 @@ function isValidRecord(value: unknown): value is ReplayEvidenceRecord {
       !isNonEmptyString(record.policyVersion) ||
       !isDigest(record.inputFingerprint) ||
       !isDigest(record.resultFingerprint) ||
+      !isDigest(record.recordFingerprint) ||
       typeof record.capturedAt !== "string" ||
       !Number.isFinite(Date.parse(record.capturedAt)) ||
       !Array.isArray(record.externalReads) ||
@@ -74,7 +75,8 @@ function isValidRecord(value: unknown): value is ReplayEvidenceRecord {
       ) return false;
       keys.add(read.key);
     }
-    return true;
+    const { recordFingerprint, ...unsignedRecord } = record;
+    return fingerprintJson(unsignedRecord) === recordFingerprint;
   } catch {
     return false;
   }
