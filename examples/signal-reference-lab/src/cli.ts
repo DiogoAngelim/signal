@@ -6,7 +6,7 @@ async function main() {
   const command = process.argv[2] ?? "evaluate";
   if (command === "benchmark") {
     const report = await runBenchmark({ iterations: Number(process.env.LAB_ITERATIONS ?? 250), concurrency: Number(process.env.LAB_CONCURRENCY ?? 16), warmup: Number(process.env.LAB_WARMUP ?? 20) });
-    const output = { generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", harnessVersion: "0.1.0", ...report };
+    const output = { generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", ...report };
     const outIndex = process.argv.indexOf("--out");
     if (outIndex >= 0 && process.argv[outIndex + 1]) await writeFile(process.argv[outIndex + 1], JSON.stringify(output, null, 2));
     console.log(JSON.stringify(output, null, 2));
@@ -27,7 +27,7 @@ async function main() {
   }
   if (command !== "evaluate") throw new Error(`Unknown command: ${command}. Use evaluate, benchmark, compare or coverage.`);
   const report = await runEvaluation();
-  console.log(JSON.stringify({ generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", harnessVersion: "0.1.0", environment: { node: process.version, platform: process.platform, arch: process.arch }, ...report }, null, 2));
+  console.log(JSON.stringify({ generatedAt: new Date().toISOString(), signalCommit: process.env.SIGNAL_COMMIT ?? "not-injected", appCommit: process.env.APP_COMMIT ?? "not-injected", harnessVersion: "0.1.0", environment: { node: process.version, platform: process.platform, arch: process.arch }, ...report }, null, 2));
   if (report.results.some((item) => item.status !== "passed")) process.exitCode = 1;
 }
 main().catch((error) => { console.error(error); process.exitCode = 1; });
