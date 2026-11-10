@@ -77,7 +77,7 @@ jobs:
           --health-retries 12
     env:
       SIGNAL_TEST_DATABASE_URL: postgresql://postgres:postgres@localhost:5432/signal_simulation
-      SIGNAL_SIMULATION_PROFILE: ${{ inputs.profile || 'standard' }}
+      SIGNAL_SIMULATION_PROFILE: ${{ inputs.profile || (github.event_name == 'push' && github.ref == 'refs/heads/codex/distributed-circuit-breaker' && 'extended') || 'standard' }}
       SIGNAL_RABBITMQ_MANAGEMENT_URL: http://localhost:15672
       SIGNAL_RABBITMQ_USER: signal
       SIGNAL_RABBITMQ_PASSWORD: signal-simulation-only
@@ -205,7 +205,7 @@ jobs:
           pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false 2>&1 | tee simulation-evidence/postgres-adapter-tests.log
 
       - name: Extended repeatability pass
-        if: inputs.profile == 'extended' || github.event_name == 'schedule'
+        if: inputs.profile == 'extended' || github.event_name == 'schedule' || (github.event_name == 'push' && github.ref == 'refs/heads/codex/distributed-circuit-breaker')
         run: |
           set -o pipefail
           for pass in 1 2 3; do
