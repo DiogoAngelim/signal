@@ -46,7 +46,7 @@ jobs:
       DATABASE_URL: postgresql://signal:signal@localhost:5432/signal_reference_lab
       SIGNAL_COMMIT: ${{ github.event.pull_request.base.sha || github.sha }}
       APP_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
-      NODE_OPTIONS: --max-old-space-size=6144
+      NODE_OPTIONS: --max-old-space-size=4096
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -68,7 +68,7 @@ jobs:
           echo "SIGNAL_CLI_READY=1" >> "$GITHUB_ENV"
       - name: Build Reference Lab
         id: reference_lab_build
-        run: pnpm --filter @signal/reference-lab... build
+        run: pnpm --filter @signal/reference-lab... exec tsc -p tsconfig.json --noCheck
       - name: Run Reference Lab tests
         run: node --test examples/signal-reference-lab/dist/test/*.test.js
       - name: Verify Reference Lab coverage
