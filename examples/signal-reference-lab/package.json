@@ -16,6 +16,7 @@
   },
   "dependencies": {
     "@signal/sdk-node": "workspace:*",
+    "@signal/decision": "workspace:*",
     "zod": "catalog:"
   },
   "devDependencies": {
