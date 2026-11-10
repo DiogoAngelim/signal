@@ -20,7 +20,7 @@ deployment or external operator-controlled infrastructure.
 | Correctness | Failed-handler retry, concurrent duplicate coalescing, successful dedupe | Dispatcher regression tests | Vitest results |
 | HTTP identity | Spoofed body claims rejected; trusted resolver identity reaches authorization hook | Fastify integration tests | Vitest results |
 | Execution outcomes | Completion duration and failed-execution counts for query, mutation, and event paths; error codes are recorded without payloads or sensitive error details | Runtime lifecycle observations; regression tests assert one completion and one error event per failed operation | Vitest results |
-| Subscriber delivery | Successful/failed handler counts, handler duration, sanitized error codes, completed replay deduplication counts, and in-flight coalescing counts by event name | Runtime subscription wrapper plus replay-safe deduper callbacks; test covers handler failure, retry success, and duplicate suppression | Vitest results |
+| Subscriber delivery | Successful/failed handler counts, handler duration, sanitized error codes, completed replay deduplication counts, and in-flight coalescing counts by event name | Runtime subscription wrapper plus replay-safe deduper callbacks; tests cover handler failure, retry success, completed duplicate suppression, and concurrent in-flight delivery with exactly one handler execution | Vitest results |
 | Architecture | Dependency-rule violations | `pnpm arch:check` | CI logs |
 | Build and type safety | Signal package builds and TypeScript checks | Core workspace build and typecheck workflows | CI logs |
 | Database resilience | Transaction, network fault, crash/recovery, fencing tests | PostgreSQL-backed integration suite | Production-simulation artifact |
