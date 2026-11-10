@@ -64,17 +64,19 @@ export function createReplaySafeSubscriber(
     }
 
     const processing = (async () => {
-      const accepted = await deduper.remember({
+      const dedupeInput = {
         consumerId,
         messageId: envelope.messageId,
         envelope,
-      });
-
-      if (!accepted) {
+      };
+      if (deduper.hasSeen && await deduper.hasSeen(dedupeInput)) {
         return;
       }
 
+      // Do not persist consumption before the side effect: a failed handler
+      // must remain eligible for redelivery.
       await handler(envelope);
+      await deduper.remember(dedupeInput);
     })();
 
     inFlight.set(key, processing);
@@ -92,6 +94,9 @@ export function createInMemoryConsumerDeduper(): SignalConsumerDeduper {
   const seen = new Set<string>();
 
   return {
+    async hasSeen(input): Promise<boolean> {
+      return seen.has(`${input.consumerId}:${input.messageId}`);
+    },
     async remember(input): Promise<boolean> {
       const key = `${input.consumerId}:${input.messageId}`;
       if (seen.has(key)) {

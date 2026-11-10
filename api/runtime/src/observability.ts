@@ -232,10 +232,34 @@ export function createBufferedObservabilityPort(
   let exportFailures = 0;
   let closed = false;
   let draining: Promise<void> | undefined;
+  let flushScheduled = false;
+
+  const scheduleFlush = () => {
+    if (flushScheduled) return;
+    flushScheduled = true;
+    queueMicrotask(() => {
+      flushScheduled = false;
+      void flush().catch(() => {
+        // Failed batches remain queued; the next event or explicit flush retries.
+      });
+    });
+  };
 
   const flush = async (): Promise<void> => {
-    if (draining) return draining;
-    draining = (async () => {
+    // Serialize concurrent flush requests. If an earlier export failed, the
+    // retained batch is retried by this explicit/new flush request.
+    while (draining) {
+      const active = draining;
+      try {
+        await active;
+      } catch {
+        // The failed batch remains at the head of the queue.
+      }
+      if (draining === active) draining = undefined;
+    }
+    if (queue.length === 0) return;
+
+    const current = (async () => {
       while (queue.length > 0) {
         const batch = queue.splice(0, batchSize);
         try {
@@ -247,11 +271,11 @@ export function createBufferedObservabilityPort(
         }
       }
     })();
-
+    draining = current;
     try {
-      await draining;
+      await current;
     } finally {
-      draining = undefined;
+      if (draining === current) draining = undefined;
     }
   };
 
@@ -263,11 +287,7 @@ export function createBufferedObservabilityPort(
       }
       queue.push({ ...event, meta: event.meta ? { ...event.meta } : undefined });
       // Defer I/O so the synchronous runtime lifecycle hook remains bounded.
-      queueMicrotask(() => {
-        void flush().catch(() => {
-          // Failed batches remain queued and are visible through stats().
-        });
-      });
+      scheduleFlush();
     },
     flush,
     async close() {

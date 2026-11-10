@@ -91,10 +91,9 @@ describe("buffered observability port", () => {
     }, { capacity: 4, batchSize: 2 });
 
     port.emit({ event: "execution.start" });
-    await Promise.resolve();
-    await Promise.resolve();
+    await expect(port.flush()).rejects.toThrow("collector unavailable");
     expect(port.stats().queued).toBe(1);
-    expect(port.stats().exportFailures).toBeGreaterThanOrEqual(1);
+    expect(port.stats().exportFailures).toBe(1);
 
     fail = false;
     await port.flush();
