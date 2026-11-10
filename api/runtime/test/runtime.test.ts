@@ -1226,7 +1226,27 @@ describe("runtime", () => {
       },
     });
 
+    runtime.registerQuery(
+      defineQuery({
+        name: "observed.ambiguous.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+    runtime.registerEvent(
+      defineEvent({
+        name: "observed.ambiguous.v1",
+        kind: "event",
+        inputSchema: z.object({}),
+        resultSchema: z.object({}),
+        handler: (payload) => payload,
+      }),
+    );
+
     const unknown = await runtime.run("observed.unknown.v1", {});
+    const ambiguous = await runtime.run("observed.ambiguous.v1", {});
     const unsupported = await runtime.execute({
       kind: "unsupported" as never,
       name: "observed.unsupported.v1",
@@ -1234,10 +1254,12 @@ describe("runtime", () => {
     });
 
     expect(unknown.ok).toBe(false);
+    expect(ambiguous.ok).toBe(false);
     expect(unsupported.ok).toBe(false);
-    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(2);
+    expect(observations.filter((item) => item.event === "error.occurred")).toHaveLength(3);
     expect(observations.map((item) => item.meta?.errorCode)).toEqual([
       "OPERATION_NOT_FOUND",
+      "AMBIGUOUS_OPERATION_KIND",
       "UNSUPPORTED_OPERATION_KIND",
     ]);
     expect(observations.every((item) => (item.durationMs ?? -1) >= 0)).toBe(true);
