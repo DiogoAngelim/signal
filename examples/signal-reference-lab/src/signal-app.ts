@@ -54,10 +54,16 @@ const outcomeInput = z.object({
   notes: z.string().max(2000),
 });
 
-export function createReferenceLab(options: { now?: () => Date } = {}) {
+export function createReferenceLab(options: {
+  now?: () => Date;
+  initialRequests?: CaseRequest[];
+  initialEvents?: LabEvent[];
+} = {}) {
   const now = options.now ?? (() => new Date());
-  const requests = new Map<string, CaseRequest>();
-  const events: LabEvent[] = [];
+  const requests = new Map<string, CaseRequest>(
+    (options.initialRequests ?? []).map((request) => [request.id, structuredClone(request)]),
+  );
+  const events: LabEvent[] = (options.initialEvents ?? []).map((event) => structuredClone(event));
   const inFlightSubmissions = new Map<string, Promise<CaseRequest>>();
   const memory = createInMemoryDecisionMemoryStore();
   const agency = createAgencyPipeline({
@@ -425,6 +431,12 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
   return {
     runtime,
     events,
+    exportState() {
+      return {
+        requests: [...requests.values()].map((request) => structuredClone(request)),
+        events: events.map((event) => structuredClone(event)),
+      };
+    },
     memory,
     agency,
     listTelemetry() {
