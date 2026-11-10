@@ -43,7 +43,8 @@ Do not label Signal production-certified until the following evidence exists:
    - [x] Provide a PostgreSQL dispatcher with lease/claim, retry, dead-letter, and acknowledgement semantics.
    - [x] Add PostgreSQL integration tests for atomic commit/rollback, lease renewal and recovery, expiry-aware acknowledgement/retry fencing, acknowledgement ownership, and dead-lettering (executed in CI when database service is available).
    - [x] Run a real RabbitMQ child-process SIGKILL simulation after publish and before acknowledgement; reclaim the lease, republish, and verify consumer inbox deduplication in CI. This validates the tested boundary, not every possible instruction-level crash point.
-   - [x] Provide a PostgreSQL transactional consumer inbox that commits the deduplication key with consumer database side effects; test rollback, redelivery, and concurrent independent adapters.\n   - [ ] Require destination idempotency or reconciliation for third-party side effects. Do not claim exactly-once external side effects.
+   - [x] Provide a PostgreSQL transactional consumer inbox that commits the deduplication key with consumer database side effects; test rollback, redelivery, and concurrent independent adapters.
+   - [ ] Require destination idempotency or reconciliation for third-party side effects. Do not claim exactly-once external side effects.
 
 2. **Replay completeness**
    - [x] Define a versioned replay evidence envelope binding operation/version, handler artifact digest, policy version, canonical input, external-read snapshots, and result fingerprints.
