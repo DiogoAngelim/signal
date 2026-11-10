@@ -65,7 +65,8 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Retry budgets and local circuit breakers | Exercised deterministically; distributed coordination and real provider failure remain unverified |
 | Replay evidence integrity | Partial; content-addressed record creation and verification tested, full replay executor not integrated |
 | Audit chains/checkpoints and tamper detection | Exercised for hash-chain verification and signed checkpoint anchoring; durable external ledger not configured |
-| Metrics/tracing export, resource benchmarks, production load and soak | Not verified; the included benchmark is local-only |
+| Runtime lifecycle telemetry collection | Exercised through Signal `ObservabilityPort` in memory |
+| Local throughput/latency/RSS benchmark | Exercised; production load, distributed metrics/tracing export and soak remain unverified |
 | Kernel legacy compatibility and Signal CLI certification surfaces | Not verified / not applicable to the current workflow |
 
 A capability is not credited merely because a package exists. Each status must be backed by a scenario and observable evidence. In-process delivery is not proof of durable delivery or exactly-once external effects. The inventory deliberately distinguishes exercised, partial and unverified capabilities rather than presenting simulated adapters as production integrations.
@@ -80,4 +81,4 @@ The score is for the reference integration and its harness, not a certification 
 
 The application uses public Signal package exports only. The harness does not modify Signal, hide failures or automatically change source code. It reports evidence and limitations for subsequent engineering.
 
-The remaining gates are real PostgreSQL integration (transactions, outbox/inbox, concurrent workers, leases and restart recovery), HTTP binding integration, runtime authorization, fault injection for retries/circuit breakers/provider failures, deterministic replay and audit verification, telemetry/resource collection, repeated load/soak profiles, and comparable persisted baselines. These are explicit unverified work, not silently simulated successes.
+The remaining gates are real PostgreSQL integration (transactions, outbox/inbox, concurrent workers, leases and restart recovery), external authentication and runtime authorization policies, distributed fault injection/provider failures, complete historical replay execution and compatibility checks, immutable audit storage and external key custody, telemetry export/resource profiling, repeated load/soak profiles, and persisted multi-run baselines. These are explicit unverified work, not silently simulated successes.
