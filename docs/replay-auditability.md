@@ -22,15 +22,15 @@ assumed, what was unknown — is essential for:
 - **Trust** — Systems that can explain their decisions earn more trust than
   systems that cannot.
 
-Replay is a design objective, not a blanket runtime guarantee. Signal currently supports
-idempotent result replay when a durable adapter has stored the completed result,
-and it provides evidence/journal and audit-chain primitives. It does not yet
-persist a complete, versioned replay envelope for every execution or provide a
-general-purpose deterministic re-execution engine. Deterministic reconstruction
-requires operation/version identifiers, canonical inputs, policy/configuration
-versions, handler artifact identity, and snapshots of all external reads. Runtime
-metadata such as message identifiers, wall-clock timestamps, and durations may
-legitimately differ.
+Replay is a supported, explicit capability, not an automatic guarantee
+for every execution. Signal provides durable idempotent result replay when a
+configured adapter is used, versioned replay-evidence records, tenant-scoped
+PostgreSQL persistence, and a deterministic replay validator. Applications
+must explicitly capture every decision-relevant external read, retain the
+matching handler artifact, and invoke replay through a pure, side-effect-free
+boundary. Signal does not automatically intercept arbitrary I/O or reissue
+external side effects. Runtime metadata such as message identifiers,
+wall-clock timestamps, and durations may legitimately differ.
 
 ## Versioned replay evidence records
 
@@ -53,6 +53,10 @@ row-level security, and an insert-only application contract. Reads and writes
 must supply the tenant identity; PostgreSQL enforces the transaction-local
 signal.tenant_id setting for each adapter operation. Derive tenantId from a
 trusted authenticated principal, never from an untrusted request payload.
+This GUC-based policy is defense in depth against accidental cross-tenant
+queries; a database role able to issue arbitrary SQL can set the GUC itself.
+Do not treat it as a substitute for trusted application authorization,
+parameterized queries, least-privilege roles, and database access isolation.
 
 replayWithEvidence verifies the record, requires exact operation, handler
 artifact, and policy identity, supplies captured external reads to the
