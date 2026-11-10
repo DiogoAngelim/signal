@@ -5,11 +5,11 @@ This document is the release gate for Signal itself. A passing package build or 
 ## Source-level controls implemented
 
 - Retry delay is capped exponential backoff; full jitter is available with an injectable random source.
-- Retry and circuit-breaker configuration is validated.
+- Retry and circuit-breaker configuration is validated. Retry execution supports bounded attempts, capped exponential backoff, full jitter, absolute deadlines, caller cancellation, and an injectable shared token-bucket retry budget that limits aggregate retry amplification.
 - The in-memory circuit-breaker controller issues opaque, generation-scoped permits; stale outcomes cannot close a newer breaker generation, and half-open probe leases can be renewed or reclaimed after expiry.
 - The PostgreSQL distributed circuit-breaker adapter coordinates a single half-open probe across independent adapter instances with expiring UUID fencing tokens.
 - Audit-chain verification checks contiguous zero-based sequence numbers, linkage, SHA-256 formatting, timestamps, identity fields, and entry hashes.
-- Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key.
+- Ed25519 signed audit checkpoints can bind a chain sequence/head hash to a key ID; verification supports an externally managed trusted public key. The PostgreSQL audit-ledger adapter persists contiguous entries and checkpoints, serializes append operations, and uses append-only triggers plus default privilege revocation.
 - The runtime public entrypoint exports resilience, audit-chain, and outbox APIs.
 - The PostgreSQL transactional adapter atomically commits an idempotency result with emitted event envelopes in one database transaction.
 - The outbox uses leased claims with `FOR UPDATE SKIP LOCKED`, bounded batches, at-least-once delivery, retry backoff, acknowledgement ownership, dead-letter state, and bounded-cardinality queue-health statistics.
@@ -79,16 +79,16 @@ Do not label Signal production-certified until the following evidence exists:
    - Prove telemetry exporter failure cannot take down decision execution.
 
 7. **Load, chaos, and recovery validation**
-   - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, PostgreSQL idempotency/outbox, and RabbitMQ queue/recovery behavior.
+   - [x] Publish reproducible benchmark scripts and commit-addressed raw CI artifacts for runtime dispatch, HTTP/rate limits, in-memory and distributed circuit breakers, PostgreSQL idempotency/outbox, RabbitMQ queue/recovery behavior, and sustained in-process runtime/memory trend measurement.
    - [x] Exercise bounded concurrency, half-open races, PostgreSQL failure/recovery, Toxiproxy network faults, RabbitMQ publish/backlog/redelivery metrics, worker process termination, and timed database backup/restore in CI simulations.
-   - [ ] Measure sustained production load, long-duration memory trends, managed-database contention, and deployment-specific recovery objectives.
+   - [ ] Run repeated sustained-runtime benchmarks on controlled runners and measure managed-database contention, long-duration memory trends, and deployment-specific recovery objectives.
    - [ ] Set production budgets from measured service requirements rather than CI runner estimates.
 
 ## Current completion boundary
 
 The transactional outbox, source-level statistical safeguards, signed audit-checkpoint primitives, and queue-health metrics are implemented in this branch. The PostgreSQL adapter is exercised by a disposable PostgreSQL service in CI. The transactional outbox is not active in any deployment merely because it exists in the repository. Operators must apply migration `0001_transactional_outbox.sql`, instantiate `createPostgresTransactionalStore`, and run a persistent worker calling `dispatchOutboxBatch`. The legacy `createPostgresIdempotencyStore` is not sufficient for idempotent mutations that emit events.
 
-The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. The RabbitMQ benchmark uses the ephemeral broker management API; it is not an application AMQP client benchmark or production broker certification. Source-only changes cannot truthfully certify those controls.
+The remaining checklist items are intentionally marked incomplete where real infrastructure, representative production data, independently protected secrets/storage, or measured workloads are required. The PostgreSQL audit ledger is a source capability; it is not independently tamper-proof against database owners and is not externally anchored until a deployment connects an independently administered checkpoint store and managed signing-key custody. The RabbitMQ benchmark uses the ephemeral broker management API; it is not an application AMQP client benchmark or production broker certification. The sustained-runtime benchmark script is a repeatable source artifact but has not yet produced controlled long-duration evidence. Source-only changes cannot truthfully certify those controls.
 
 ## Certification rule
 
