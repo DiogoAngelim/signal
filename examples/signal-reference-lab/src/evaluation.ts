@@ -52,6 +52,7 @@ const capabilities: Capability[] = [
 
 export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; summary: string }> {
   const results: ScenarioResult[] = [];
+  const capabilityResults = capabilities.map((item) => ({ ...item, scenarios: [...item.scenarios] }));
   const run = async (id: string, title: string, fn: (assert: (condition: unknown, message: string) => void) => Promise<void>) => {
     const started = performance.now(), failures: string[] = []; let assertions = 0;
     const assert = (condition: unknown, message: string) => { assertions++; if (!condition) failures.push(message); };
@@ -305,9 +306,29 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     try { await app.submitRequest({ tenantId: "", title: "x", description: "short" }); } catch { rejected = true; }
     a(rejected, "invalid request should be rejected");
   });
+  const postgresResult = results.find((item) => item.id === "postgres-integration");
+  const postgresPassed = postgresResult?.status === "passed";
+  const postgresIds = new Set(["postgres.idempotency", "postgres.transactional-outbox", "postgres.consumer-inbox", "postgres.audit-ledger", "postgres.replay-evidence", "postgres.retry-budget", "postgres.distributed-breaker", "postgres.transactions"]);
+  for (const item of capabilityResults) {
+    if (postgresIds.has(item.id)) {
+      item.status = postgresPassed ? (item.id === "postgres.transactional-outbox" ? "partial" : "exercised") : "not-verified";
+      item.scenarios = postgresPassed ? ["postgres-integration"] : [];
+      if (postgresPassed) item.evidence = "PostgreSQL integration scenario passed against the configured database."; 
+    }
+    if (item.id === "runtime.idempotency" && postgresPassed) {
+      item.status = "exercised";
+      item.scenarios = ["idempotency", "concurrency", "postgres-integration"];
+      item.evidence = "In-memory duplicate handling and PostgreSQL-backed durable idempotency replay are exercised."; 
+      item.limitation = "Cross-host contention under production load remains unmeasured."; 
+    }
+    if (item.id === "memory.lifecycle" && postgresPassed) {
+      item.scenarios = ["lifecycle", "postgres-integration"];
+      item.evidence = "In-memory lifecycle plus NeonPostgresAdapter decision/review persistence and retrieval are exercised."; 
+    }
+  }
   const passed = results.filter((item) => item.status === "passed").length;
-  const score = scoreEngineering(results, capabilities);
-  return { results, capabilities, score, summary: `${passed}/${results.length} scenarios passed; ${capabilities.filter((item) => item.status === "exercised").length}/${capabilities.length} capabilities directly exercised.` };
+  const score = scoreEngineering(results, capabilityResults);
+  return { results, capabilities: capabilityResults, score, summary: passed + "/" + results.length + " scenarios passed; " + capabilityResults.filter((item) => item.status === "exercised").length + "/" + capabilityResults.length + " capabilities directly exercised." };
 }
 
 export type Scorecard = { overall: number; dimensions: { name: string; weight: number; score: number; confidence: "high" | "medium" | "low"; evidence: string[] }[]; interpretation: string };
