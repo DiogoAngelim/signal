@@ -4,6 +4,7 @@ import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
 import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
 import { NeonPostgresAdapter } from "@signal/decision-memory";
+import { SignalOrchestrator, ReplayEngine, StocksOptimizerPlugin } from "@signal/kernel";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
@@ -41,7 +42,8 @@ const capabilities: Capability[] = [
   { id: "memory.lifecycle", area: "Decision memory", capability: "Decision record and review persistence, retrieval, compaction and retention", status: "partial", scenarios: ["lifecycle", "postgres-integration"], evidence: "In-memory SDK store plus NeonPostgresAdapter persist and retrieve decision records and reviews.", limitation: "Compaction, retention scheduling and large-history retrieval are not benchmarked." },
   { id: "commitment.constraints", area: "Commitment", capability: "Resource constraints, feasibility and allocation policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "@signal/commitment evaluateCommitment runs for each assessment with explicit capacity and hard evidence constraints" },
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/semantic-state resolveSemanticState interprets confidence, risk, stability and coherence" },
-  { id: "kernel.compatibility", area: "Kernel", capability: "Kernel orchestration, plugin contracts, stores, execution controller and replay engine", status: "not-verified", scenarios: [], evidence: "@signal/kernel is a separate orchestration surface and is not integrated into this runtime-based workflow." },
+  { id: "kernel.compatibility", area: "Kernel", capability: "Kernel orchestration, plugin contracts, stores and execution lifecycle", status: "exercised", scenarios: ["kernel-pipeline"], evidence: "Public SignalOrchestrator registers a real StocksOptimizerPlugin, executes all four stages, persists output and disposes the plugin." },
+  { id: "kernel.replay", area: "Kernel", capability: "Kernel historical pipeline replay and deterministic result comparison", status: "exercised", scenarios: ["kernel-pipeline"], evidence: "ReplayEngine reruns the registered pipeline and compares the original result." },
   { id: "cli.signal-verification", area: "Signal CLI", capability: "Signal CLI verify, replay, test, build, audit and release commands", status: "not-verified", scenarios: [], evidence: "The lab's own runner is separate from the repository's @signal/cli." },
   { id: "observability.lifecycle", area: "Observability", capability: "Structured runtime lifecycle event emission", status: "exercised", scenarios: ["lifecycle"], evidence: "Signal ObservabilityPort collector captures runtime lifecycle hooks." },
   { id: "observability.export", area: "Observability", capability: "Prometheus exposition, metric allowlists and cardinality controls", status: "partial", scenarios: ["observability-metrics"], evidence: "Prometheus recorder renders bounded counters and latency histograms.", limitation: "No external scrape target, trace exporter or telemetry overhead study." },
@@ -295,6 +297,21 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
   } else {
     results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
   }
+  await run("kernel-pipeline", "Kernel plugin orchestration and replay reproduce the four-stage pipeline", async (a) => {
+    const orchestrator = new SignalOrchestrator({ domain: "reference-lab", version: 1, maxConcurrentPipelines: 2 });
+    const plugin = new StocksOptimizerPlugin();
+    await orchestrator.registerPlugin(plugin);
+    a(orchestrator.registeredPlugins.includes(plugin.id), "kernel should register the plugin");
+    const input = { requestId: "kernel-case-1", amount: 42 };
+    const original = await orchestrator.execute(input, "stocks-generator", "stocks-analyzer", "stocks-scorer", "stocks-aggregator");
+    a(original.trace.length === 4, "pipeline should record all four stage traces");
+    a((original.result as { decision: string }).decision === "hold", "reference plugin should produce its deterministic default decision");
+    const replay = new ReplayEngine(orchestrator.eventBus, orchestrator.signalStore, orchestrator.decisionStore, orchestrator.pipelineRunner);
+    const replayResult = await replay.replay(original.id, input, plugin.getGenerator!(), plugin.getAnalyzer!(), plugin.getScorer!(), plugin.getAggregator!());
+    a(replayResult.match && replayResult.mismatches.length === 0, "kernel replay should reproduce the original pipeline result");
+    await orchestrator.disposePlugin(plugin.id);
+    a(!orchestrator.registeredPlugins.includes(plugin.id), "kernel should dispose and unregister the plugin");
+  });
   await run("observability-metrics", "Prometheus metrics render bounded execution telemetry", async (a) => {
     const metrics = createPrometheusMetricsRecorder({ maxSeries: 100 });
     metrics.increment("signal.execution.started");
