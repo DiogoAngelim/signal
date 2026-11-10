@@ -65,6 +65,13 @@ and side-effect-free; the helper cannot prevent arbitrary I/O inside a callback.
 External actions must be represented as separate commands and must never be
 reissued by replay.
 
+Replay snapshots may contain sensitive application data. Capture the minimum
+fields required to reproduce the decision, redact credentials and bearer
+tokens before persistence, encrypt storage and backups, enforce tenant-scoped
+authorization in the persistence boundary, and define retention/deletion
+requirements before enabling capture. A fingerprint does not anonymize the
+underlying snapshot.
+
 Exact handler artifact matching is intentionally conservative. A newer handler
 or policy must not be substituted silently. Cross-version replay requires
 retaining the original executable artifact or an independently validated
