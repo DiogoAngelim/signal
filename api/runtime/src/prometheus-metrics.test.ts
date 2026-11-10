@@ -30,11 +30,11 @@ describe("Prometheus metrics recorder", () => {
     expect(output).toContain("# TYPE signal_execution_completed_total counter");
     expect(output).toContain('signal_execution_completed_total{execution_mode="live",operation_kind="query"} 5');
     expect(output).toContain("signal_outbox_pending 7");
-    expect(output).toContain('signal_execution_duration_ms_bucket{execution_mode="live",le="10",operation_kind="query",outcome="completed"} 1');
-    expect(output).toContain('signal_execution_duration_ms_bucket{execution_mode="live",le="100",operation_kind="query",outcome="completed"} 2');
-    expect(output).toContain('signal_execution_duration_ms_bucket{execution_mode="live",le="+Inf",operation_kind="query",outcome="completed"} 2');
-    expect(output).toContain("signal_execution_duration_ms_sum");
-    expect(output).toContain("signal_execution_duration_ms_count");
+    expect(output).toContain('signal_execution_duration_seconds_bucket{execution_mode="live",le="0.01",operation_kind="query",outcome="completed"} 1');
+    expect(output).toContain('signal_execution_duration_seconds_bucket{execution_mode="live",le="0.1",operation_kind="query",outcome="completed"} 2');
+    expect(output).toContain('signal_execution_duration_seconds_bucket{execution_mode="live",le="+Inf",operation_kind="query",outcome="completed"} 2');
+    expect(output).toContain("signal_execution_duration_seconds_sum");
+    expect(output).toContain("signal_execution_duration_seconds_count");
   });
 
   it("rejects arbitrary metric names and unbounded label dimensions", () => {
