@@ -31,7 +31,7 @@ This document is the release gate for Signal itself. A passing package build or 
 | Calibration | Metrics and uncertainty intervals are computed from supplied traces | No model is certified without representative, independent, leakage-free production outcomes |
 | Drift | Chronological window comparison is descriptive | It is not a hypothesis test, causal diagnosis, or automatic rollback signal |
 | Observability | Bounded in-memory metric recorder is available | It is not durable and does not provide alerting, aggregation, or retention guarantees |
-| Performance | CI archives reproducible calibration/learning, runtime, HTTP/rate-limit, in-memory breaker, PostgreSQL outbox/idempotency, distributed-breaker, and RabbitMQ queue benchmarks with p50/p95/p99, throughput, queue age/backlog, CPU, and memory observations | CI runner and ephemeral PostgreSQL results are regression evidence, not production capacity or SLO certification |
+| Performance | CI archives reproducible calibration/learning, audit-chain/checkpoint, runtime, HTTP/rate-limit, in-memory breaker, PostgreSQL outbox/idempotency, distributed-breaker, and RabbitMQ queue benchmarks with p50/p95/p99, throughput, queue age/backlog, CPU, and memory observations | CI runner and ephemeral PostgreSQL results are regression evidence, not production capacity or SLO certification |
 
 ## Release-blocking production evidence
 
