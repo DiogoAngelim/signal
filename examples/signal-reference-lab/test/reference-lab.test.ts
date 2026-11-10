@@ -1,6 +1,5 @@
 import test from "node:test";
 import assert from "node:assert/strict";
-import { existsSync } from "node:fs";
 import { runEvaluation, scoreEngineering } from "../src/evaluation.js";
 import { runBenchmark } from "../src/benchmark.js";
 import { compareBenchmarks } from "../src/comparison.js";
@@ -8,12 +7,12 @@ import { compareBenchmarks } from "../src/comparison.js";
 test("reference lab executes lifecycle and safety scenarios", async () => {
   const report = await runEvaluation();
   assert.equal(report.results.length, 16);
-  const cliBuilt = existsSync("../../signal-cli/dist/cli/index.js");
-  assert.ok(report.results.every((item) => item.status === "passed" || (item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL) || (item.id === "signal-cli" && item.status === "blocked" && !cliBuilt)), JSON.stringify(report.results));
+  const cliReady = process.env.SIGNAL_CLI_READY === "1";
+  assert.ok(report.results.every((item) => item.status === "passed" || (item.id === "postgres-integration" && item.status === "blocked" && !process.env.DATABASE_URL) || (item.id === "signal-cli" && item.status === "blocked" && !cliReady)), JSON.stringify(report.results));
   const postgres = report.results.find((item) => item.id === "postgres-integration");
   assert.equal(postgres?.status, process.env.DATABASE_URL ? "passed" : "blocked");
   const cli = report.results.find((item) => item.id === "signal-cli");
-  assert.equal(cli?.status, cliBuilt ? "passed" : "blocked");
+  assert.equal(cli?.status, cliReady ? "passed" : "blocked");
   assert.ok(report.score.overall > 0 && report.score.overall <= 10);
 });
 
