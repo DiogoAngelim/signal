@@ -13,7 +13,7 @@ const capabilities: Capability[] = [
   { id: "protocol.envelopes-schemas", area: "Protocol", capability: "Envelope contracts, operation kinds, schema validation and normalized errors", status: "exercised", scenarios: ["invalid-input"], evidence: "SDK operation definitions validate request schemas at dispatch" },
   { id: "sdk.definitions", area: "SDK", capability: "Public query and mutation operation registration", status: "exercised", scenarios: ["lifecycle"], evidence: "createReferenceLab registers public SDK operation definitions" },
   { id: "runtime.dispatch-context", area: "Runtime", capability: "Query/mutation dispatch and execution context propagation", status: "exercised", scenarios: ["lifecycle"], evidence: "Public runtime.query and runtime.mutation calls with source context" },
-  { id: "runtime.authorization", area: "Runtime", capability: "Runtime-level mutation authorization policies", status: "exercised", scenarios: ["runtime-authorization"], evidence: "Runtime enforces authenticated context and operation-specific authorize policy." },
+  { id: "runtime.authorization", area: "Runtime", capability: "Runtime-level mutation authorization policies", status: "exercised", scenarios: ["runtime-authorization", "runtime-policy"], evidence: "Runtime enforces trusted authenticated context and operation-specific authorize policy." },
   { id: "runtime.idempotency", area: "Idempotency", capability: "Reservation, replay, payload conflict and concurrent duplicate handling", status: "partial", scenarios: ["idempotency"], evidence: "Stable mutation keys are passed to the default memory storage port", limitation: "No distributed storage adapter or cross-process test." },
   { id: "events.publish-subscribe", area: "Events", capability: "Event publication and in-process subscriber delivery", status: "exercised", scenarios: ["lifecycle"], evidence: "Four domain lifecycle events are published and subscribed" },
   { id: "binding.http", area: "HTTP binding", capability: "Signal HTTP query/mutation routes, validation and auth-claim rejection", status: "exercised", scenarios: ["http-binding"], evidence: "@signal/binding-http Fastify server is exercised through inject(); external verified identity middleware remains unconfigured." },
@@ -74,8 +74,6 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     a(blocked, "approval must be blocked when assessment recommends investigation");
     let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
     a(actionBlocked, "action execution must remain blocked without an approved decision");
-    let actionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { actionBlocked = true; }
-    a(actionBlocked, "action execution must be blocked without an approved decision");
     const rejected = await app.decide({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", approve: false, rationale: "Reject pending independent evidence." });
     a(rejected.result === "rejected", "operator rejection should be recordable");
     let rejectedActionBlocked = false; try { await app.executeAction({ requestId: request.id, tenantId: "tenant-a", actor: "operator-1", kind: "grant-access" }); } catch { rejectedActionBlocked = true; }
@@ -161,7 +159,7 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     if (probe) breaker.recordSuccess(probe, 1002);
     a(breaker.snapshot().state === "closed", "successful probe should close the breaker");
   });
-  await run("runtime-authorization", "Runtime rejects unauthenticated and unauthorized mutations", async (a) => {
+  await run("runtime-policy", "Operation authorization policy enforces actor roles", async (a) => {
     const runtime = createSignalRuntime({ runtimeName: "reference-lab-auth-test", requireMutationAuthorization: true });
     runtime.registerMutation({
       name: "lab.authorization.probe.v1", kind: "mutation", idempotency: "required",
