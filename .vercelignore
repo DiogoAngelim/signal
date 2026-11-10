@@ -45,7 +45,6 @@ apps
 test
 spec
 schemas
-public
 
 # Allow the maritime-aware monorepo packages required by the Vercel build helper
 !packages
