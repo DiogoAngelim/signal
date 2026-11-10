@@ -35,10 +35,12 @@ Create a non-owner role for the runtime and grant only required operations:
     GRANT USAGE ON SCHEMA public TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_entries TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_checkpoints TO signal_audit_writer;
+    GRANT SELECT, INSERT ON signal_replay_evidence TO signal_audit_writer;
     GRANT USAGE, SELECT ON SEQUENCE signal_audit_checkpoints_checkpoint_id_seq
       TO signal_audit_writer;
     REVOKE UPDATE, DELETE, TRUNCATE ON signal_audit_entries FROM signal_audit_writer;
     REVOKE UPDATE, DELETE, TRUNCATE ON signal_audit_checkpoints FROM signal_audit_writer;
+    REVOKE UPDATE, DELETE, TRUNCATE ON signal_replay_evidence FROM signal_audit_writer;
 
 Do not grant ownership, CREATE on the schema, trigger-management privileges,
 or membership in a role that can mutate audit tables. Review inherited grants
@@ -62,7 +64,7 @@ latestCheckpoint returns the latest stored checkpoint; verify its signature
 against a trusted public-key registry before relying on it. Close the adapter
 during graceful shutdown.
 
-The adapter validates chain continuity and checkpoint-to-head binding. It does
+The adapter validates chain continuity and checkpoint-to-head binding. The same insert-only role may persist replay evidence through createPostgresReplayEvidenceStore after migration 0006; grant SELECT and INSERT on signal_replay_evidence and no mutation privileges. It does
 not independently recompute every entry hash or verify checkpoint signatures.
 Use Signal's verifyChain, verifyAuditCheckpoint, and
 verifyCheckpointAgainstChain primitives during audit/recovery workflows.
