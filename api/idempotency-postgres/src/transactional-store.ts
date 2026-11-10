@@ -324,7 +324,8 @@ export function createPostgresTransactionalStore(
         `UPDATE signal_outbox
          SET status = 'delivered', delivered_at = now(),
              locked_by = NULL, locked_until = NULL, lease_token = NULL, last_error = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3`,
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
+           AND locked_until > now()`,
         [input.id, input.workerId, input.leaseToken],
       );
       return result.rowCount === 1;
@@ -337,6 +338,7 @@ export function createPostgresTransactionalStore(
              available_at = $4::timestamptz, last_error = $5,
              locked_by = NULL, locked_until = NULL, lease_token = NULL
          WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
+           AND locked_until > now()
          RETURNING status`,
         [input.id, input.workerId, input.leaseToken, input.availableAt, input.error, input.maxAttempts],
       );
