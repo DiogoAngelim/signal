@@ -41,7 +41,7 @@ Create a non-owner role for the runtime and grant only required operations:
     GRANT USAGE ON SCHEMA public TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_entries TO signal_audit_writer;
     GRANT SELECT, INSERT ON signal_audit_checkpoints TO signal_audit_writer;
-    GRANT SELECT, INSERT ON signal_replay_evidence TO signal_audit_writer;\n    GRANT SELECT, INSERT, UPDATE ON signal_retry_budgets TO signal_retry_budget;\n    GRANT INSERT ON signal_consumer_inbox TO signal_consumer;
+    GRANT SELECT, INSERT ON signal_replay_evidence TO signal_audit_writer;\n    GRANT SELECT, INSERT, UPDATE ON signal_retry_budgets TO signal_retry_budget;\n    GRANT SELECT, INSERT ON signal_consumer_inbox TO signal_consumer;
     GRANT USAGE, SELECT ON SEQUENCE signal_audit_checkpoints_checkpoint_id_seq
       TO signal_audit_writer;
     REVOKE UPDATE, DELETE, TRUNCATE ON signal_audit_entries FROM signal_audit_writer;
