@@ -11,6 +11,7 @@ export type QualityCriterion = {
   evidence: string[];
   limitation?: string;
   critical?: boolean;
+  score?: number;
 };
 export type QualityPillar = {
   id: QualityPillarName;
@@ -125,7 +126,7 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     criterion("performance.latency", "Latency distribution and tail behavior", 30, "validated", [scoreEvidence("p95 ms", benchmark.timing.p95Ms, baseline.timing.p95Ms), scoreEvidence("p99 ms", benchmark.timing.p99Ms, baseline.timing.p99Ms)]),
     criterion("performance.throughput", "Sustained throughput and concurrency", 20, "validated", [scoreEvidence("operations/second", benchmark.timing.throughputPerSecond, baseline.timing.throughputPerSecond)]),
     criterion("performance.resources", "Memory and resource efficiency", 15, "validated", [scoreEvidence("RSS delta bytes", currentRss, baselineRss)]),
-  ].map((item) => item.id === "performance.latency" ? { ...item, evidence: [...item.evidence, `derived score=${latencyScore.toFixed(2)}`] } : item.id === "performance.throughput" ? { ...item, evidence: [...item.evidence, `derived score=${throughputScore.toFixed(2)}`] } : item.id === "performance.resources" ? { ...item, evidence: [...item.evidence, `derived score=${resourceScore.toFixed(2)}`] } : item);
+  ].map((item) => item.id === "performance.latency" ? { ...item, score: latencyScore, evidence: [...item.evidence, `derived score=${latencyScore.toFixed(2)}`] } : item.id === "performance.throughput" ? { ...item, score: throughputScore, evidence: [...item.evidence, `derived score=${throughputScore.toFixed(2)}`] } : item.id === "performance.resources" ? { ...item, score: resourceScore, evidence: [...item.evidence, `derived score=${resourceScore.toFixed(2)}`] } : item);
 }
 
 function makePillar(
@@ -135,7 +136,7 @@ function makePillar(
 ): QualityPillar {
   const totalWeight = criteria.reduce((sum, item) => sum + item.weight, 0);
   const validatedWeight = criteria.reduce((sum, item) => sum + (item.status === "validated" ? item.weight : item.status === "partial" ? item.weight * 0.5 : 0), 0);
-  const earned = criteria.reduce((sum, item) => sum + item.weight * (item.status === "validated" ? 1 : item.status === "partial" ? 0.5 : 0), 0);
+  const earned = criteria.reduce((sum, item) => sum + item.weight * (item.status === "validated" ? (item.score ?? 10) / 10 : item.status === "partial" ? (item.score ?? 5) / 10 : 0), 0);
   const criticalFailure = criteria.some((item) => item.critical && item.status === "failed");
   const score = totalWeight > 0 ? Number(Math.min(criticalFailure ? 2 : 10, (earned / totalWeight) * 10).toFixed(2)) : null;
   const coverage = totalWeight ? Number((validatedWeight / totalWeight).toFixed(3)) : 0;
