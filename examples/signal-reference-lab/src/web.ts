@@ -21,7 +21,7 @@ const server = createServer(async (req, res) => {
   if (req.method === "GET" && url.pathname === "/") { res.writeHead(200, { "content-type": "text/html; charset=utf-8" }); res.end(html); return; }
   if (req.method === "GET" && url.pathname === "/api/requests") {
     const tenantId = url.searchParams.get("tenantId") ?? "";
-    const requests = [...(app as any).requests?.values?.() ?? []].filter((item: any) => item.tenantId === tenantId);
+    const requests = app.listRequests(tenantId);
     send(200, { requests, events: app.events.filter((event) => event.tenantId === tenantId) }); return;
   }
   if (req.method === "GET" && url.pathname === "/api/evaluate") { send(200, await runEvaluation()); return; }
