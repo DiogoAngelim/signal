@@ -55,6 +55,7 @@ export function createDistributedCircuitBreakerController(
       // A denied concurrent acquisition must not discard the token held by
       // another in-flight operation on this controller. An allowed permit
       // replaces it; PostgreSQL fencing rejects any expired generation.
+      if (permit.allowed) probeToken = permit.probeToken;
       return permit.allowed;
     },
     async renewProbe() {
