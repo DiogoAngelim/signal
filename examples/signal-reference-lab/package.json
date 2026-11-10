@@ -1,0 +1,35 @@
+{
+  "name": "@signal/reference-lab",
+  "version": "0.1.0",
+  "private": true,
+  "type": "commonjs",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "typecheck": "tsc -p tsconfig.typecheck.json --noEmit --skipLibCheck",
+    "test": "pnpm run build && node --test dist/test/*.test.js",
+    "lab": "pnpm run build && node dist/src/cli.js",
+    "evaluate": "pnpm run build && node dist/src/cli.js evaluate",
+    "benchmark": "pnpm run build && node dist/src/cli.js benchmark",
+    "compare": "pnpm run build && node dist/src/cli.js compare",
+    "coverage:verify": "pnpm run build && node dist/src/cli.js coverage",
+    "start": "pnpm run build && node dist/src/web.js",
+    "db:migrate": "node scripts/migrate-postgres.mjs"
+  },
+  "dependencies": {
+    "@signal/sdk-node": "workspace:*",
+    "@signal/binding-http": "workspace:*",
+    "@signal/agency": "workspace:*",
+    "@signal/decision": "workspace:*",
+    "@signal/decision-memory": "workspace:*",
+    "@signal/commitment": "workspace:*",
+    "@signal/semantic-state": "workspace:*",
+    "zod": "catalog:",
+    "@signal/idempotency-postgres": "workspace:*",
+    "@signal/kernel": "workspace:*",
+    "pg": "catalog:"
+  },
+  "devDependencies": {
+    "@types/node": "catalog:",
+    "typescript": "catalog:"
+  }
+}

@@ -1,0 +1,93 @@
+name: Signal Reference Lab
+
+concurrency:
+  group: signal-reference-lab-${{ github.ref }}
+  cancel-in-progress: true
+
+on:
+  pull_request:
+    paths:
+      - "examples/signal-reference-lab/**"
+      - "signal-cli/**"
+      - "api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+      - ".github/workflows/reference-lab.yml"
+  push:
+    branches: [main]
+    paths:
+      - "examples/signal-reference-lab/**"
+      - "signal-cli/**"
+      - "api/**"
+      - "packages/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - "tsconfig.base.json"
+jobs:
+  reference-lab:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: signal
+          POSTGRES_PASSWORD: signal
+          POSTGRES_DB: signal_reference_lab
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U signal -d signal_reference_lab"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+    env:
+      DATABASE_URL: postgresql://signal:signal@localhost:5432/signal_reference_lab
+      SIGNAL_COMMIT: ${{ github.event.pull_request.base.sha || github.sha }}
+      APP_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      NODE_OPTIONS: --max-old-space-size=4096
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build Signal workspace libraries
+        run: pnpm build:library
+      - name: Apply Signal PostgreSQL migrations
+        run: pnpm --filter @signal/reference-lab db:migrate
+      - name: Build and verify Signal CLI
+        run: |
+          npm ci --prefix signal-cli
+          npm run build --prefix signal-cli
+          echo "SIGNAL_CLI_READY=1" >> "$GITHUB_ENV"
+      - name: Build Reference Lab
+        id: reference_lab_build
+        run: pnpm --filter @signal/reference-lab build
+      - name: Semantic application typecheck
+        run: pnpm --filter @signal/reference-lab typecheck
+        env:
+          NODE_OPTIONS: --max-old-space-size=3072
+      - name: Run Reference Lab tests
+        run: node --test examples/signal-reference-lab/dist/test/*.test.js
+      - name: Verify Reference Lab coverage
+        run: node examples/signal-reference-lab/dist/src/cli.js coverage
+      - name: Capture reproducible evaluation and benchmark artifacts
+        if: always() && steps.reference_lab_build.outcome == 'success'
+        run: |
+          mkdir -p reference-lab-evidence
+          node examples/signal-reference-lab/dist/src/cli.js evaluate --out reference-lab-evidence/evaluation.json
+          node examples/signal-reference-lab/dist/src/cli.js benchmark --out reference-lab-evidence/benchmark.json
+      - name: Upload reference lab evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-reference-lab-${{ github.run_id }}-${{ github.run_attempt }}
+          path: reference-lab-evidence/
+          if-no-files-found: warn
+          retention-days: 30

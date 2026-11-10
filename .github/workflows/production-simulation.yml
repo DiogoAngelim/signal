@@ -15,6 +15,7 @@ on:
     - cron: "23 4 * * 2"
   pull_request:
     paths:
+      - "examples/signal-reference-lab/**"
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
       - "api/ports/**"
@@ -26,6 +27,7 @@ on:
       - main
       - "codex/**"
     paths:
+      - "examples/signal-reference-lab/**"
       - "api/idempotency-postgres/**"
       - "api/runtime/**"
       - "api/ports/**"

@@ -124,7 +124,7 @@ export function executeTest(
     writeProof(
       PROOF_TYPES.TEST_PROOF,
       "FAIL",
-      [preLastHash, postLastHash],
+      [preLastHash ?? GENESIS_HASH, postLastHash ?? GENESIS_HASH],
       false,
       {
         reason: "State drift detected after test execution",
@@ -155,7 +155,7 @@ export function executeTest(
   const proofPath = writeProof(
     PROOF_TYPES.AUDIT_PROOF,
     "PASS",
-    [preLastHash],
+    [preLastHash ?? GENESIS_HASH],
     true,
     {
       preVerify: true,

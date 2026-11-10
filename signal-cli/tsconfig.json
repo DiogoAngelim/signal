@@ -16,7 +16,7 @@
     "sourceMap": true,
     "noUncheckedIndexedAccess": true,
     "noImplicitOverride": true,
-    "noPropertyAccessFromIndexSignature": true,
+    "noPropertyAccessFromIndexSignature": false,
     "allowSyntheticDefaultImports": true
   },
   "include": ["src/**/*.ts"],

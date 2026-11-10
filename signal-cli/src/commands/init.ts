@@ -154,8 +154,7 @@ function importHardeningCheckpoints(root: string): {
       const trace = buildImportTrace(checkpoint, artifactHashes);
 
       // Compute previous hash
-      const previousHash =
-        phases.length === 0 ? GENESIS_HASH : phases[phases.length - 1]?.hash;
+      const previousHash = getPreviousHash(phases);
 
       // Compute input state hash from checkpoint data
       const inputStateHash = hashValue({
