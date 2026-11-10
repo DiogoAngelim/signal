@@ -49,7 +49,8 @@
     "bench:postgres": "pnpm build:library && node benchmarks/prepare-postgres.mjs && node benchmarks/postgres-outbox.mjs",
     "bench:circuit-breaker": "pnpm build:library && node benchmarks/distributed-circuit-breaker.mjs",
     "bench:in-memory-circuit-breaker": "pnpm build:library && node benchmarks/in-memory-circuit-breaker.mjs",
-    "bench:agency-statistics": "pnpm build:library && node benchmarks/agency-statistics.mjs"
+    "bench:agency-statistics": "pnpm build:library && node benchmarks/agency-statistics.mjs",
+    "bench:audit-chain": "pnpm build:library && node benchmarks/audit-chain.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
