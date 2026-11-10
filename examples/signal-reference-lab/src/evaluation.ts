@@ -1,4 +1,7 @@
 import { generateKeyPairSync, randomUUID } from "node:crypto";
+import { existsSync } from "node:fs";
+import { resolve } from "node:path";
+import { spawnSync } from "node:child_process";
 import { execFileSync } from "node:child_process";
 import { resolve } from "node:path";
 import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController, createPrometheusMetricsRecorder } from "@signal/sdk-node";
@@ -46,7 +49,7 @@ const capabilities: Capability[] = [
   { id: "semantic-state.interpretation", area: "Semantic state", capability: "Generic state lexicon and semantic interpretation", status: "exercised", scenarios: ["lifecycle"], evidence: "@signal/semantic-state resolveSemanticState interprets confidence, risk, stability and coherence" },
   { id: "kernel.compatibility", area: "Kernel", capability: "Kernel orchestration, plugin contracts, stores and execution lifecycle", status: "exercised", scenarios: ["kernel-pipeline"], evidence: "Public SignalOrchestrator registers a real StocksOptimizerPlugin, executes all four stages, persists output and disposes the plugin." },
   { id: "kernel.replay", area: "Kernel", capability: "Kernel historical pipeline replay and deterministic result comparison", status: "exercised", scenarios: ["kernel-pipeline"], evidence: "ReplayEngine reruns the registered pipeline and compares the original result." },
-  { id: "cli.signal-verification", area: "Signal CLI", capability: "Signal CLI verify, replay, test, build, audit and release commands", status: "not-verified", scenarios: [], evidence: "The lab's own runner is separate from the repository's @signal/cli." },
+  { id: "cli.signal-verification", area: "Signal CLI", capability: "Standalone Signal CLI phase-chain and artifact verification", status: "not-verified", scenarios: [], evidence: "The CLI verifier is run as a separate executable against its checked-in proof state." },
   { id: "observability.lifecycle", area: "Observability", capability: "Structured runtime lifecycle event emission", status: "exercised", scenarios: ["lifecycle"], evidence: "Signal ObservabilityPort collector captures runtime lifecycle hooks." },
   { id: "observability.export", area: "Observability", capability: "Prometheus exposition, metric allowlists and cardinality controls", status: "partial", scenarios: ["observability-metrics"], evidence: "Prometheus recorder renders bounded counters and latency histograms.", limitation: "No external scrape target, trace exporter or telemetry overhead study." },
   { id: "cli.verification", area: "CLI", capability: "Repeatable local scenario and capability report commands", status: "exercised", scenarios: ["lifecycle"], evidence: "evaluate and coverage CLI commands emit JSON reports" }
@@ -375,6 +378,13 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
       item.scenarios = ["lifecycle", "postgres-integration"];
       item.evidence = "In-memory lifecycle plus NeonPostgresAdapter decision/review persistence and retrieval are exercised."; 
     }
+  }
+  const cliPassed = results.some((item) => item.id === "signal-cli" && item.status === "passed");
+  const cliCapability = capabilityResults.find((item) => item.id === "cli.signal-verification");
+  if (cliCapability) {
+    cliCapability.status = cliPassed ? "exercised" : "not-verified";
+    cliCapability.scenarios = cliPassed ? ["signal-cli"] : [];
+    cliCapability.evidence = cliPassed ? "The standalone Signal CLI verify command passed against the checked-in proof state." : "The standalone Signal CLI binary was not built or did not pass verification.";
   }
   const passed = results.filter((item) => item.status === "passed").length;
   const score = scoreEngineering(results, capabilityResults);
