@@ -53,6 +53,7 @@ let handled = 0;
 dispatcher.subscribe("bench.sustained.received.v1", () => { handled += 1; });
 const payload = { body: "x".repeat(payloadBytes) };
 const latencies = [];
+const maxLatencySamples = 100_000;
 const samples = [];
 const cpuBefore = process.cpuUsage();
 const started = performance.now();
@@ -69,7 +70,13 @@ while (performance.now() - started < durationMs) {
       name: "bench.sustained.received.v1",
       payload,
     }));
-    latencies.push(performance.now() - operationStarted);
+    const latency = performance.now() - operationStarted;
+    const seen = completed + 1;
+    if (latencies.length < maxLatencySamples) latencies.push(latency);
+    else {
+      const replacementIndex = Math.floor(Math.random() * seen);
+      if (replacementIndex < maxLatencySamples) latencies[replacementIndex] = latency;
+    }
   }));
   submitted += batchSize;
   completed += batchSize;
@@ -116,7 +123,7 @@ const report = {
     handled,
     wallTimeMs,
     throughputOpsPerSecond: completed / (wallTimeMs / 1000),
-    latency: summarize(latencies),
+    latency: { ...summarize(latencies), sampling: "uniform reservoir", maxSamples: maxLatencySamples },
     cpuUserMs: cpu.user / 1000,
     cpuSystemMs: cpu.system / 1000,
     cpuCoresUsed: ((cpu.user + cpu.system) / 1000) / wallTimeMs,
