@@ -51,12 +51,10 @@ export function createDistributedCircuitBreakerController(
   return {
     snapshot: () => port.snapshot(key),
     async tryAcquire(now) {
-      // A new acquisition attempt supersedes any locally retained permit.
-      // Clear first so a denied/failed acquisition can never reuse a stale
-      // generation token from an earlier half-open probe.
-      probeToken = undefined;
       const permit = await port.tryAcquire(key, config, now);
-      if (permit.allowed) probeToken = permit.probeToken;
+      // A denied concurrent acquisition must not discard the token held by
+      // another in-flight operation on this controller. An allowed permit
+      // replaces it; PostgreSQL fencing rejects any expired generation.
       return permit.allowed;
     },
     async renewProbe() {
