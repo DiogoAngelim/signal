@@ -22,9 +22,11 @@ anchoring.
 
 ## Apply migration
 
-Apply migrations in order through 0005_append_only_audit_ledger.sql. Run
-migrations as a dedicated schema owner, not as the application runtime role.
-Do not let application processes execute DDL.
+Apply migrations in numeric order through 0005_append_only_audit_ledger.sql
+for the audit ledger. If using the replay evidence store, also apply
+0006_immutable_replay_evidence.sql before granting access to
+signal_replay_evidence. Run migrations as a dedicated schema owner, not as the
+application runtime role. Do not let application processes execute DDL.
 
 ## Least-privilege application role
 
