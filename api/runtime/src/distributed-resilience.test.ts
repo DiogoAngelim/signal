@@ -39,6 +39,8 @@ describe("distributed runtime circuit breaker controller", () => {
     const controller = createDistributedCircuitBreakerController(port, "provider-a");
     expect((await controller.snapshot())?.state).toBe("half-open");
     expect(await controller.tryAcquire()).toBe(true);
+    permit = { allowed: false };
+    expect(await controller.tryAcquire()).toBe(false);
     expect(await controller.renewProbe()).toBe(true);
     expect(calls.at(-1)).toEqual(["renewProbe", "provider-a", "probe-generation-1", 15000]);
     expect(await controller.recordSuccess()).toBe(true);
