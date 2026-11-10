@@ -46,11 +46,13 @@ Do not label Signal production-certified until the following evidence exists:
    - [ ] Require consumer idempotency for at-least-once delivery. Do not claim exactly-once external side effects.
 
 2. **Replay completeness**
-   - Persist operation/version identifiers, canonical input, policy/configuration versions, and immutable snapshots of external reads used by a decision.
-   - Separate replay-safe computation from side-effect execution.
-   - Test replay across process restarts and supported package-version upgrades.
-   - Reject or explicitly mark replay as incomplete when required evidence is missing.
-
+   - [x] Define a versioned replay evidence envelope binding operation/version, handler artifact digest, policy version, canonical input, external-read snapshots, and result fingerprints.
+   - [x] Persist replay evidence in an immutable PostgreSQL store with insert-only semantics and append-only guards.
+   - [x] Provide a replay validator that fails closed on digest mismatch, incompatible handler/policy identity, or result divergence.
+   - [x] Keep replay computation explicitly separate from external side effects through a pure callback boundary.
+   - [ ] Integrate explicit evidence capture into each application execution path that requires deterministic reconstruction; Signal cannot automatically observe arbitrary external reads.
+   - [x] Test evidence persistence through a new adapter/pool instance and fail-closed compatibility checks for mismatched handler/policy versions.
+   - [ ] Execute retained historical handler artifacts across supported runtime/package upgrades and verify reproducible results.
 3. **Trusted audit checkpoints**
    - [x] Provide Ed25519 checkpoint signing and verification primitives binding sequence, chain-head hash, timestamp, and key ID.
    - [ ] Persist audit entries append-only under restrictive database permissions.
