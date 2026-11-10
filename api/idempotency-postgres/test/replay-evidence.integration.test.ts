@@ -85,10 +85,15 @@ integration("PostgreSQL immutable replay evidence store", () => {
     expect(await restartedStore.get({ tenantId, executionId })).toEqual(record);
     await restartedStore.close();
 
-    const conflicting = {
+    const conflictingBase = {
       ...record,
       result: { accepted: false },
       resultFingerprint: fingerprint({ accepted: false }),
+    };
+    const { recordFingerprint: _originalFingerprint, ...conflictingUnsigned } = conflictingBase;
+    const conflicting = {
+      ...conflictingUnsigned,
+      recordFingerprint: fingerprint(conflictingUnsigned),
     };
     await expect(store.save(conflicting)).rejects.toThrow("different content");
 
