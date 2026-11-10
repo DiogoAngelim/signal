@@ -53,7 +53,7 @@ const capabilities: Capability[] = [
   { id: "cli.signal-verification", area: "Signal CLI", capability: "Signal CLI verify, replay, test/build wrappers and audit proof generation", status: "not-verified", scenarios: [], evidence: "Verify, replay, custom-command test/build wrappers and full audit run against the checked-in phase chain and proof state." },
   { id: "observability.lifecycle", area: "Observability", capability: "Structured runtime lifecycle event emission", status: "exercised", scenarios: ["lifecycle"], evidence: "Signal ObservabilityPort collector captures runtime lifecycle hooks." },
   { id: "observability.export", area: "Observability", capability: "Prometheus exposition, metric allowlists and cardinality controls", status: "partial", scenarios: ["observability-metrics"], evidence: "Prometheus recorder renders bounded counters and latency histograms.", limitation: "No external scrape target, trace exporter or telemetry overhead study." },
-  { id: "cli.verification", area: "CLI", capability: "Repeatable local scenario and capability report commands", status: "exercised", scenarios: ["lifecycle"], evidence: "evaluate and coverage CLI commands emit JSON reports" }
+
 ];
 
 export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capabilities: Capability[]; score: Scorecard; qualityGates: Record<ScenarioTarget, { total: number; passed: number; failed: number; blocked: number }>; summary: string }> {
