@@ -1,5 +1,5 @@
 import type { BenchmarkReport } from "./benchmark.js";
-import type { Capability, ScenarioResult } from "./evaluation.js";
+import type { ScenarioResult } from "./evaluation.js";
 
 export type QualityPillarName = "correctness" | "security" | "performance" | "reliability";
 export type EvidenceStatus = "validated" | "partial" | "failed" | "unverified";
@@ -146,7 +146,6 @@ function makePillar(
 
 export function scoreQuality(
   results: ScenarioResult[],
-  inventory: Capability[],
   benchmark?: BenchmarkEvidence,
 ): QualityScorecard {
   const s = (id: string) => scenarioStatus(results, [id]);
