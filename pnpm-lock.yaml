@@ -70,6 +70,10 @@ overrides:
 importers:
 
   .:
+    dependencies:
+      pg:
+        specifier: 'catalog:'
+        version: 8.21.0
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
