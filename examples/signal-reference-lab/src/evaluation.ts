@@ -81,6 +81,14 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     let prematureOutcomeBlocked = false; try { await app.recordOutcome({ requestId: request.id, tenantId: "tenant-a", result: "success", notes: "Attempted to record an outcome before execution." }); } catch { prematureOutcomeBlocked = true; }
     a(prematureOutcomeBlocked, "outcome capture must require an executed action");
   });
+  await run("runtime-authorization", "Runtime rejects mutations without trusted authorization", async (a) => {
+    const app = createReferenceLab();
+    const input = { tenantId: "tenant-a", title: "Review privileged request", description: "Check that mutation authorization is enforced by the runtime." };
+    const denied = await app.runtime.mutation("lab.request.submit.v1", input, { idempotencyKey: "unauthorized-attempt", source: { system: "untrusted-client", transport: "test", runtime: "reference-lab" } });
+    a(!denied.ok, "runtime must reject a mutation without trusted authorization");
+    const accepted = await app.submitRequest(input);
+    a(accepted.status === "received", "trusted internal operator context should be authorized");
+  });
   await run("tenant-isolation", "Tenant boundary prevents cross-tenant reads and writes", async (a) => {
     const app = createReferenceLab(); const request = await app.submitRequest({ tenantId: "tenant-a", title: "Review data export", description: "Assess a requested export of customer data." });
     a(await app.getRequest(request.id, "tenant-b") === null, "other tenant must not read request");
