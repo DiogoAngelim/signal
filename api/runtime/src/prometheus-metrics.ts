@@ -245,7 +245,10 @@ export function createPrometheusMetricsRecorder(
       sample.count += 1;
       sample.sum += durationMs / 1_000;
       for (let index = 0; index < buckets.length; index += 1) {
-        if (durationMs <= buckets[index]!) sample.bucketCounts[index]! += 1;
+        if (durationMs <= buckets[index]!) {
+          sample.bucketCounts[index]! += 1;
+          break;
+        }
       }
     },
 
