@@ -1,7 +1,8 @@
-import { generateKeyPairSync } from "node:crypto";
-import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime } from "@signal/sdk-node";
+import { generateKeyPairSync, randomUUID } from "node:crypto";
+import { createAuditChainEntry, verifyChain, signAuditCheckpoint, verifyAuditCheckpoint, verifyCheckpointAgainstChain, createReplayEvidenceRecord, verifyReplayEvidenceRecord, createCircuitBreakerController, createRetryBudget, executeWithRetry, createSignalRuntime, createInProcessDispatcher, createDistributedCircuitBreakerController } from "@signal/sdk-node";
 import { z } from "zod";
 import { createSignalHttpServer } from "@signal/binding-http";
+import { createPostgresTransactionalStore, createPostgresConsumerInbox, createPostgresRetryBudget, createPostgresCircuitBreakerPort, createPostgresReplayEvidenceStore, createPostgresAuditLedger } from "@signal/idempotency-postgres";
 import { createReferenceLab } from "./signal-app.js";
 import type { CaseRequest } from "./domain.js";
 
@@ -17,11 +18,11 @@ const capabilities: Capability[] = [
   { id: "runtime.idempotency", area: "Idempotency", capability: "Reservation, replay, payload conflict and concurrent duplicate handling", status: "partial", scenarios: ["idempotency"], evidence: "Stable mutation keys are passed to the default memory storage port", limitation: "No distributed storage adapter or cross-process test." },
   { id: "events.publish-subscribe", area: "Events", capability: "Event publication and in-process subscriber delivery", status: "exercised", scenarios: ["lifecycle"], evidence: "Four domain lifecycle events are published and subscribed" },
   { id: "binding.http", area: "HTTP binding", capability: "Signal HTTP query/mutation routes, validation and auth-claim rejection", status: "exercised", scenarios: ["http-binding"], evidence: "@signal/binding-http Fastify server is exercised through inject(); external verified identity middleware remains unconfigured." },
-  { id: "postgres.transactions", area: "PostgreSQL", capability: "Database transactions, migrations, locks and persistence", status: "not-verified", scenarios: [], evidence: "No PostgreSQL adapter or database is configured." },
-  { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "not-verified", scenarios: [], evidence: "Default in-process dispatcher only; no durable worker is started." },
-  { id: "inbox.transactionality", area: "Inbox", capability: "Transactional consumer inbox and effect deduplication", status: "not-verified", scenarios: [], evidence: "Subscriber callback deduplicates in process only." },
+  { id: "postgres.transactions", area: "PostgreSQL", capability: "Database transactions, migrations, locks and persistence", status: "exercised", scenarios: ["postgres-integration"], evidence: "Ephemeral PostgreSQL integration validates transactional idempotency, outbox, consumer inbox, retry budget, distributed breaker, replay evidence and audit ledger." },
+  { id: "outbox.durability", area: "Outbox", capability: "Durable outbox, leases, fencing and crash recovery", status: "exercised", scenarios: ["postgres-integration"], evidence: "Transactional mutation emits to PostgreSQL outbox; runtime dispatch acknowledges durable delivery." },
+  { id: "inbox.transactionality", area: "Inbox", capability: "Transactional consumer inbox and effect deduplication", status: "exercised", scenarios: ["postgres-integration"], evidence: "PostgreSQL inbox processOnce commits one handler execution and returns duplicate for repeated delivery." },
   { id: "resilience.retry-budgets", area: "Resilience", capability: "Retry policies, budgets and bounded retry execution", status: "exercised", scenarios: ["resilience"], evidence: "executeWithRetry is exercised with a deterministic retry budget and transient failure." },
-  { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker open/half-open probe and recovery", status: "exercised", scenarios: ["resilience"], evidence: "Permit-scoped circuit breaker transitions are tested with an injected clock.", limitation: "Distributed breaker coordination and real provider failures remain unverified." },
+  { id: "resilience.circuit-breakers", area: "Resilience", capability: "Circuit breaker open/half-open probe and recovery", status: "exercised", scenarios: ["resilience", "postgres-integration"], evidence: "Local permit-scoped transitions and PostgreSQL distributed breaker coordination are exercised.", limitation: "Real provider failures and multi-region coordination remain unverified." },
   { id: "replay.evidence", area: "Replay", capability: "Content-addressed replay evidence creation and integrity verification", status: "partial", scenarios: ["replay-evidence"], evidence: "Replay evidence records and digest verification are exercised.", limitation: "A complete historical replay executor and cross-version compatibility workflow are not yet integrated." },
   { id: "audit.chain-checkpoints", area: "Audit", capability: "Hash-chain integrity, signed checkpoints and tamper detection", status: "exercised", scenarios: ["audit-integrity"], evidence: "Audit chain verification, Ed25519 checkpoint signing and chain anchoring are exercised." },
   { id: "decision.assessment", area: "Decision", capability: "Evidence lineage, uncertainty assessment and hard-stop policy", status: "exercised", scenarios: ["lifecycle", "authorization"], evidence: "packages/decision assessDecisionEvidence is used to calculate evidence quality, confidence, governance and stewardship" },
@@ -179,6 +180,88 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     const authorized = await runtime.mutation<{ action: string }, { accepted: boolean }>("lab.authorization.probe.v1", { action: "write" }, { idempotencyKey: "authorized", auth: { actor: { id: "operator", roles: ["lab:write"] } } });
     a(authorized.ok && authorized.result.accepted, "authorized actor should execute mutation");
   });
+  if (process.env.DATABASE_URL) {
+    await run("postgres-integration", "PostgreSQL adapters preserve transactional delivery and shared coordination", async (a) => {
+      const connectionString = process.env.DATABASE_URL as string;
+      const suffix = randomUUID();
+      const store = createPostgresTransactionalStore({ connectionString, applicationName: "signal-reference-lab-test" });
+      const inbox = createPostgresConsumerInbox({ connectionString, applicationName: "signal-reference-lab-inbox" });
+      const retryBudget = createPostgresRetryBudget({ connectionString, budgetKey: `reference-lab:${suffix}`, capacity: 1 });
+      const breakerPort = createPostgresCircuitBreakerPort({ connectionString });
+      const breaker = createDistributedCircuitBreakerController(breakerPort, `reference-lab:${suffix}`, { threshold: 1, resetTimeoutMs: 0, probeLeaseMs: 1000 });
+      const replayStore = createPostgresReplayEvidenceStore({ connectionString, applicationName: "signal-reference-lab-replay" });
+      const keys = generateKeyPairSync("ed25519");
+      const privateKey = keys.privateKey.export({ type: "pkcs8", format: "pem" }).toString();
+      const publicKey = keys.publicKey.export({ type: "spki", format: "pem" }).toString();
+      const keyId = `reference-lab-${suffix}`;
+      let auditHistory: ReturnType<typeof createAuditChainEntry>[] = [];
+      const auditLedger = createPostgresAuditLedger({
+        connectionString,
+        verifyEntry(entry) {
+          const existing = auditHistory.find((item) => item.sequence === entry.sequence);
+          if (existing) return existing.hash === entry.hash && verifyChain(auditHistory.slice(0, entry.sequence + 1));
+          return verifyChain([...auditHistory, entry]);
+        },
+        verifyCheckpoint(checkpoint) { return verifyAuditCheckpoint(checkpoint, publicKey, keyId); }
+      });
+      try {
+        const eventPort = createInProcessDispatcher();
+        let deliveries = 0;
+        const runtime = createSignalRuntime({ runtimeName: "signal-reference-lab-postgres", eventPort, storagePort: store });
+        runtime.registerEvent({ name: "lab.postgres.outbox.v1", kind: "event", inputSchema: z.object({ token: z.string() }), resultSchema: z.object({ accepted: z.boolean() }), handler: () => ({ accepted: true }) });
+        runtime.subscribe("lab.postgres.outbox.v1", () => { deliveries += 1; }, { consumerId: "postgres-outbox-proof", replaySafe: true });
+        runtime.registerMutation({
+          name: "lab.postgres.commit.v1", kind: "mutation", idempotency: "required",
+          inputSchema: z.object({ token: z.string() }), resultSchema: z.object({ committed: z.boolean() }),
+          async handler(input, context) { await context.emit("lab.postgres.outbox.v1", { token: input.token }); return { committed: true }; }
+        });
+        const first = await runtime.mutation<{ token: string }, { committed: boolean }>("lab.postgres.commit.v1", { token: suffix }, { idempotencyKey: `outbox:${suffix}` });
+        a(first.ok && first.result.committed, "PostgreSQL-backed mutation should commit");
+        a(deliveries === 1, "committed outbox event should reach the in-process subscriber");
+        const replayed = await runtime.mutation<{ token: string }, { committed: boolean }>("lab.postgres.commit.v1", { token: suffix }, { idempotencyKey: `outbox:${suffix}` });
+        a(replayed.ok && deliveries === 1, "idempotent replay must not redeliver the event");
+        const outboxStats = await store.getStats();
+        a(outboxStats.delivered >= 1, "outbox should retain durable delivery state");
+
+        let effects = 0;
+        const inboxInput = { tenantId: `tenant-${suffix}`, consumerName: "reference-lab", messageId: `message-${suffix}` };
+        const processed = await inbox.processOnce(inboxInput, async (client) => { effects += 1; await client.query("SELECT 1"); return "applied"; });
+        const duplicate = await inbox.processOnce(inboxInput, async () => { effects += 1; return "duplicate-effect"; });
+        a(processed.status === "processed" && duplicate.status === "duplicate" && effects === 1, "transactional inbox should apply a consumer effect once");
+
+        a(await retryBudget.tryConsume(), "shared retry budget should grant its available token");
+        a(!(await retryBudget.tryConsume()), "shared retry budget should reject after exhaustion");
+        a(await breaker.tryAcquire(), "distributed breaker should grant an initial permit");
+        a(await breaker.recordFailure(), "distributed breaker should record failure");
+        a((await breaker.snapshot())?.state === "open", "distributed breaker should open at threshold");
+        a(await breaker.tryAcquire(new Date(Date.now() + 100)), "distributed breaker should admit a half-open probe after reset");
+        a(await breaker.recordSuccess(), "distributed breaker should record successful probe");
+        a((await breaker.snapshot())?.state === "closed", "successful distributed probe should close breaker");
+
+        const replayRecord = createReplayEvidenceRecord({ tenantId: `tenant-${suffix}`, executionId: `execution-${suffix}`, operationName: "lab.postgres.commit.v1", operationVersion: "v1", handlerArtifactDigest: "a".repeat(64), policyVersion: "reference-policy-v1", canonicalInput: { token: suffix }, externalReads: [], result: { committed: true } });
+        await replayStore.save(replayRecord);
+        const replayLoaded = await replayStore.get({ tenantId: replayRecord.tenantId, executionId: replayRecord.executionId });
+        a(Boolean(replayLoaded) && verifyReplayEvidenceRecord(replayLoaded!), "PostgreSQL replay evidence should persist and verify");
+
+        const existingAudit = await auditLedger.readEntries({ limit: 10000 });
+        auditHistory = existingAudit;
+        const previous = auditHistory.at(-1) ?? null;
+        const entry = createAuditChainEntry(previous, { operationName: "lab.postgres.commit.v1", operationKind: "mutation", messageId: `audit-${suffix}`, outcome: "completed" });
+        auditHistory = [...auditHistory, entry];
+        await auditLedger.appendEntry(entry);
+        const checkpoint = signAuditCheckpoint(auditHistory, { keyId, privateKey });
+        await auditLedger.appendCheckpoint(checkpoint);
+        const persistedAudit = await auditLedger.readEntries({ limit: 10000 });
+        const persistedCheckpoint = await auditLedger.latestCheckpoint();
+        a(verifyChain(persistedAudit), "persisted audit chain should verify");
+        a(Boolean(persistedCheckpoint) && verifyCheckpointAgainstChain(persistedCheckpoint!, persistedAudit), "persisted signed checkpoint should anchor the audit chain");
+      } finally {
+        await Promise.all([store.close(), inbox.close(), retryBudget.close(), breakerPort.close(), replayStore.close(), auditLedger.close()]);
+      }
+    });
+  } else {
+    results.push({ id: "postgres-integration", title: "PostgreSQL adapter integration", status: "blocked", durationMs: 0, assertions: 0, failures: [], evidence: ["DATABASE_URL is not configured; durable persistence/outbox/inbox/distributed adapters were not exercised."] });
+  }
   await run("invalid-input", "Malformed request is rejected by the Signal contract", async (a) => {
     const app = createReferenceLab(); let rejected = false;
     try { await app.submitRequest({ tenantId: "", title: "x", description: "short" }); } catch { rejected = true; }
