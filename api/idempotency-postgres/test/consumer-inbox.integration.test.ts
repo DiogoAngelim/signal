@@ -36,7 +36,7 @@ integration("PostgreSQL transactional consumer inbox", () => {
     const quotedDatabaseName = '"' + databaseName.replaceAll('"', '""') + '"';
     await admin.query(`GRANT CONNECT ON DATABASE ${quotedDatabaseName} TO "${roleName}"`);
     await admin.query(`GRANT USAGE ON SCHEMA public TO "${roleName}"`);
-    await admin.query(`GRANT INSERT ON signal_consumer_inbox TO "${roleName}"`);
+    await admin.query(`GRANT SELECT, INSERT ON signal_consumer_inbox TO "${roleName}"`);
     await admin.query(`GRANT INSERT ON signal_inbox_test_side_effects TO "${roleName}"`);
     const scopedUrl = new URL(connectionString!);
     scopedUrl.username = roleName;
