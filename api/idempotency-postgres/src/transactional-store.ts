@@ -272,8 +272,8 @@ export function createPostgresTransactionalStore(
       if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 1000) {
         throw new RangeError("Outbox limit must be between 1 and 1000.");
       }
-      if (!Number.isFinite(input.leaseMs) || input.leaseMs < 1000) {
-        throw new RangeError("Outbox lease must be at least 1000 milliseconds.");
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Outbox lease must be an integer between 1000 and 86400000 milliseconds.");
       }
       const client = await pool.connect();
       try {
