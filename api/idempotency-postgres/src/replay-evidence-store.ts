@@ -1,4 +1,5 @@
 import type { ReplayEvidencePort, ReplayEvidenceRecord } from "@signal/ports";
+import { createHash } from "node:crypto";
 import { Pool } from "pg";
 
 function stableJson(value: unknown): string {
@@ -10,6 +11,10 @@ function stableJson(value: unknown): string {
   if (Array.isArray(value)) return "[" + value.map(stableJson).join(",") + "]";
   const record = value as Record<string, unknown>;
   return "{" + Object.keys(record).sort().map((key) => JSON.stringify(key) + ":" + stableJson(record[key])).join(",") + "}";
+}
+
+function fingerprintJson(value: unknown): string {
+  return createHash("sha256").update(stableJson(value)).digest("hex");
 }
 
 export interface CreatePostgresReplayEvidenceStoreOptions {
@@ -43,9 +48,16 @@ export function createPostgresReplayEvidenceStore(
         !record.policyVersion.trim() ||
         !/^[a-f0-9]{64}$/.test(record.inputFingerprint) ||
         !/^[a-f0-9]{64}$/.test(record.resultFingerprint) ||
-        !Number.isFinite(Date.parse(record.capturedAt))
+        !Number.isFinite(Date.parse(record.capturedAt)) ||
+        fingerprintJson(record.canonicalInput) !== record.inputFingerprint ||
+        fingerprintJson(record.result) !== record.resultFingerprint ||
+        record.externalReads.some((read) =>
+          !/^[a-f0-9]{64}$/.test(read.valueFingerprint) ||
+          fingerprintJson(read.value) !== read.valueFingerprint ||
+          !Number.isFinite(Date.parse(read.observedAt)),
+        )
       ) {
-        throw new Error("Invalid replay evidence record.");
+        throw new Error("Invalid replay evidence record or content fingerprint.");
       }
       const inserted = await pool.query(
         `INSERT INTO signal_replay_evidence
