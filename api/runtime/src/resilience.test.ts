@@ -62,12 +62,16 @@ describe("executeWithRetry", () => {
     expect(second).toHaveBeenCalledOnce();
 
     now = 1_000;
-    await expect(executeWithRetry(second, {
+    const third = vi.fn()
+      .mockRejectedValueOnce(transient())
+      .mockResolvedValue("third");
+    await expect(executeWithRetry(third, {
       ...policy,
       retryBudget: budget,
       random: () => 0,
       sleep: async () => {},
-    })).resolves.toBe("second");
+    })).resolves.toBe("third");
+    expect(third).toHaveBeenCalledTimes(2);
     expect(budget.snapshot().available).toBe(0);
   });
 
