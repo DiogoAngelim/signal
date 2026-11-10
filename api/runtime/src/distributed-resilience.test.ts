@@ -148,6 +148,33 @@ describe("executeWithDistributedCircuitBreaker", () => {
     expect(controller.recordFailure).toHaveBeenCalledOnce();
   });
 
+  it("reports unrecorded outcomes without masking dependency results or observer failures", async () => {
+    const reported: unknown[] = [];
+    const controller = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockResolvedValue(true),
+      renewProbe: vi.fn().mockResolvedValue(false),
+      recordSuccess: vi.fn().mockResolvedValue(false),
+      recordFailure: vi.fn().mockResolvedValue(false),
+    };
+
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => "dependency-result",
+      { onCoordinationError: (error) => { reported.push(error); } },
+    )).resolves.toBe("dependency-result");
+    expect(reported[0]).toMatchObject({
+      code: "CIRCUIT_BREAKER_OUTCOME_NOT_RECORDED",
+    });
+
+    const dependencyFailure = new Error("dependency failed");
+    await expect(executeWithDistributedCircuitBreaker(
+      controller,
+      async () => { throw dependencyFailure; },
+      { onCoordinationError: () => { throw new Error("telemetry failed"); } },
+    )).rejects.toBe(dependencyFailure);
+  });
+
   it("rejects when the shared breaker denies a permit", async () => {
     const controller = {
       snapshot: vi.fn().mockResolvedValue(null),
