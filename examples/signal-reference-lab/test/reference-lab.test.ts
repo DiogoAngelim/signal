@@ -30,6 +30,10 @@ test("benchmark emits reproducible workload and percentile metadata", async () =
   assert.equal(report.workload.iterations, 12);
   assert.equal(report.workload.concurrency, 3);
   assert.ok(report.timing.p95Ms >= 0);
+  assert.equal(report.samplesMs.length, 12);
+  assert.equal(report.integrity.valid, true);
+  assert.equal(report.integrity.actualSamples, report.workload.iterations);
+  assert.ok(report.environment.cpuModel.length > 0 && report.environment.osRelease.length > 0);
   assert.ok(report.environment.rssAfter > 0);
   assert.ok(report.limitations.length >= 2);
 });
@@ -38,4 +42,5 @@ test("benchmark comparison rejects mismatched workload", async () => {
   const baseline = await runBenchmark({ iterations: 10, concurrency: 2, warmup: 1 });
   const current = await runBenchmark({ iterations: 11, concurrency: 2, warmup: 1 });
   assert.throws(() => compareBenchmarks(current, baseline), /workload parameters differ/);
+  assert.throws(() => compareBenchmarks({ ...baseline, integrity: { ...baseline.integrity, valid: false } }, baseline), /measurement integrity is invalid/);
 });
