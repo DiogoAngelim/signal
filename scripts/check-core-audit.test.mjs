@@ -8,32 +8,32 @@ const script = new URL("./check-core-audit.mjs", import.meta.url);
 const cases = [
   {
     name: "moderate-only summary",
-    output: "4 vulnerabilities found\\nSeverity: 4 moderate\\n",
+    output: "4 vulnerabilities found\nSeverity: 4 moderate\n",
     expected: 0,
   },
   {
     name: "clean audit",
-    output: "No known vulnerabilities found\\n",
+    output: "No known vulnerabilities found\n",
     expected: 0,
   },
   {
     name: "high summary without advisory detail",
-    output: "1 vulnerabilities found\\nSeverity: 1 high\\n",
+    output: "1 vulnerabilities found\nSeverity: 1 high\n",
     expected: 1,
   },
   {
     name: "core high advisory",
-    output: "┌───────────────┐\\n│ high          │\\n│ Package       │ axios │\\n│ Paths         │ api__runtime │\\n",
+    output: "┌───────────────┐\n│ high          │\n│ Package       │ axios │\n│ Paths         │ api__runtime │\n",
     expected: 1,
   },
   {
     name: "example high advisory",
-    output: "┌───────────────┐\\n│ high          │\\n│ Package       │ axios │\\n│ Paths         │ examples__aware │\\n",
+    output: "┌───────────────┐\n│ high          │\n│ Package       │ axios │\n│ Paths         │ examples__aware │\n",
     expected: 0,
   },
   {
     name: "unparseable non-empty output",
-    output: "audit failed unexpectedly\\n",
+    output: "audit failed unexpectedly\n",
     expected: 1,
   },
 ];
@@ -48,11 +48,11 @@ try {
     if (result.status !== testCase.expected) {
       throw new Error(
         testCase.name + ": expected exit " + testCase.expected +
-        ", received " + result.status + "\\n" + result.stdout + result.stderr,
+        ", received " + result.status + "\n" + result.stdout + result.stderr,
       );
     }
   }
-  process.stdout.write("Dependency audit parser fixtures passed (" + cases.length + ").\\n");
+  process.stdout.write("Dependency audit parser fixtures passed (" + cases.length + ").\n");
 } finally {
   await rm(directory, { recursive: true, force: true });
 }
