@@ -55,6 +55,7 @@ integration("PostgreSQL distributed circuit breaker", () => {
     const eligibleAt = new Date(Date.now() + config.resetTimeoutMs + 25);
     const firstProbe = await portA.tryAcquire(key, config, eligibleAt);
     expect(firstProbe.allowed).toBe(true);
+    expect(await portA.renewProbe(key, firstProbe.probeToken!, 5000)).toBe(true);
     await setupPool.query(
       "UPDATE signal_circuit_breakers SET probe_expires_at = now() - interval '1 second' WHERE breaker_key = $1",
       [key],
