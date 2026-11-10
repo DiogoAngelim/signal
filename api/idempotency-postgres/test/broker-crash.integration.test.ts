@@ -98,18 +98,24 @@ integration("broker and consumer crash-boundary simulation", () => {
     });
 
     // The broker confirms the first publish; the worker crashes before DB ack.
+    const firstPublishStartedAt = Date.now();
     expect(await publish()).toMatchObject({ routed: true });
+    const firstPublishConfirmedAt = Date.now();
     await admin.query(
       "UPDATE signal_outbox SET locked_until = now() - interval '1 second' WHERE message_id = $1",
       [messageId],
     );
 
     const secondWorkerId = `worker-after-restart-${suffix}`;
+    const recoveryClaimStartedAt = Date.now();
     const secondClaim = await store.claimBatch({ workerId: secondWorkerId, limit: 100, leaseMs: 30_000 });
+    const recoveryClaimLatencyMs = Date.now() - recoveryClaimStartedAt;
     const recovered = secondClaim.find((item) => item.envelope.messageId === messageId);
     expect(recovered).toBeDefined();
     // Recovery republishes because the first worker cannot know whether publish succeeded.
+    const recoveryPublishStartedAt = Date.now();
     expect(await publish()).toMatchObject({ routed: true });
+    const recoveryPublishConfirmedAt = Date.now();
 
     const deliveries = await brokerRequest(`api/queues/%2F/${queueName}/get`, {
       method: "POST",
@@ -145,13 +151,27 @@ integration("broker and consumer crash-boundary simulation", () => {
       }
     }
 
-    expect((await admin.query(
+    const sideEffectCount = (await admin.query(
       "SELECT count(*)::int AS count FROM signal_simulation_side_effects WHERE message_id = $1",
       [messageId],
-    )).rows[0].count).toBe(1);
+    )).rows[0].count;
+    expect(sideEffectCount).toBe(1);
 
-    expect(await store.acknowledge({ id: event!.id, workerId: `worker-before-crash-${suffix}`, leaseToken: event!.leaseToken })).toBe(false);
-    expect(await store.acknowledge({ id: recovered!.id, workerId: secondWorkerId, leaseToken: recovered!.leaseToken })).toBe(true);
+    const staleAckAccepted = await store.acknowledge({ id: event!.id, workerId: `worker-before-crash-${suffix}`, leaseToken: event!.leaseToken });
+    const recoveryAckAccepted = await store.acknowledge({ id: recovered!.id, workerId: secondWorkerId, leaseToken: recovered!.leaseToken });
+    expect(staleAckAccepted).toBe(false);
+    expect(recoveryAckAccepted).toBe(true);
+    console.info("SIGNAL_BROKER_RECOVERY_METRICS", JSON.stringify({
+      initialPublishLatencyMs: firstPublishConfirmedAt - firstPublishStartedAt,
+      recoveryClaimLatencyMs,
+      recoveryPublishLatencyMs: recoveryPublishConfirmedAt - recoveryPublishStartedAt,
+      recoveryElapsedMs: recoveryPublishConfirmedAt - firstPublishConfirmedAt,
+      duplicateDeliveries: matching.length,
+      redeliveryAmplification: matching.length,
+      consumerSideEffects: sideEffectCount,
+      staleAcknowledgementRejected: !staleAckAccepted,
+      recoveryAcknowledgementAccepted: recoveryAckAccepted,
+    }));
   });
 
   it("does not acknowledge an outbox event when broker publication fails", async () => {
