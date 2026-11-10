@@ -433,10 +433,10 @@ export function createReferenceLab(options: { now?: () => Date } = {}) {
     listAgencyTraces() {
       return agency.memory.list();
     },
-    listDecisionRecords() {
+    async listDecisionRecords() {
       return memory.listDecisionRecords();
     },
-    listDecisionReviews() {
+    async listDecisionReviews() {
       return memory.listDecisionReviews();
     },
     listRequests(tenantId: string) {
