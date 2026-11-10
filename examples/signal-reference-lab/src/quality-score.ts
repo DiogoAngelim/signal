@@ -35,7 +35,7 @@ export type QualityScorecard = {
 };
 
 type BenchmarkEvidence = Pick<BenchmarkReport, "timing" | "integrity" | "environment" | "workload"> & {
-  baseline?: Pick<BenchmarkReport, "timing" | "environment" | "workload">;
+  baseline?: BenchmarkReport;
 };
 
 const PILLAR_WEIGHTS: Record<QualityPillarName, number> = {
@@ -86,11 +86,14 @@ function performanceCriteria(benchmark?: BenchmarkEvidence): QualityCriterion[] 
     benchmark.integrity.expectedSamples === benchmark.workload.iterations &&
     benchmark.workload.iterations >= 30;
   const baseline = benchmark.baseline;
-  const comparable = Boolean(baseline &&
+  const baselineValid = Boolean(baseline && baseline.integrity.valid && baseline.integrity.actualSamples === baseline.workload.iterations && baseline.integrity.expectedSamples === baseline.workload.iterations && baseline.workload.iterations >= 30);
+  const comparable = Boolean(baselineValid && baseline &&
     baseline.workload.operation === benchmark.workload.operation &&
     baseline.workload.iterations === benchmark.workload.iterations &&
     baseline.workload.concurrency === benchmark.workload.concurrency &&
+    baseline.workload.warmup === benchmark.workload.warmup &&
     baseline.environment.node === benchmark.environment.node &&
+    baseline.environment.platform === benchmark.environment.platform &&
     baseline.environment.osRelease === benchmark.environment.osRelease &&
     baseline.environment.arch === benchmark.environment.arch &&
     baseline.environment.cpuModel === benchmark.environment.cpuModel &&
