@@ -480,7 +480,7 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
     Math.min(10, 2 + observabilityCoverage * 4)
   ];
   const evidenceByDimension = [
-    [...results.map((item) => `${item.id}:${item.status} (${item.assertions} assertions${item.failureAttribution ? `; attribution=${item.failureAttribution}` : ""})`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
+    [...results.map((item) => `${item.id}:${item.status} [${item.target}] (${item.assertions} assertions${item.failureAttribution ? `; attribution=${item.failureAttribution}` : ""})`), `Capability coverage: ${exercisedCount} exercised, ${partialCount} partial, ${unverifiedCount} unverified.`],
     [`Reliability-related capability coverage: ${(reliabilityCoverage * 100).toFixed(0)}%.`, "PostgreSQL durability, outbox/inbox and distributed recovery remain unverified where not explicitly exercised."],
     ["Local in-process query benchmark reports latency/throughput/RSS.", "No production or cross-host baseline is included; score is neutral and low-confidence."],
     [`Weighted capability coverage across ${inventory.length} registered surfaces: ${(coverage * 100).toFixed(0)}%.`, "Public SDK operations; separate domain/evaluation modules; no private package imports."],
@@ -500,7 +500,7 @@ export function scoreEngineering(results: ScenarioResult[], inventory: Capabilit
   return {
     overall,
     dimensions,
-    interpretation: "Provisional reference-app integration score, not a certification or production score for Signal. Scenario pass rate and weighted capability coverage both influence correctness and architecture scores. Unverified capabilities reduce coverage rather than being silently credited. Performance and operability remain low-confidence until production-like measurements and telemetry are connected."
+    interpretation: "Provisional score of Signal engineering capabilities demonstrated through this reference lab, not a certification or production-readiness claim. Signal-targeted scenario pass rate and observed capability coverage drive the score; reference-app and integration gates are reported separately and failures are not automatically attributed to Signal. Unverified capabilities are not credited. Performance remains neutral until production-like measurements are available."
   };
 }
 export function summarizeRequests(items: CaseRequest[]) { return { total: items.length, assessed: items.filter((item) => item.assessment).length, decided: items.filter((item) => item.decision).length, outcomes: items.filter((item) => item.outcome).length }; }
