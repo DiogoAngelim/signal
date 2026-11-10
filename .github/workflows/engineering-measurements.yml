@@ -66,6 +66,10 @@ jobs:
         run: node benchmarks/agency-statistics.mjs --runs 3 --sizes 1000,10000,50000 --bootstrap-iterations 1000 --output benchmark-results/agency-statistics.json
         env:
           GITHUB_SHA: ${{ github.sha }}
+      - name: Measure audit-chain and signed-checkpoint performance
+        run: node benchmarks/audit-chain.mjs --runs 3 --sizes 1000,10000,50000 --output benchmark-results/audit-chain.json
+        env:
+          GITHUB_SHA: ${{ github.sha }}
       - name: Measure in-memory circuit-breaker throughput and probe contention
         run: node benchmarks/in-memory-circuit-breaker.mjs --iterations 10000 --runs 3 --concurrency 1,16,64 --output benchmark-results/in-memory-circuit-breaker.json
         env:
