@@ -10,10 +10,29 @@
     ],
     "lib": [
       "ES2022"
-    ]
+    ],
+    "paths": {
+      "@signal/decision": [
+        "./src/typecheck-stubs/decision.d.ts"
+      ],
+      "@signal/commitment": [
+        "./src/typecheck-stubs/commitment.d.ts"
+      ],
+      "@signal/semantic-state": [
+        "./src/typecheck-stubs/semantic-state.d.ts"
+      ],
+      "@signal/sdk-node": [
+        "./src/typecheck-stubs/sdk-node.d.ts"
+      ],
+      "@signal/agency": [
+        "./src/typecheck-stubs/agency.d.ts"
+      ]
+    }
   },
   "include": [
-    "src/domain.ts"
+    "src/domain.ts",
+    "src/signal-app.ts",
+    "src/typecheck-stubs/*.d.ts"
   ],
   "exclude": [
     "dist",
@@ -21,7 +40,6 @@
     "test",
     "src/cli.ts",
     "src/evaluation.ts",
-    "src/web.ts",
-    "src/signal-app.ts"
+    "src/web.ts"
   ]
 }
