@@ -50,7 +50,9 @@ Signal exports a bounded Prometheus text recorder through
 authenticated or network-restricted `/metrics` endpoint using
 `text/plain; version=0.0.4; charset=utf-8`. Configure Prometheus to scrape
 each replica and remote-write or retain samples in the operator-managed
-monitoring backend.
+monitoring backend. A starter Grafana dashboard is provided at
+`deploy/observability/grafana-dashboard.json`; import it and bind its
+Prometheus datasource in the deployment.
 
 The recorder uses a fixed metric-name and label-value allowlist, defaults to
 1,000 retained label series, counts dropped new series, and exports duration
