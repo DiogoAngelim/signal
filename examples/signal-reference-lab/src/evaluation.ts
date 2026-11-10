@@ -338,6 +338,14 @@ export async function runEvaluation(): Promise<{ results: ScenarioResult[]; capa
     try { await app.submitRequest({ tenantId: "", title: "x", description: "short" }); } catch { rejected = true; }
     a(rejected, "invalid request should be rejected");
   });
+  const cliResult = results.find((item) => item.id === "signal-cli");
+  const cliPassed = cliResult?.status === "passed";
+  const cliCapability = capabilityResults.find((item) => item.id === "cli.signal-verification");
+  if (cliCapability) {
+    cliCapability.status = cliPassed ? "exercised" : "not-verified";
+    cliCapability.scenarios = cliPassed ? ["signal-cli"] : [];
+    cliCapability.evidence = cliPassed ? "Signal CLI verify command exited successfully against its checked-in phase-chain and proof artifacts." : "Signal CLI verification was not run in this environment."; 
+  }
   const postgresResult = results.find((item) => item.id === "postgres-integration");
   const postgresPassed = postgresResult?.status === "passed";
   const postgresIds = new Set(["postgres.idempotency", "postgres.transactional-outbox", "postgres.consumer-inbox", "postgres.audit-ledger", "postgres.replay-evidence", "postgres.retry-budget", "postgres.distributed-breaker", "postgres.transactions"]);
