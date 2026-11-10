@@ -14,6 +14,7 @@ on:
     branches: [main]
     paths:
       - "examples/signal-reference-lab/**"
+      - "signal-cli/**"
       - "api/**"
       - "packages/**"
       - "pnpm-lock.yaml"
