@@ -48,8 +48,10 @@ Use createReplayEvidenceRecord from @signal/runtime to construct the record,
 verifyReplayEvidenceRecord before trusting it, and ReplayEvidencePort to persist
 it. The PostgreSQL implementation is createPostgresReplayEvidenceStore from
 @signal/idempotency-postgres. Migration 0006_immutable_replay_evidence.sql
-creates immutable persistence with row mutation/truncate guards and an
-insert-only application contract.
+creates immutable persistence with row mutation/truncate guards, tenant-scoped
+row-level security, and an insert-only application contract. Reads and writes
+must supply the tenant identity; PostgreSQL enforces the transaction-local
+signal.tenant_id setting for each adapter operation.
 
 replayWithEvidence verifies the record, requires exact operation, handler
 artifact, and policy identity, supplies captured external reads to the
@@ -67,9 +69,8 @@ reissued by replay.
 
 Replay snapshots may contain sensitive application data. Capture the minimum
 fields required to reproduce the decision, redact credentials and bearer
-tokens before persistence, encrypt storage and backups, enforce tenant-scoped
-authorization in the persistence boundary, and define retention/deletion
-requirements before enabling capture. A fingerprint does not anonymize the
+tokens before persistence, encrypt storage and backups, retain database row-level security and tenant
+scoping, and define retention/deletion requirements before enabling capture. A fingerprint does not anonymize the
 underlying snapshot.
 
 Exact handler artifact matching is intentionally conservative. A newer handler
