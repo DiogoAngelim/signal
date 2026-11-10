@@ -51,8 +51,33 @@ export async function dispatchOutboxBatch(
   };
 
   for (const record of records) {
+    let leaseLost = false;
+    let renewalInFlight: Promise<void> | undefined;
+    const renew = async () => {
+      if (renewalInFlight || leaseLost) return renewalInFlight;
+      renewalInFlight = (async () => {
+        try {
+          const renewed = await outbox.renewLease({
+            id: record.id, workerId, leaseToken: record.leaseToken, leaseMs,
+          });
+          if (!renewed) leaseLost = true;
+        } catch {
+          // A failed renewal means ownership cannot safely be assumed.
+          leaseLost = true;
+        }
+      })();
+      await renewalInFlight;
+      renewalInFlight = undefined;
+    };
+    const heartbeat = setInterval(() => { void renew(); }, Math.max(250, Math.floor(leaseMs / 3)));
     try {
       await eventPort.dispatch(record.envelope);
+      clearInterval(heartbeat);
+      if (renewalInFlight) await renewalInFlight;
+      if (leaseLost) {
+        result.leaseLost += 1;
+        continue;
+      }
       const acknowledged = await outbox.acknowledge({
         id: record.id,
         workerId,
@@ -61,6 +86,12 @@ export async function dispatchOutboxBatch(
       if (acknowledged) result.delivered += 1;
       else result.leaseLost += 1;
     } catch (error) {
+      clearInterval(heartbeat);
+      if (renewalInFlight) await renewalInFlight;
+      if (leaseLost) {
+        result.leaseLost += 1;
+        continue;
+      }
       const attempts = Math.max(1, record.attempts);
       const delayMs = Math.min(300_000, 1000 * 2 ** Math.min(attempts - 1, 8));
       const retry = await outbox.retry({
@@ -86,6 +117,7 @@ export function isOutboxPort(value: unknown): value is OutboxPort {
   return (
     typeof candidate.getStats === "function" &&
     typeof candidate.claimBatch === "function" &&
+    typeof candidate.renewLease === "function" &&
     typeof candidate.acknowledge === "function" &&
     typeof candidate.retry === "function"
   );
