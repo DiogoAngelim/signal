@@ -210,6 +210,73 @@ describe("http binding", () => {
     await app.close();
   });
 
+  it("shares rate-limit counters across independent HTTP server instances", async () => {
+    type Counter = { current: number; expiresAt: number };
+    class SharedRateLimitStore {
+      static counters = new Map<string, Counter>();
+
+      constructor(_options: unknown) {}
+
+      child(_routeOptions: unknown) {
+        return this;
+      }
+
+      incr(
+        key: string,
+        callback: (error: Error | null, result?: { current: number; ttl: number }) => void,
+        timeWindow: number,
+      ) {
+        const now = Date.now();
+        let counter = SharedRateLimitStore.counters.get(key);
+        if (!counter || counter.expiresAt <= now) {
+          counter = { current: 0, expiresAt: now + timeWindow };
+          SharedRateLimitStore.counters.set(key, counter);
+        }
+        counter.current += 1;
+        callback(null, {
+          current: counter.current,
+          ttl: Math.max(0, counter.expiresAt - now),
+        });
+      }
+    }
+
+    SharedRateLimitStore.counters.clear();
+    const runtime = new SignalRuntime({
+      eventPort: noopEventPort,
+      storagePort: createMemoryIdempotencyStore(),
+    });
+    runtime.registerQuery(
+      defineQuery({
+        name: "shared-limit.read.v1",
+        kind: "query",
+        inputSchema: z.object({}),
+        resultSchema: z.object({ ok: z.boolean() }),
+        handler: () => ({ ok: true }),
+      }),
+    );
+
+    const options = {
+      rateLimits: {
+        query: { max: 1, timeWindow: 60_000 },
+        store: SharedRateLimitStore,
+      },
+    };
+    const appA = createSignalHttpServer(runtime, options);
+    const appB = createSignalHttpServer(runtime, options);
+    const request = {
+      method: "POST" as const,
+      url: "/signal/query/shared-limit.read.v1",
+      payload: { payload: {} },
+    };
+
+    expect((await appA.inject(request)).statusCode).toBe(200);
+    const crossInstanceLimited = await appB.inject(request);
+    expect(crossInstanceLimited.statusCode).toBe(429);
+    expect(crossInstanceLimited.json().error.code).toBe("RATE_LIMIT_EXCEEDED");
+
+    await Promise.all([appA.close(), appB.close()]);
+  });
+
   it("rejects client authentication claims and uses only trusted server context", async () => {
     const runtime = new SignalRuntime({
       eventPort: noopEventPort,
