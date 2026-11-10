@@ -46,6 +46,7 @@ jobs:
       DATABASE_URL: postgresql://signal:signal@localhost:5432/signal_reference_lab
       SIGNAL_COMMIT: ${{ github.event.pull_request.base.sha || github.sha }}
       APP_COMMIT: ${{ github.event.pull_request.head.sha || github.sha }}
+      NODE_OPTIONS: --max-old-space-size=5120
     steps:
       - uses: actions/checkout@v4
       - uses: pnpm/action-setup@v4
@@ -66,14 +67,16 @@ jobs:
           npm run build --prefix signal-cli
           echo "SIGNAL_CLI_READY=1" >> "$GITHUB_ENV"
       - run: pnpm --filter @signal/reference-lab... build
-      - run: pnpm --filter @signal/reference-lab test
-      - run: pnpm --filter @signal/reference-lab coverage:verify
+      - name: Run Reference Lab tests
+        run: node --test examples/signal-reference-lab/dist/test/*.test.js
+      - name: Verify Reference Lab coverage
+        run: node examples/signal-reference-lab/dist/src/cli.js coverage
       - name: Capture reproducible evaluation and benchmark artifacts
         if: always()
         run: |
           mkdir -p reference-lab-evidence
-          pnpm --filter @signal/reference-lab evaluate -- --out ../../reference-lab-evidence/evaluation.json
-          pnpm --filter @signal/reference-lab benchmark -- --out ../../reference-lab-evidence/benchmark.json
+          node examples/signal-reference-lab/dist/src/cli.js evaluate -- --out reference-lab-evidence/evaluation.json
+          node examples/signal-reference-lab/dist/src/cli.js benchmark -- --out reference-lab-evidence/benchmark.json
       - name: Upload reference lab evidence
         if: always()
         uses: actions/upload-artifact@v4
