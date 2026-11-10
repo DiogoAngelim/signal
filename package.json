@@ -50,7 +50,8 @@
     "bench:circuit-breaker": "pnpm build:library && node benchmarks/distributed-circuit-breaker.mjs",
     "bench:in-memory-circuit-breaker": "pnpm build:library && node benchmarks/in-memory-circuit-breaker.mjs",
     "bench:agency-statistics": "pnpm build:library && node benchmarks/agency-statistics.mjs",
-    "bench:audit-chain": "pnpm build:library && node benchmarks/audit-chain.mjs"
+    "bench:audit-chain": "pnpm build:library && node benchmarks/audit-chain.mjs",
+    "bench:decision-pipeline": "pnpm build:library && node benchmarks/decision-pipeline.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
