@@ -428,10 +428,11 @@ export class SignalRuntime implements SignalBinding {
       });
     }
 
+    const startedAt = Date.now();
     const kinds = this.findRegisteredKinds(name);
 
     if (kinds.length === 0) {
-      this.emitCommandFailure(name, "unknown", Date.now(), "OPERATION_NOT_FOUND");
+      this.emitCommandFailure(name, "unknown", startedAt, "OPERATION_NOT_FOUND");
       return createExecuteFailure(
         "OPERATION_NOT_FOUND",
         `Unknown operation: ${name}`,
@@ -442,7 +443,7 @@ export class SignalRuntime implements SignalBinding {
     }
 
     if (kinds.length > 1) {
-      this.emitCommandFailure(name, "ambiguous", Date.now(), "AMBIGUOUS_OPERATION_KIND");
+      this.emitCommandFailure(name, "ambiguous", startedAt, "AMBIGUOUS_OPERATION_KIND");
       return createExecuteFailure(
         "AMBIGUOUS_OPERATION_KIND",
         `Operation kind is ambiguous for ${name}; pass options.kind to run it explicitly.`,
@@ -467,6 +468,7 @@ export class SignalRuntime implements SignalBinding {
   async execute<TData = unknown>(
     input: SignalExecuteInput,
   ): Promise<SignalExecuteResult<TData>> {
+    const startedAt = Date.now();
     const request = toExecuteRequest(input.context, input.meta);
 
     switch (input.kind) {
@@ -550,7 +552,7 @@ export class SignalRuntime implements SignalBinding {
         this.emitCommandFailure(
           input.name,
           String(input.kind),
-          Date.now(),
+          startedAt,
           "UNSUPPORTED_OPERATION_KIND",
         );
         return createExecuteFailure(
