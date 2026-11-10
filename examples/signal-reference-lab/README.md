@@ -9,10 +9,11 @@ The reference workflow is intentionally generic: submit a request, attach source
 The workflow exercises:
 - `@signal/sdk-node`: registered queries and mutations, runtime dispatch, context, idempotency keys, event publication and subscribers;
 - `@signal/decision`: evidence assessment, governance, stewardship, decision records and structured outcome learning reviews;
-- `@signal/decision-memory` through the public SDK: in-memory decision record and review storage;
+- `@signal/decision-memory`: in-memory and PostgreSQL decision record/review storage;
 - `@signal/commitment`: resource allocation, feasibility and hard constraints;
 - `@signal/semantic-state`: generic-state lexicon interpretation;
-- `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
+- `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis;
+- `@signal/binding-http` and `@signal/idempotency-postgres`: HTTP dispatch plus durable idempotency, outbox/inbox, retry-budget, circuit-breaker, replay-evidence and audit adapters.
 
 The evaluation harness runs fourteen deterministic scenarios:
 - end-to-end request, evidence, assessment, decision, approved action and outcome;
