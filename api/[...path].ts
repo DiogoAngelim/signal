@@ -7,6 +7,7 @@ type VercelRequest = AsyncIterable<Buffer | string> & {
   method?: string;
   headers: Record<string, string | string[] | undefined>;
   query: Record<string, string | string[] | undefined>;
+  body?: unknown;
 };
 type VercelResponse = {
   setHeader(name: string, value: string | string[]): void;
@@ -34,6 +35,11 @@ function database(): Pool {
 async function ensureSchema() {
   schemaReady ??= (async () => {
     await database().query(`
+      CREATE TABLE IF NOT EXISTS reference_lab_auth_attempts (
+        ip_hash text PRIMARY KEY,
+        window_started_at timestamptz NOT NULL DEFAULT now(),
+        attempts integer NOT NULL DEFAULT 0
+      );
       CREATE TABLE IF NOT EXISTS reference_lab_state (
         id text PRIMARY KEY CHECK (id = 'main'),
         payload jsonb NOT NULL,
@@ -81,6 +87,7 @@ function sameOrigin(req: VercelRequest): boolean {
 }
 
 async function readBody(req: VercelRequest): Promise<Record<string, unknown>> {
+  if (req.body && typeof req.body === "object" && !Array.isArray(req.body)) return req.body as Record<string, unknown>;
   const chunks: Buffer[] = [];
   let size = 0;
   for await (const chunk of req) {
@@ -134,6 +141,17 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     if (req.method === "POST" && path === "/auth/login") {
       if (!sameOrigin(req)) return json(res, 403, { error: "Request origin rejected." });
       const body = await readBody(req);
+      const ip = String(req.headers["x-forwarded-for"] ?? "unknown").split(",")[0].trim();
+      const ipHash = createHmac("sha256", process.env.SESSION_SECRET ?? "").update(ip).digest("hex");
+      const attempts = await database().query(
+        `INSERT INTO reference_lab_auth_attempts (ip_hash, window_started_at, attempts)
+         VALUES ($1, now(), 1)
+         ON CONFLICT (ip_hash) DO UPDATE SET
+           attempts = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 || ' minutes')::interval THEN 1 ELSE reference_lab_auth_attempts.attempts + 1 END,
+           window_started_at = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 || ' minutes')::interval THEN now() ELSE reference_lab_auth_attempts.window_started_at END
+         RETURNING attempts`, [ipHash, 15],
+      );
+      if (Number(attempts.rows[0]?.attempts ?? 0) > 10) return json(res, 429, { error: "Too many attempts. Try again in 15 minutes." });
       const expected = process.env.LAB_ACCESS_PASSWORD ?? "";
       const supplied = typeof body.password === "string" ? body.password : "";
       if (expected.length < 24) return json(res, 503, { error: "Access password is not configured securely." });
