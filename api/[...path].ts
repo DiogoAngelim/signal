@@ -147,8 +147,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         `INSERT INTO reference_lab_auth_attempts (ip_hash, window_started_at, attempts)
          VALUES ($1, now(), 1)
          ON CONFLICT (ip_hash) DO UPDATE SET
-           attempts = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 || ' minutes')::interval THEN 1 ELSE reference_lab_auth_attempts.attempts + 1 END,
-           window_started_at = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 || ' minutes')::interval THEN now() ELSE reference_lab_auth_attempts.window_started_at END
+           attempts = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 * interval '1 minute') THEN 1 ELSE reference_lab_auth_attempts.attempts + 1 END,
+           window_started_at = CASE WHEN reference_lab_auth_attempts.window_started_at < now() - ($2 * interval '1 minute') THEN now() ELSE reference_lab_auth_attempts.window_started_at END
          RETURNING attempts`, [ipHash, 15],
       );
       if (Number(attempts.rows[0]?.attempts ?? 0) > 10) return json(res, 429, { error: "Too many attempts. Try again in 15 minutes." });
