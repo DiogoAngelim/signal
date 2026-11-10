@@ -247,7 +247,7 @@ describe("http binding", () => {
     });
     runtime.registerQuery(
       defineQuery({
-        name: "shared-limit.read.v1",
+        name: "shared.read.v1",
         kind: "query",
         inputSchema: z.object({}),
         resultSchema: z.object({ ok: z.boolean() }),
@@ -265,7 +265,7 @@ describe("http binding", () => {
     const appB = createSignalHttpServer(runtime, options);
     const request = {
       method: "POST" as const,
-      url: "/signal/query/shared-limit.read.v1",
+      url: "/signal/query/shared.read.v1",
       payload: { payload: {} },
     };
 
