@@ -167,6 +167,20 @@ describe("executeWithDistributedCircuitBreaker", () => {
       code: "CIRCUIT_BREAKER_OUTCOME_NOT_RECORDED",
     });
 
+    const acquisitionFailure = new Error("coordination store unavailable");
+    const unavailableController = {
+      snapshot: vi.fn().mockResolvedValue(null),
+      tryAcquire: vi.fn().mockRejectedValue(acquisitionFailure),
+      renewProbe: vi.fn().mockResolvedValue(false),
+      recordSuccess: vi.fn().mockResolvedValue(false),
+      recordFailure: vi.fn().mockResolvedValue(false),
+    };
+    await expect(executeWithDistributedCircuitBreaker(
+      unavailableController,
+      async () => "must-not-run",
+      { onCoordinationError: () => { throw new Error("telemetry failed"); } },
+    )).rejects.toBe(acquisitionFailure);
+
     const dependencyFailure = new Error("dependency failed");
     await expect(executeWithDistributedCircuitBreaker(
       controller,
