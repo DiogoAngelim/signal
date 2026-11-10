@@ -4,7 +4,7 @@ A deliberately small case-management application and a reproducible engineering 
 
 ## What it does
 
-The reference workflow is intentionally generic: submit a request, attach sourced evidence, assess uncertainty and risk, make a capacity-constrained decision, record an accountable authorization, capture the eventual outcome, and review what happened.
+The reference workflow is intentionally generic: submit a request, attach sourced evidence, assess uncertainty and risk, make a capacity-constrained decision, record an accountable authorization, execute only an explicitly approved action, capture the eventual outcome, and review what happened.
 
 The workflow exercises:
 - `@signal/sdk-node`: registered queries and mutations, runtime dispatch, context, idempotency keys, event publication and subscribers;
@@ -14,7 +14,7 @@ The workflow exercises:
 - `@signal/semantic-state`: generic-state lexicon interpretation;
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis.
 
-The evaluation harness runs six deterministic scenarios: full lifecycle, evidence hard-stop, tenant isolation, repeat submission, concurrent duplicate submission, and invalid input. It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
+The evaluation harness runs six deterministic scenarios: full lifecycle including approval-gated action execution, evidence hard-stop, tenant isolation, repeat submission, concurrent duplicate submission, and invalid input. It emits machine-readable scenario results, capability status, a weighted engineering scorecard and evidence references.
 
 ## Run
 
@@ -42,7 +42,7 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Mutation idempotency and concurrent duplicates | Partial: memory-backed runtime only; no distributed proof |
 | Tenant boundary | Exercised at application repository boundary; not an external identity/authentication certification |
 | Decision evidence assessment, governance, stewardship and rationale | Exercised through `@signal/decision` |
-| Decision record and outcome review storage | Partial: public SDK in-memory store; durable persistence and retention are not exercised |
+| Decision record and outcome review storage | Partial: public SDK in-memory store; durable persistence and retention are not exercised |\n| Approved action execution | Exercised; action execution requires an approved decision and records the accountable operator |
 | Commitment constraints and resource allocation | Exercised through `@signal/commitment` |
 | Semantic-state interpretation | Exercised through `@signal/semantic-state` |
 | Agency policy and decision/outcome cycles | Exercised through `@signal/agency`; calibration and statistical learning remain partial because the sample is intentionally small |
