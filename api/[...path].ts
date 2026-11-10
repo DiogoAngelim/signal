@@ -168,7 +168,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     }
     if (!authenticated(req)) return json(res, 401, { error: "Authentication required." });
     if (req.method !== "GET" && !sameOrigin(req)) return json(res, 403, { error: "Request origin rejected." });
-    if (req.method === "GET" && path === "/evaluate") return json(res, 200, await runEvaluation());
+    if (req.method === "GET" && path === "/evaluate") return json(res, 200, await runEvaluation({ includePostgres: false }));
     if (req.method === "GET" && path === "/requests") {
       const result = await withLab(async (_client, app) => ({
         requests: app.listRequests(TENANT_ID),
