@@ -38,7 +38,7 @@ export function createPostgresConsumerInbox(
   });
 
   return {
-    async processOnce<T>(input, handler): Promise<ConsumerInboxOutcome<T>> {
+    async processOnce<T>(input: ConsumerInboxInput, handler: (transaction: PoolClient) => Promise<T>): Promise<ConsumerInboxOutcome<T>> {
       if (!input.tenantId.trim() || input.tenantId.length > 200) {
         throw new RangeError("tenantId must contain 1 to 200 non-whitespace characters.");
       }
