@@ -144,3 +144,13 @@ The evaluation report itself labels the score provisional and explicitly says it
 Artifact: `signal-reference-lab-42853111860-1` (GitHub Actions artifact ID `13782365395`; retained until 2026-12-10).
 
 This is a genuine, reproducible CI verification result for the Reference Lab at the stated commit. It is not a deployment validation, production validation, independent customer outcome, or evidence that the currently updated documentation PR commit has rerun the Reference Lab workflow.
+
+
+## Documentation PR validation
+
+The documentation-only change set was subsequently validated on its current PR head commit `b3fdaa66a5ae9909e4197c2137b0df1176854af7`:
+
+- [Signal quality run 42917749324](https://github.com/DiogoAngelim/signal/actions/runs/42917749324): completed successfully; Library correctness and architecture job passed.
+- [Signal core run 42917749390](https://github.com/DiogoAngelim/signal/actions/runs/42917749390): completed successfully; core job passed.
+
+These checks validate the documentation PR's repository quality/core gates. They are distinct from the Reference Lab run above and do not imply that the Reference Lab workflow was rerun on this documentation-only head commit.
