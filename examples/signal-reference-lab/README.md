@@ -15,7 +15,7 @@ The workflow exercises:
 - `@signal/agency`: approval policy, decision/outcome cycles, trace retention and self-diagnosis;
 - `@signal/binding-http` and `@signal/idempotency-postgres`: HTTP dispatch plus durable idempotency, outbox/inbox, retry-budget, circuit-breaker, replay-evidence and audit adapters.
 
-The evaluation harness runs fourteen deterministic scenarios:
+The evaluation harness runs fifteen deterministic scenarios:
 - end-to-end request, evidence, assessment, decision, approved action and outcome;
 - evidence hard-stop and action authorization;
 - tenant isolation;
@@ -25,6 +25,7 @@ The evaluation harness runs fourteen deterministic scenarios:
 - replay-evidence integrity;
 - retry-budget and circuit-breaker recovery;
 - PostgreSQL transactional idempotency, durable outbox delivery, consumer inbox deduplication, shared retry budgets, distributed breaker state, replay evidence and append-only audit ledger;
+- kernel plugin registration, four-stage orchestration, lifecycle and replay;
 - bounded Prometheus counters and latency histograms.
 - runtime authentication enforcement and operation-level actor-role authorization;
 - malformed-input rejection.
@@ -86,7 +87,8 @@ Save a benchmark baseline with `pnpm benchmark -- --out baseline.json`, then com
 | Runtime lifecycle telemetry collection | Exercised through Signal `ObservabilityPort` in memory |
 | Prometheus metrics exposition and cardinality bounds | Partial: counters/histograms render with bounded series; external scrape and trace export remain unverified |
 | Local throughput/latency/RSS benchmark | Exercised; production load, distributed metrics/tracing export and soak remain unverified |
-| Kernel legacy compatibility and Signal CLI certification surfaces | Not verified / not applicable to the current workflow |
+| Kernel plugin pipeline, orchestration and replay | Exercised with the public `@signal/kernel` package |
+| Signal CLI verify/replay/test/build/audit commands | Not verified by this harness; separate CLI validation remains a gate |
 
 A capability is not credited merely because a package exists. Each status must be backed by a scenario and observable evidence. In-process delivery is not proof of durable delivery or exactly-once external effects. The inventory deliberately distinguishes exercised, partial and unverified capabilities rather than presenting simulated adapters as production integrations.
 
