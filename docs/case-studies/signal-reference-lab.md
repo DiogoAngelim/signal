@@ -161,6 +161,7 @@ That integration is package-level and CI-validated. It is not the Signal SDK/run
 
 **Not established**
 - Production throughput, latency SLOs, long-duration soak behavior, or capacity under representative traffic.
+- A deployed UI screenshot or demo recording; the current visual evidence is the lifecycle diagram and linked, reproducible CI artifacts.
 - Multi-region failover or cross-host contention under production load.
 - External identity-provider integration or a complete production authorization deployment.
 - External key custody, independent audit-checkpoint retention, or managed security certification.
