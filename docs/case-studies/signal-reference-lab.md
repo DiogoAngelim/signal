@@ -37,6 +37,20 @@ Request → Evidence → Assessment → Decision → Authorization
         → Action → Outcome → Review → Learning → Memory
 ~~~
 
+~~~mermaid
+flowchart LR
+  A[Request] --> B[Evidence]
+  B --> C[Assessment]
+  C --> D[Decision]
+  D --> E{Human authorization}
+  E -->|Approved| F[Action]
+  E -->|Rejected| X[No action]
+  F --> G[Outcome]
+  G --> H[Review]
+  H --> I[Learning]
+  I --> J[Memory]
+~~~
+
 The platform separates three architectural responsibilities:
 
 | Layer | Responsibility |
