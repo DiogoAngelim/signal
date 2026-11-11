@@ -111,6 +111,8 @@ The 8.49 score is the Reference Lab's provisional engineering score, not a certi
 
 A separate quality scorecard reports correctness 8.2, security 7.2, and reliability 8.0. Its overall composite is intentionally withheld because the performance pillar does not yet have a matched, production-like baseline. These two scoring systems are not interchangeable.
 
+The Reference Lab evaluation artifact records app commit `2ff4ba1c7f29b16947fa6f02ed1a6100dcbe9523` and Signal source commit `20ab95a6de8b36fd28c07ae7da4249e4d8ed16f7`. The production-simulation and engineering-measurement workflows ran against GitHub's PR merge-test commit `0107a24f7c0fb813fd72cf782d81356c3e578bee`, combining that PR head with the pre-merge base. PR #48 was subsequently squash-merged as `e6e44a9b25ce984d0e823af366b2c507a8e63455`.
+
 ### Engineering measurements
 
 A separate GitHub Actions engineering-measurements run produced machine-readable benchmark artifacts on a Linux runner with Node.js 20.20.2, an AMD EPYC 7763 CPU, and four logical CPUs.
