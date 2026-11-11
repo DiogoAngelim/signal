@@ -11,7 +11,7 @@ This assessment combines repository inspection with completed CI evidence from 2
 | Candidate | Decision relevance | Current evidence | Credibility role | Decision |
 |---|---|---|---|---|
 | Signal Reference Lab | High | A runnable application uses public Signal packages and defines 17 deterministic scenarios; 28/34 capabilities are directly exercised. PostgreSQL integration, lease renewal/fencing, broker crash recovery, and separate engineering benchmarks have passing CI evidence. | Primary reproducible technical case study | **Select now** |
-| Workbench | Very high | Separate application consumes the released `@signal/decision@0.1.0` package in its authenticated commercial assessment flow; persists Signal assessments; displays an evidence-review summary; includes 30 shared scenarios; and passed full CI (68 files, 663 tests, typecheck, migrations, audit, and build). No production deployment or outcome-labeled commercial dataset was verified. | Application integration case study; future external business-outcome case | **Select package-level integration case study now. Defer production and business-outcome claims.** |
+| Workbench | Very high | Separate application consumes released `@signal/decision@0.1.0` in its authenticated assessment path; persists Signal assessments and evidence provenance; supplies Workbench-calculated economic indicators as derived facts; displays them separately from uncertain assumptions; and is deployed at workbench.naubly.com. Original package-integration CI recorded 68 files/663 tests plus typecheck, migrations, audit, and build. Latest production build passed TypeScript and generated 43 static pages. Authenticated production workflow and outcome-labeled commercial dataset remain unverified. | Production-deployed application integration; future external business-outcome case | **Select and update the application integration case study. Keep customer-validation and business-outcome claims deferred.** |
 | Stocks Optimizer | High | Exists as a substantial application under `examples/stocks-optimizer`, with its own pnpm workspace and API CI workflow. Its workspace manifest does not declare Signal packages, and its workflow tests the app's own API server. The actual integration path into Signal was not established by this source review. | Conditional quantitative case study | **Defer pending proof of a real Signal runtime/domain-package path and independent financial test fixtures.** |
 | Liquidity Manager | Medium | A React/Vite application with Nubank-related dependencies; its manifest does not declare Signal packages. No distinct independently verifiable Signal decision use case was established in this review. | Low incremental value at present | **Exclude from this project.** |
 | AlgAI / Client | Not assessed for this project | Outside the narrowed case-study scope. | None | **Exclude.** |
@@ -55,7 +55,7 @@ Remaining unverified areas include external identity-provider integration, provi
 
 ## Workbench: package integration and future external business case
 
-Workbench is now a real package-level application integration: its separate repository consumes Signal's released decision-assessment package inside a consequential commercial workflow. It is also the strongest candidate for a future real-world business case because it contains independently reconciled commercial economics. Production deployment and outcome-labeled business evidence remain unverified.
+Workbench is now a production-deployed package-level application integration: its separate repository consumes Signal's released decision-assessment package inside a consequential commercial workflow. The current adapter also passes Workbench-calculated expected revenue, costs, expected net value, and break-even outputs into Signal as derived indicators, while loading persisted evidence classifications and preserving the distinction between calculations and uncertain assumptions. The production build is validated, but authenticated end-to-end workflow execution and outcome-labeled business evidence remain unverified.
 
 The inspected test file `src/lib/decision-signals.test.ts` includes:
 - Missing and invalid input handling.
@@ -66,7 +66,7 @@ The inspected test file `src/lib/decision-signals.test.ts` includes:
 - Filtering of model-invented finding codes.
 - Thirty reconciliation scenarios comparing the independent Signal-named calculation with Workbench economics.
 
-This original local feature is still not proof of Signal platform integration. Separately, Workbench PR #178 now adds a genuine package-level integration through the released `@signal/decision@0.1.0` artifact. That integration is source-implemented and CI-validated, but it is not the Signal SDK/runtime, a hosted service, a production deployment, or evidence of improved business outcomes. See [Workbench Application Integration Case Study](case-studies/workbench-integration.md).
+This original local feature is still not proof of Signal platform integration. Separately, Workbench PR #178 now adds a genuine package-level integration through the released `@signal/decision@0.1.0` artifact. That integration is now deployed as part of Workbench production, but it is not a Signal SDK/runtime or hosted-service integration, and it is not evidence of improved business outcomes. See [Workbench Application Integration Case Study](case-studies/workbench-integration.md).
 
 The completed package-level integration should be extended only through separately validated Signal releases and capabilities. A future Workbench business-outcome case study should:
 1. Preserve Workbench as the owner of commercial records and economic calculations.
@@ -102,7 +102,7 @@ The inspected manifest identifies a frontend application with banking-related de
 2. Inspect the latest relevant workflow run, job logs, and uploaded JSON artifacts.
 3. Report each scenario as passed, failed, blocked, partial, or unverified.
 4. Fix only defects that materially affect the selected case study.
-5. Treat Workbench as package-integrated but keep its production/business-outcome case deferred; keep Stocks Optimizer deferred until its genuine Signal integration path is demonstrated.
+5. Treat Workbench as a production-deployed package integration, while keeping authenticated end-to-end validation and business-outcome claims deferred; keep Stocks Optimizer deferred until its genuine Signal integration path is demonstrated.
 6. Keep changes in reviewable PRs. Do not merge, deploy, publish packages, or change production resources as part of this case-study effort.
 
 ## Claim policy
