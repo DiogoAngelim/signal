@@ -101,6 +101,15 @@ describe("PostgreSQL transactional storage", () => {
     expect(mocks.client.release).toHaveBeenCalledTimes(1);
   });
 
+  it("rejects invalid outbox lease durations before opening a transaction", async () => {
+    const store = createPostgresTransactionalStore({ connectionString: "postgres://example" });
+    for (const leaseMs of [999.5, 1000.5, 86_400_001]) {
+      await expect(store.claimBatch({ workerId: "worker", limit: 1, leaseMs })).rejects.toThrow(/integer between 1000 and 86400000/);
+    }
+    expect(mocks.client.query).not.toHaveBeenCalled();
+    await store.close();
+  });
+
   it("claims with SKIP LOCKED and guards acknowledgement by lease owner", async () => {
     mocks.client.query.mockResolvedValueOnce({ rowCount: null, rows: [] });
     mocks.client.query.mockResolvedValueOnce({
@@ -137,6 +146,45 @@ describe("PostgreSQL transactional storage", () => {
     expect(acknowledged).toBe(true);
     expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_by = $2");
     expect(mocks.poolQuery.mock.calls[0][0]).toContain("lease_token = $3");
+  });
+
+  it("renews only the current unexpired outbox lease", async () => {
+    mocks.poolQuery.mockResolvedValueOnce({ rowCount: 1, rows: [] }).mockResolvedValueOnce({ rowCount: 0, rows: [] });
+    const store = createPostgresTransactionalStore({ connectionString: "postgres://example" });
+    await expect(store.renewLease({ id: "10", workerId: "worker-1", leaseToken: "lease-token-1", leaseMs: 5000 })).resolves.toBe(true);
+    await expect(store.renewLease({ id: "10", workerId: "worker-1", leaseToken: "stale-token", leaseMs: 5000 })).resolves.toBe(false);
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_until > now()");
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("lease_token = $3");
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_until = now()");
+    await expect(store.renewLease({ id: "10", workerId: "worker-1", leaseToken: "lease-token-1", leaseMs: 999 })).rejects.toThrow(/between 1000 and 86400000/);
+    await store.close();
+  });
+
+  it("requires an unexpired lease for acknowledgement and retry", async () => {
+    mocks.poolQuery
+      .mockResolvedValueOnce({ rowCount: 1, rows: [] })
+      .mockResolvedValueOnce({ rowCount: 0, rows: [] });
+    const store = createPostgresTransactionalStore({
+      connectionString: "postgres://example",
+    });
+
+    await expect(store.acknowledge({
+      id: "10",
+      workerId: "worker-1",
+      leaseToken: "lease-token-1",
+    })).resolves.toBe(true);
+    await expect(store.retry({
+      id: "10",
+      workerId: "worker-1",
+      leaseToken: "lease-token-1",
+      availableAt: new Date().toISOString(),
+      error: "expired lease",
+      maxAttempts: 5,
+    })).resolves.toBe("lease-lost");
+
+    expect(mocks.poolQuery.mock.calls[0][0]).toContain("locked_until > now()");
+    expect(mocks.poolQuery.mock.calls[1][0]).toContain("locked_until > now()");
+    await store.close();
   });
 
   it("reports bounded-cardinality outbox queue health", async () => {

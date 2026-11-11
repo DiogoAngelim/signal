@@ -1,4 +1,4 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
 import { createMemoryIdempotencyStore } from "./idempotency";
 
 describe("createMemoryIdempotencyStore", () => {
@@ -89,4 +89,32 @@ describe("createMemoryIdempotencyStore", () => {
     })).resolves.toBe(false);
   });
 
+  it("renews active outbox leases and fences expired generations", async () => {
+    vi.useFakeTimers();
+    try {
+      vi.setSystemTime(new Date("2026-11-10T12:00:00.000Z"));
+      const store = createMemoryIdempotencyStore();
+      const input = { operationName: "outbox.lease.v1", idempotencyKey: "lease-1", payloadFingerprint: "fp" };
+      const reservation = await store.reserve(input);
+      await store.completeWithEvents({
+        ...input,
+        reservationToken: reservation.record!.reservationToken!,
+        result: { ok: true },
+        events: [{
+          protocol: "signal.v1", kind: "event", name: "outbox.lease.v1",
+          messageId: "outbox-lease-event", timestamp: new Date().toISOString(), payload: {},
+        }],
+      });
+      const first = (await store.claimBatch({ workerId: "worker", limit: 1, leaseMs: 1000 }))[0];
+      await expect(store.renewLease({ id: first.id, workerId: "worker", leaseToken: first.leaseToken, leaseMs: 2000 })).resolves.toBe(true);
+      vi.advanceTimersByTime(2100);
+      await expect(store.renewLease({ id: first.id, workerId: "worker", leaseToken: first.leaseToken, leaseMs: 2000 })).resolves.toBe(false);
+      const second = (await store.claimBatch({ workerId: "worker", limit: 1, leaseMs: 2000 }))[0];
+      expect(second.leaseToken).not.toBe(first.leaseToken);
+      await expect(store.acknowledge({ id: second.id, workerId: "worker", leaseToken: first.leaseToken })).resolves.toBe(false);
+      await expect(store.acknowledge({ id: second.id, workerId: "worker", leaseToken: second.leaseToken })).resolves.toBe(true);
+    } finally {
+      vi.useRealTimers();
+    }
+  });
 });

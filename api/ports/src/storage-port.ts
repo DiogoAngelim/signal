@@ -78,6 +78,13 @@ export interface OutboxPort {
     limit: number;
     leaseMs: number;
   }): Promise<OutboxRecord[]>;
+  /** Extend a live lease without changing its fencing token. */
+  renewLease(input: {
+    id: string;
+    workerId: string;
+    leaseToken: string;
+    leaseMs: number;
+  }): Promise<boolean>;
   /** Acknowledge only when the caller still owns the lease. */
   acknowledge(input: {
     id: string;

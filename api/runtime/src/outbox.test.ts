@@ -26,6 +26,7 @@ function createOutbox(records: OutboxRecord[]) {
   const outbox: OutboxPort = {
     getStats: vi.fn(async () => ({ pending: 0, processing: 0, delivered: 0, deadLettered: 0, oldestPendingAgeMs: null })),
     claimBatch: vi.fn(async () => records),
+    renewLease: vi.fn(async () => true),
     acknowledge: vi.fn(async ({ id }) => {
       acknowledged.push(id);
       return true;
@@ -82,6 +83,55 @@ describe("durable outbox dispatcher", () => {
     );
   });
 
+  it("renews the lease while a slow handler is running", async () => {
+    vi.useFakeTimers();
+    try {
+      const harness = createOutbox([record("event-slow"), record("event-waiting")]);
+      let finish!: () => void;
+      let calls = 0;
+      const dispatch = vi.fn(() => ++calls === 1
+        ? new Promise<void>((resolve) => { finish = resolve; })
+        : Promise.resolve());
+      const pending = dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch, subscribe: () => () => undefined },
+        { workerId: "worker-slow", leaseMs: 1000 },
+      );
+      await vi.advanceTimersByTimeAsync(350);
+      expect(harness.outbox.renewLease).toHaveBeenCalledWith({
+        id: "event-slow", workerId: "worker-slow", leaseToken: "lease-event-slow", leaseMs: 1000,
+      });
+      expect(harness.outbox.renewLease).toHaveBeenCalledWith({
+        id: "event-waiting", workerId: "worker-slow", leaseToken: "lease-event-waiting", leaseMs: 1000,
+      });
+      finish();
+      await expect(pending).resolves.toMatchObject({ delivered: 2, leaseLost: 0 });
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
+  it("does not acknowledge or retry after lease renewal is rejected", async () => {
+    vi.useFakeTimers();
+    try {
+      const harness = createOutbox([record("event-fenced")]);
+      harness.outbox.renewLease = vi.fn(async () => false);
+      let finish!: () => void;
+      const pending = dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch: () => new Promise<void>((resolve) => { finish = resolve; }), subscribe: () => () => undefined },
+        { workerId: "worker-fenced", leaseMs: 1000 },
+      );
+      await vi.advanceTimersByTimeAsync(350);
+      finish();
+      await expect(pending).resolves.toMatchObject({ delivered: 0, scheduled: 0, leaseLost: 1 });
+      expect(harness.outbox.acknowledge).not.toHaveBeenCalled();
+      expect(harness.outbox.retry).not.toHaveBeenCalled();
+    } finally {
+      vi.useRealTimers();
+    }
+  });
+
   it("does not report delivery when the lease was lost before acknowledgement", async () => {
     const harness = createOutbox([record("event-4")]);
     harness.outbox.acknowledge = vi.fn(async () => false);
@@ -91,6 +141,18 @@ describe("durable outbox dispatcher", () => {
     );
     expect(result.delivered).toBe(0);
     expect(result.leaseLost).toBe(1);
+  });
+
+  it("rejects fractional and excessive lease durations before claiming", async () => {
+    const harness = createOutbox([]);
+    for (const leaseMs of [999.5, 1000.5, 86_400_001]) {
+      await expect(dispatchOutboxBatch(
+        harness.outbox,
+        { dispatch: vi.fn(), subscribe: () => () => undefined },
+        { leaseMs },
+      )).rejects.toThrow("leaseMs");
+    }
+    expect(harness.outbox.claimBatch).not.toHaveBeenCalled();
   });
 
   it("rejects invalid batch bounds before claiming", async () => {

@@ -43,7 +43,7 @@ Outbox ownership is now represented by two independent values:
 - `workerId` identifies the worker process for diagnostics.
 - `leaseToken` identifies one specific claim generation.
 
-Every successful claim creates a new UUID token. Acknowledge and retry operations must present both values. The database update is conditional on the current worker identity and token; stale operations affect zero rows and are reported as lease loss. Reusing a worker ID after restart does not restore authority from an earlier lease.
+Every successful claim creates a new UUID token. Renewal, acknowledgement, and retry operations must present both values and require the lease to remain unexpired. Renewal extends the expiry without changing the token; stale operations affect zero rows and are reported as lease loss. The runtime renews active dispatch leases at one-third of the configured lease interval. Reusing a worker ID after restart does not restore authority from an earlier lease.
 
 The migration `0002_outbox_lease_fencing.sql` adds the outbox token and a database constraint requiring it exactly while a row is processing. The migration `0003_idempotency_reservation_leases.sql` adds a finite reservation expiry and a generation token. Runtime handlers renew their reservation every 60 seconds against a five-minute lease; completion and failure require the current token and an unexpired lease. Expired reservations are atomically reclaimed with a new token. Consumers still must deduplicate on `envelope.messageId`: the outbox is at-least-once by design.
 

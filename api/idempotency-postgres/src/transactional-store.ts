@@ -272,8 +272,8 @@ export function createPostgresTransactionalStore(
       if (!Number.isSafeInteger(input.limit) || input.limit < 1 || input.limit > 1000) {
         throw new RangeError("Outbox limit must be between 1 and 1000.");
       }
-      if (!Number.isFinite(input.leaseMs) || input.leaseMs < 1000) {
-        throw new RangeError("Outbox lease must be at least 1000 milliseconds.");
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Outbox lease must be an integer between 1000 and 86400000 milliseconds.");
       }
       const client = await pool.connect();
       try {
@@ -319,12 +319,27 @@ export function createPostgresTransactionalStore(
       }
     },
 
+    async renewLease(input): Promise<boolean> {
+      if (!Number.isSafeInteger(input.leaseMs) || input.leaseMs < 1_000 || input.leaseMs > 86_400_000) {
+        throw new RangeError("Outbox lease must be between 1000 and 86400000 milliseconds.");
+      }
+      const renewed = await pool.query(
+        `UPDATE signal_outbox
+         SET locked_until = now() + ($4 * interval '1 millisecond')
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2
+           AND lease_token = $3 AND locked_until > now()`,
+        [input.id, input.workerId, input.leaseToken, input.leaseMs],
+      );
+      return renewed.rowCount === 1;
+    },
+
     async acknowledge(input): Promise<boolean> {
       const result = await pool.query(
         `UPDATE signal_outbox
          SET status = 'delivered', delivered_at = now(),
              locked_by = NULL, locked_until = NULL, lease_token = NULL, last_error = NULL
-         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3`,
+         WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
+           AND locked_until > now()`,
         [input.id, input.workerId, input.leaseToken],
       );
       return result.rowCount === 1;
@@ -337,6 +352,7 @@ export function createPostgresTransactionalStore(
              available_at = $4::timestamptz, last_error = $5,
              locked_by = NULL, locked_until = NULL, lease_token = NULL
          WHERE id = $1 AND status = 'processing' AND locked_by = $2 AND lease_token = $3
+           AND locked_until > now()
          RETURNING status`,
         [input.id, input.workerId, input.leaseToken, input.availableAt, input.error, input.maxAttempts],
       );

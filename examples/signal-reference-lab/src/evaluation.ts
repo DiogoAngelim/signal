@@ -427,12 +427,14 @@ export async function runEvaluation(options: { benchmark?: BenchmarkReport & { b
     if (postgresIds.has(item.id)) {
       item.status = postgresPassed ? (item.id === "postgres.transactional-outbox" ? "partial" : "exercised") : "not-verified";
       item.scenarios = postgresPassed ? ["postgres-integration"] : [];
-      if (postgresPassed) item.evidence = "PostgreSQL integration scenario passed against the configured database."; 
-    }
-    if (item.id === "outbox.durability") {
-      item.status = postgresPassed ? "partial" : "not-verified";
-      item.scenarios = postgresPassed ? ["postgres-integration"] : [];
-      item.evidence = postgresPassed ? "Transactional outbox commit and delivery acknowledgement are exercised; crash recovery and stale-worker fencing are not." : "Durable outbox adapter is not exercised without PostgreSQL."; 
+      if (postgresPassed) {
+        item.evidence = item.id === "postgres.transactional-outbox"
+          ? "PostgreSQL integration exercises atomic mutation/outbox commit and rollback, concurrent claims, lease renewal, expiry/reclaim, stale-owner acknowledgement/retry fencing, and dead-letter behavior."
+          : "PostgreSQL integration scenario passed against the configured database.";
+        if (item.id === "postgres.transactional-outbox") {
+          item.limitation = "The separate production-simulation workflow covers the RabbitMQ publish/crash/redelivery boundary; this Reference Lab scenario does not claim broker-level delivery certification.";
+        }
+      }
     }
     if (item.id === "inbox.transactionality") {
       item.status = postgresPassed ? "exercised" : "not-verified";

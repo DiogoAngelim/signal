@@ -34,8 +34,8 @@ export async function dispatchOutboxBatch(
   if (!Number.isSafeInteger(limit) || limit < 1 || limit > 1000) {
     throw new RangeError("limit must be an integer between 1 and 1000.");
   }
-  if (!Number.isFinite(leaseMs) || leaseMs < 1000) {
-    throw new RangeError("leaseMs must be at least 1000 milliseconds.");
+  if (!Number.isSafeInteger(leaseMs) || leaseMs < 1000 || leaseMs > 86_400_000) {
+    throw new RangeError("leaseMs must be an integer between 1000 and 86400000 milliseconds.");
   }
   if (!Number.isSafeInteger(maxAttempts) || maxAttempts < 1) {
     throw new RangeError("maxAttempts must be a positive safe integer.");
@@ -50,31 +50,81 @@ export async function dispatchOutboxBatch(
     leaseLost: 0,
   };
 
-  for (const record of records) {
-    try {
-      await eventPort.dispatch(record.envelope);
-      const acknowledged = await outbox.acknowledge({
-        id: record.id,
-        workerId,
-        leaseToken: record.leaseToken,
-      });
-      if (acknowledged) result.delivered += 1;
-      else result.leaseLost += 1;
-    } catch (error) {
-      const attempts = Math.max(1, record.attempts);
-      const delayMs = Math.min(300_000, 1000 * 2 ** Math.min(attempts - 1, 8));
-      const retry = await outbox.retry({
-        id: record.id,
-        workerId,
-        leaseToken: record.leaseToken,
-        availableAt: new Date(now() + delayMs).toISOString(),
-        error: error instanceof Error ? error.message : String(error),
-        maxAttempts,
-      });
-      if (retry === "scheduled") result.scheduled += 1;
-      else if (retry === "dead-lettered") result.deadLettered += 1;
-      else result.leaseLost += 1;
+  const active = new Map<string, OutboxRecord>(records.map((record) => [record.id, record] as const));
+  const lost = new Set<string>();
+  let renewalInFlight: Promise<void> | undefined;
+  const renewActiveLeases = async () => {
+    if (renewalInFlight) return renewalInFlight;
+    renewalInFlight = Promise.all([...active.entries()].map(async ([id, record]) => {
+      if (!active.has(id)) return;
+      try {
+        const renewed = await outbox.renewLease({
+          id, workerId, leaseToken: record.leaseToken, leaseMs,
+        });
+        if (!renewed && active.has(id)) {
+          lost.add(id);
+          active.delete(id);
+        }
+      } catch {
+        // Ownership is uncertain after a renewal error; do not finalize it.
+        if (active.has(id)) {
+          lost.add(id);
+          active.delete(id);
+        }
+      }
+    })).then(() => undefined);
+    await renewalInFlight;
+    renewalInFlight = undefined;
+  };
+  // Keep every unprocessed claim alive, not only the record currently dispatched.
+  const heartbeat = setInterval(() => { void renewActiveLeases(); }, Math.max(250, Math.floor(leaseMs / 3)));
+
+  try {
+    for (const record of records) {
+      if (lost.has(record.id) || !active.has(record.id)) {
+        result.leaseLost += 1;
+        continue;
+      }
+      try {
+        await eventPort.dispatch(record.envelope);
+        if (renewalInFlight) await renewalInFlight;
+        if (lost.has(record.id) || !active.has(record.id)) {
+          result.leaseLost += 1;
+          continue;
+        }
+        const acknowledged = await outbox.acknowledge({
+          id: record.id,
+          workerId,
+          leaseToken: record.leaseToken,
+        });
+        active.delete(record.id);
+        if (acknowledged) result.delivered += 1;
+        else result.leaseLost += 1;
+      } catch (error) {
+        if (renewalInFlight) await renewalInFlight;
+        if (lost.has(record.id) || !active.has(record.id)) {
+          result.leaseLost += 1;
+          continue;
+        }
+        const attempts = Math.max(1, record.attempts);
+        const delayMs = Math.min(300_000, 1000 * 2 ** Math.min(attempts - 1, 8));
+        const retry = await outbox.retry({
+          id: record.id,
+          workerId,
+          leaseToken: record.leaseToken,
+          availableAt: new Date(now() + delayMs).toISOString(),
+          error: error instanceof Error ? error.message : String(error),
+          maxAttempts,
+        });
+        active.delete(record.id);
+        if (retry === "scheduled") result.scheduled += 1;
+        else if (retry === "dead-lettered") result.deadLettered += 1;
+        else result.leaseLost += 1;
+      }
     }
+  } finally {
+    clearInterval(heartbeat);
+    if (renewalInFlight) await renewalInFlight;
   }
 
   return result;
@@ -86,6 +136,7 @@ export function isOutboxPort(value: unknown): value is OutboxPort {
   return (
     typeof candidate.getStats === "function" &&
     typeof candidate.claimBatch === "function" &&
+    typeof candidate.renewLease === "function" &&
     typeof candidate.acknowledge === "function" &&
     typeof candidate.retry === "function"
   );
