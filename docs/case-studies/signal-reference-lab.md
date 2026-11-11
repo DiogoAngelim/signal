@@ -130,7 +130,7 @@ These are reproducible engineering measurements, not production capacity claims.
 
 ### Independent CI verification
 
-The final PR revision passed all nine GitHub Actions workflows:
+The final revision of reliability/security PR #48 passed all nine GitHub Actions workflows:
 
 - [Signal Reference Lab](https://github.com/DiogoAngelim/signal/actions/runs/42927061931) — 17/17 scenarios.
 - [Signal production simulation](https://github.com/DiogoAngelim/signal/actions/runs/42927061765) — PostgreSQL correctness, contention, and recovery.
