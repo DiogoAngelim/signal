@@ -126,11 +126,11 @@ The final PR revision passed all nine GitHub Actions workflows:
 - [pnpm lockfile refresh](https://github.com/DiogoAngelim/signal/actions/runs/42927061639).
 - [AI decision-system course validation](https://github.com/DiogoAngelim/signal/actions/runs/42927061932).
 
-The lease-fencing work and dependency remediation were merged in [PR #48](https://github.com/DiogoAngelim/signal/pull/48), merge commit \`e6e44a9b25ce984d0e823af366b2c507a8e63455\`. The security workflow passed after the workspace \`node-forge\` override and lockfile were upgraded to 1.4.3.
+The lease-fencing work and dependency remediation were merged in [PR #48](https://github.com/DiogoAngelim/signal/pull/48), merge commit `e6e44a9b25ce984d0e823af366b2c507a8e63455`. The security workflow passed after the workspace `node-forge` override and lockfile were upgraded to 1.4.3.
 
 ## Application integration
 
-The Reference Lab demonstrates Signal's own technical capabilities. [Workbench](workbench-integration.md) provides a separate application-integration case study: a distinct application consumes the released \`@signal/decision@0.1.0\` package in a commercial assessment workflow while retaining ownership of its commercial records, economic calculations, recommendations, approvals, and outcomes.
+The Reference Lab demonstrates Signal's own technical capabilities. [Workbench](workbench-integration.md) provides a separate application-integration case study: a distinct application consumes the released `@signal/decision@0.1.0` package in a commercial assessment workflow while retaining ownership of its commercial records, economic calculations, recommendations, approvals, and outcomes.
 
 That integration is package-level and CI-validated. It is not the Signal SDK/runtime, a hosted service, a production deployment, or evidence of improved commercial outcomes. The two case studies demonstrate complementary forms of technical evidence without conflating them.
 
@@ -173,7 +173,7 @@ node examples/signal-reference-lab/dist/src/cli.js evaluate --out evaluation.jso
 node examples/signal-reference-lab/dist/src/cli.js benchmark --out benchmark.json
 ~~~
 
-The database commands require the isolated PostgreSQL service and \`DATABASE_URL\` configured as described in the [Reference Lab README](../../examples/signal-reference-lab/README.md).
+The database commands require the isolated PostgreSQL service and `DATABASE_URL` configured as described in the [Reference Lab README](../../examples/signal-reference-lab/README.md).
 
 ## Evidence index
 
