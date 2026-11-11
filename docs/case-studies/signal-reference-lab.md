@@ -178,7 +178,7 @@ The database commands require the isolated PostgreSQL service and \`DATABASE_URL
 ## Evidence index
 
 - [Reference Lab source and reproduction instructions](../../examples/signal-reference-lab/README.md)
-- [Reference Lab workflow definition](../.github/workflows/reference-lab.yml)
+- [Reference Lab workflow definition](../../.github/workflows/reference-lab.yml)
 - [Reference Lab CI result](https://github.com/DiogoAngelim/signal/actions/runs/42927061931)
 - [Production simulation result](https://github.com/DiogoAngelim/signal/actions/runs/42927061765)
 - [Engineering measurements and artifacts](https://github.com/DiogoAngelim/signal/actions/runs/42927061826)
