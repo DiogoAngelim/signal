@@ -49,9 +49,9 @@ The workflow is already present; do not create a duplicate workflow. A passing r
 
 ### Evidence boundaries
 
-The Reference Lab README explicitly identifies remaining unverified areas, including crash-after-claim recovery, stale-worker fencing in the harness, actual multi-process contention, external identity-provider integration, provider/network fault injection, full replay execution and cross-version compatibility, external key custody/checkpoint anchoring, external telemetry export, and production load/soak validation.
+The latest verified iteration adds PostgreSQL lease renewal and expiry fencing, stale-owner acknowledgement/retry rejection, and batch-wide runtime heartbeats. The separate production-simulation workflow also passes the broker publish/crash/redelivery boundary. These are stronger recovery tests than the earlier Reference Lab run, but they do not establish multi-region failover, cross-host contention under representative production load, or exactly-once third-party side effects.
 
-The case study must preserve those limitations. In-process tests are not proof of distributed production behavior. Synthetic scenarios are not real customer outcomes. CI benchmarks are not production SLO evidence.
+Remaining unverified areas include external identity-provider integration, provider/network fault injection across all relevant modes, full historical replay execution and cross-version compatibility, external key custody and independent checkpoint anchoring, external telemetry export and alerting, and production load/soak validation. In-process tests are not proof of distributed production behavior. Synthetic scenarios are not real customer outcomes. CI benchmarks are not production SLO evidence.
 
 ## Workbench: package integration and future external business case
 
@@ -118,38 +118,32 @@ Use these terms precisely:
 
 The immediate credibility deliverables are two rigorously reported technical/application case studies: Reference Lab and Workbench package integration. The next Workbench milestone is production validation and an evidence-backed business-outcome comparison.
 
-## Verified CI evidence: Reference Lab
+## Verified CI evidence: Reference Lab and reliability iteration
 
-The existing Reference Lab workflow was inspected for run **[42853111860](https://github.com/DiogoAngelim/signal/actions/runs/42853111860)** on commit `7611e0e0fa61b1dd8299127f1754d631488fc089` (2026-11-10).
+The latest Reference Lab evaluation artifact was generated on 2026-11-10 and records:
+- Reference Lab app commit: `2ff4ba1c7f29b16947fa6f02ed1a6100dcbe9523`.
+- Signal source commit recorded by the harness: `20ab95a6de8b36fd28c07ae7da4249e4d8ed16f7`.
+- 17/17 scenarios passed; 0 blocked; 0 failed.
+- 12/12 Signal-targeted scenarios passed.
+- 28/34 capabilities directly exercised; 6 partial.
+- 21 PostgreSQL integration assertions passed.
+- Provisional engineering score: 8.49/10.
 
-Observed results from the completed GitHub Actions job:
-- Job conclusion: **success**.
-- PostgreSQL 16 service started and passed its health check.
-- Frozen pnpm workspace installation succeeded.
-- Signal workspace library build succeeded.
-- Reference Lab PostgreSQL migrations succeeded.
-- Signal CLI installation and build succeeded.
-- Reference Lab build and semantic typecheck succeeded.
-- Compiled Reference Lab test suite succeeded.
-- Coverage verification succeeded.
-- Evaluation and benchmark evidence artifacts were generated and uploaded.
-- **17/17 scenarios passed; 0 blocked; 0 failed.**
-- **12/12 Signal-targeted scenarios passed.**
-- **28/34 capabilities directly exercised; 6 partial.**
-- PostgreSQL integration reported **21 assertions passed**.
+The run is [Signal Reference Lab 42927061931](https://github.com/DiogoAngelim/signal/actions/runs/42927061931). Its uploaded evaluation artifact is `signal-reference-lab-updated-score` (artifact ID `13814781009`). The evaluation distinguishes Signal-targeted, integration, and reference-application gates instead of attributing every application failure or success to Signal.
 
-The evaluation report itself labels the score provisional and explicitly says it is not certification or production-readiness evidence. The four-pillar composite score is withheld until each pillar has sufficient comparable evidence. Performance is neutral until production-like measurements are available.
+The PR #48 reliability/security iteration was validated on its final PR head `2ff4ba1c7f29b16947fa6f02ed1a6100dcbe9523` and merged as `e6e44a9b25ce984d0e823af366b2c507a8e63455`. All nine GitHub Actions workflows passed:
+- [Reference Lab](https://github.com/DiogoAngelim/signal/actions/runs/42927061931)
+- [Production simulation: PostgreSQL correctness, contention, and recovery](https://github.com/DiogoAngelim/signal/actions/runs/42927061765)
+- [Engineering measurements](https://github.com/DiogoAngelim/signal/actions/runs/42927061826)
+- [CodeQL and dependency audit](https://github.com/DiogoAngelim/signal/actions/runs/42927061780)
+- [Core](https://github.com/DiogoAngelim/signal/actions/runs/42927061752)
+- [Quality and architecture](https://github.com/DiogoAngelim/signal/actions/runs/42927061613)
+- [Library build, test, pack, and clean install](https://github.com/DiogoAngelim/signal/actions/runs/42927061653)
+- [Lockfile refresh](https://github.com/DiogoAngelim/signal/actions/runs/42927061639)
+- [AI decision-system course validation](https://github.com/DiogoAngelim/signal/actions/runs/42927061932)
 
-Artifact: `signal-reference-lab-42853111860-1` (GitHub Actions artifact ID `13782365395`; retained until 2026-12-10).
+The engineering-measurements artifact (run 42927061826) records a 30-second in-process dispatch workload with 14,590,304 messages submitted and handled, 486,343 operations/second, and sampled p50/p95/p99 latency of 0.033/0.058/0.074 ms. It also measures a 5,000-evidence decision pipeline, hash-chain append and verification, signed checkpoints, and synthetic calibration/learning workloads. These measurements exclude production HTTP, broker, network, and multi-process behavior where stated by each benchmark.
 
-This is a genuine, reproducible CI verification result for the Reference Lab at the stated commit. It is not a deployment validation, production validation, independent customer outcome, or evidence that the currently updated documentation PR commit has rerun the Reference Lab workflow.
+The Reference Lab run's own score is provisional and is not certification or production-readiness evidence. A separate quality scorecard reports correctness 8.2, security 7.2, and reliability 8.0; its composite remains withheld because the performance pillar lacks a matched baseline. Do not conflate this scorecard with the Reference Lab's 8.49 engineering score.
 
-
-## Documentation PR validation
-
-The documentation-only change set was subsequently validated on its current PR head commit `b3fdaa66a5ae9909e4197c2137b0df1176854af7`:
-
-- [Signal quality run 42917749324](https://github.com/DiogoAngelim/signal/actions/runs/42917749324): completed successfully; Library correctness and architecture job passed.
-- [Signal core run 42917749390](https://github.com/DiogoAngelim/signal/actions/runs/42917749390): completed successfully; core job passed.
-
-These checks validate the documentation PR's repository quality/core gates. They are distinct from the Reference Lab run above and do not imply that the Reference Lab workflow was rerun on this documentation-only head commit.
+The lease-fencing fix is merged, but the case-study documentation update remains in a separate reviewable PR. No deployment, package release, or production validation is implied by these CI results.
