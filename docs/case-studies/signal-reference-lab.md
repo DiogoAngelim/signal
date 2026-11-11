@@ -1,72 +1,201 @@
-# Case study: Signal Reference Lab
+# Signal — Engineering a foundation for reliable, continuously improving decisions
 
-**Status:** Reproducible CI verification  
-**Verified:** 2026-11-10  
-**Signal commit:** `7611e0e0fa61b1dd8299127f1754d631488fc089`  
-**Workflow:** [Signal Reference Lab run 42853111860](https://github.com/DiogoAngelim/signal/actions/runs/42853111860)
+**Built by:** Naubly  
+**What this demonstrates:** A reusable decision-processing foundation, verified through a reproducible reference application and automated engineering evidence  
+**Evidence boundary:** CI-verified technical results; no customer deployment, production certification, or measured customer-business outcome is claimed  
+**Updated:** 2026-11-10
 
-## The engineering problem
+## When a software decision becomes a reliability problem
 
-A decision-processing platform needs evidence that its contracts and runtime work together across a complete decision lifecycle—not simply that packages compile or isolated unit tests pass. It also needs a way to distinguish capabilities that are exercised from those that are only partially covered or not verified.
+A consequential software decision rarely lives in one function.
 
-## What was evaluated
+A subscription may be approved, a transaction flagged, a customer routed, a credit limit changed, or an operational action triggered. To make that decision dependable, a system must preserve more than its final answer. It must know what evidence was available, how that evidence was assessed, which rules and constraints applied, who or what authorized the action, whether the action actually happened, and what its outcome revealed.
 
-Signal Reference Lab is a runnable case-management application built against Signal's public workspace packages. It exercises a generic flow:
+In many SaaS architectures, those responsibilities evolve independently across request handlers, business rules, database transactions, queues, audit logs, and analytics jobs. The result is familiar to engineering leaders:
 
-`request → sourced evidence → assessment → decision → human authorization → action → outcome → review`
+- Retries can repeat an external side effect when a caller loses the original response.
+- A state change and its event can become inconsistent.
+- Authorization and tenant boundaries can be enforced differently across entry points.
+- Teams can see that an action happened without being able to reconstruct why it was taken.
+- Outcomes can be collected without being connected to the original decision.
+- Logs can be extensive while the decision itself remains difficult to explain, reproduce, or improve.
 
-The evaluation covers public SDK operation registration and dispatch, schema validation, authorization, tenant-boundary checks, evidence assessment, commitment constraints, semantic-state interpretation, decision memory, event publication, HTTP binding, PostgreSQL adapters, retry budgets, circuit breakers, replay evidence, audit integrity, kernel orchestration, CLI verification, and observability instrumentation.
+These are not simply observability gaps. They are architectural gaps across the full decision lifecycle.
 
-The CI workflow provisions an ephemeral PostgreSQL 16 service, installs the locked workspace, builds Signal libraries and the CLI, applies database migrations, builds and typechecks the lab, runs compiled tests and coverage verification, and stores machine-readable evaluation and benchmark artifacts.
+**Naubly built Signal to address that class of problem:** a modular foundation for applications that need decisions to be explainable, governed, safely executed, and capable of improving from observed outcomes.
 
-## Verified result
+## The engineering objective
 
-The completed workflow reported:
+The objective was not to build another rules engine or centralize every application's business logic. It was to make the decision lifecycle reusable while preserving the authority of the application that uses it.
 
-| Measure | Observed result |
+Signal separates three responsibilities:
+
+| Layer | What it owns |
+|---|---|
+| Protocol | Stable, versioned contracts for queries, mutations, events, schemas, envelopes, and results |
+| Runtime | Dispatch, authorization hooks, idempotency, replay metadata, audit, event delivery, and orchestration |
+| Domain packages | Evidence assessment, confidence discipline, governance, outcome review, learning, memory, and related decision models |
+
+Persistence, event delivery, replay, and observability sit behind explicit ports. The integrating application retains ownership of its domain records, business policies, commercial logic, and final authority.
+
+This boundary is important. A reusable decision platform should strengthen an application's architecture—not silently take control of its business.
+
+## How the system works
+
+Signal represents a decision as a lifecycle rather than a single response:
+
+~~~mermaid
+flowchart LR
+  A[Request] --> B[Evidence]
+  B --> C[Assessment]
+  C --> D[Decision]
+  D --> E{Human authorization}
+  E -->|Approved| F[Action]
+  E -->|Rejected| X[No action]
+  F --> G[Outcome]
+  G --> H[Review]
+  H --> I[Learning]
+  I --> J[Memory]
+~~~
+
+1. **Request:** An application submits a typed operation through a defined contract.
+2. **Evidence:** The system records the information and provenance relevant to the decision.
+3. **Assessment:** Evidence is evaluated with explicit treatment of uncertainty and confidence.
+4. **Decision:** The system produces a structured result that can be inspected and governed.
+5. **Authorization:** Approval is an explicit boundary before a consequential action; it is not inferred from a recommendation.
+6. **Action:** The application executes the authorized mutation through controlled runtime and persistence contracts.
+7. **Outcome:** The result is recorded against the decision that led to it.
+8. **Review and learning:** Outcomes can be examined to derive calibration and learning signals.
+9. **Memory:** Relevant learning can inform later decisions without erasing the provenance of earlier ones.
+
+The result is a traceable path from request to action and from action to learning. The application remains the authority over whether an action is permitted.
+
+## Engineering the failure paths—not just the happy path
+
+The most important reliability work concerns what happens when components disagree about whether work has completed.
+
+For example, an outbox worker may claim a message, begin handling it, and then lose its lease. A second worker may reclaim the record. If the original worker later acknowledges or retries with stale ownership, it can interfere with the new owner.
+
+The latest reliability iteration hardened this boundary with:
+
+- Expiry-aware fencing for acknowledgement and retry.
+- PostgreSQL and in-memory lease renewal using the existing claim token.
+- Batch-wide heartbeat renewal, including records waiting behind a slow sequential handler.
+- Concurrent heartbeat renewals to avoid serial renewal starvation.
+- Rejection of stale renewal after expiry or ownership change.
+- Consistent lease-duration validation across runtime and adapters.
+
+PostgreSQL integration tests exercise live renewal, expiry rejection, reclaim with a new token, and rejection of stale-owner acknowledgement and retry. A separate production-simulation workflow exercises the broker publish/crash/redelivery boundary.
+
+There is an important limit: delivery is **at-least-once**, not exactly-once. If an external side effect completes before a worker loses its lease, a consumer still needs stable message-ID deduplication or destination idempotency and reconciliation. Lease fencing prevents a stale worker from finalizing a record it no longer owns; it cannot make an arbitrary third-party side effect exactly-once.
+
+This is the distinction between demonstrating a reliability mechanism and claiming a guarantee the architecture does not provide.
+
+## What was verified
+
+Rather than rely on architectural descriptions alone, Signal includes a runnable Reference Lab that composes the public workspace packages into an application lifecycle. The lab is reproducible through repository instructions and automated CI workflows.
+
+### Reference Lab evaluation
+
+The completed evaluation reported:
+
+| Measure | Verified result |
 |---|---:|
-| Overall scenarios | **17 / 17 passed** |
-| Blocked scenarios | **0** |
-| Failed scenarios | **0** |
-| Signal-targeted scenarios | **12 / 12 passed** |
+| Scenarios passed | **17 / 17** |
+| Failed or blocked scenarios | **0** |
+| Signal-targeted scenarios passed | **12 / 12** |
 | Capabilities directly exercised | **28 / 34** |
 | Capabilities marked partial | **6** |
 | PostgreSQL integration assertions | **21 passed** |
+| Provisional engineering score | **8.49 / 10** |
 
-The GitHub Actions job completed successfully. PostgreSQL health checks, frozen dependency installation, library build, migrations, CLI build, Reference Lab build, semantic typecheck, compiled tests, coverage verification, and evidence artifact generation all succeeded.
+The 8.49/10 result is a provisional engineering score for the Reference Lab—not a customer satisfaction score, production certification, or guarantee of business impact. Its dimensions were functional correctness 9.6, reliability/resilience 9.8, performance/resource efficiency 5.0 (neutral, low confidence), architecture/design 9.4, security/integrity 7.3, maintainability 9.6, testing/verification 9.7, developer experience 7.7, and operability/delivery 5.0 (neutral, low confidence).
 
-The result is tied to the exact commit and workflow above. The artifact was uploaded as `signal-reference-lab-42853111860-1` (artifact ID `13782365395`).
+A separate quality scorecard reports correctness 8.2, security 7.2, and reliability 8.0. Its overall composite is intentionally withheld because performance does not yet have a matched, production-like baseline. These scorecards measure different things and should not be combined.
 
-## What this demonstrates
+### Performance and engineering measurements
 
-- Signal's public packages can be exercised together by a real example application.
-- The evaluated lifecycle includes evidence, decision, authorization, execution, outcome, and review—not only a prediction or isolated function.
-- PostgreSQL-backed adapter behavior is tested against a real ephemeral PostgreSQL 16 service in CI.
-- The harness records machine-readable results and distinguishes exercised, partial, blocked, and unverified capabilities.
-- The result is reproducible from a versioned repository commit and a visible CI workflow.
+The engineering-measurements workflow produced machine-readable artifacts on a Linux runner with Node.js 20.20.2, an AMD EPYC 7763 CPU, and four logical CPUs.
 
-## Limitations
+| Measurement | Observed result | What was measured |
+|---|---:|---|
+| In-process dispatch | **486,343 operations/s** over 30 seconds; 14,590,304 messages submitted and handled; sampled p50 0.033 ms, p95 0.058 ms, p99 0.074 ms | Envelope construction and one in-process subscriber |
+| Full decision pipeline | p50 **14.09 ms**, p95 **28.04 ms** | 5,000 evidence items; three synthetic runs |
+| Audit-chain append | p50 **0.0077 ms**; approximately **109,837 entries/s** | In-memory hash-chain benchmark at 50,000 entries |
+| Full audit-chain verification | p50 **411 ms** | In-memory verification at 50,000 entries |
+| Signed checkpoint creation | p50 **429 ms** | Ed25519 signing; no external key custody |
+| Calibration and learning derivation | p50 **17.89 ms** and **13.23 ms**, respectively | 50,000 synthetic traces; 1,000 moving-block-bootstrap iterations for drift analysis |
 
-This is a **technical reference case study**, not a customer deployment or production certification.
+These measurements show the computational behavior of specific tested paths. They are not production capacity claims. The dispatch benchmark excludes HTTP, PostgreSQL, brokers, network latency, multi-process contention, and production traffic. Synthetic traces test computational behavior and invariants; they do not prove real-world decision effectiveness.
 
-The evaluation does not establish:
-- production throughput, latency SLOs, or long-duration soak behavior;
-- multi-region or cross-host contention under representative production load;
-- external identity-provider integration or a complete production authorization system;
-- crash-after-claim recovery and stale-worker fencing in the Reference Lab harness;
-- provider/network fault injection across all relevant failure modes;
-- full historical replay execution or cross-version replay compatibility;
-- external key custody or independent audit-checkpoint anchoring;
-- external telemetry scraping, trace export, or operational alerting;
-- improved customer, revenue, conversion, or other business outcomes.
+### Reproducible verification
 
-The six partial capabilities remain visible in the evaluation output. In-process delivery is not proof of distributed delivery, and a CI benchmark is not a production SLO measurement. Synthetic outcome fixtures are not live calibration evidence.
+The reliability/security revision passed all nine GitHub Actions workflows:
 
-## Reproduce
+- [Reference Lab evaluation](https://github.com/DiogoAngelim/signal/actions/runs/42927061931) — 17/17 scenarios.
+- [Production simulation](https://github.com/DiogoAngelim/signal/actions/runs/42927061765) — PostgreSQL correctness, contention, recovery, and broker crash/redelivery boundary.
+- [Engineering measurements](https://github.com/DiogoAngelim/signal/actions/runs/42927061826) — benchmark artifact generation.
+- [Security assurance](https://github.com/DiogoAngelim/signal/actions/runs/42927061780) — CodeQL and dependency audit.
+- [Core workflow](https://github.com/DiogoAngelim/signal/actions/runs/42927061752).
+- [Quality and architecture](https://github.com/DiogoAngelim/signal/actions/runs/42927061613).
+- [Library build and clean-install validation](https://github.com/DiogoAngelim/signal/actions/runs/42927061653).
+- [Lockfile refresh](https://github.com/DiogoAngelim/signal/actions/runs/42927061639).
+- [AI decision-system course validation](https://github.com/DiogoAngelim/signal/actions/runs/42927061932).
+
+The lease-fencing work and dependency remediation were merged in [PR #48](https://github.com/DiogoAngelim/signal/pull/48), merge commit `e6e44a9b25ce984d0e823af366b2c507a8e63455`. The security workflow passed after the workspace `node-forge` override and lockfile were upgraded to 1.4.3.
+
+The Reference Lab evaluation artifact records app commit `2ff4ba1c7f29b16947fa6f02ed1a6100dcbe9523` and Signal source commit `20ab95a6de8b36fd28c07ae7da4249e4d8ed16f7`. The production-simulation and engineering-measurement workflows ran against GitHub's PR merge-test commit `0107a24f7c0fb813fd72cf782d81356c3e578bee`, which combined the tested PR head with the pre-merge base. PR #48 was subsequently squash-merged.
+
+## What this means for a SaaS engineering team
+
+The practical value of this architecture is not that every application needs every Signal package. It is that teams can stop rebuilding the same decision infrastructure in disconnected ways.
+
+For a team evaluating this approach, the potential benefits are:
+
+- **More explainable decisions:** preserve the evidence, assessment, authorization, and action trail needed to understand why a system acted.
+- **Safer retries and recovery:** make idempotency, ownership, and delivery semantics explicit instead of relying on best-effort handler conventions.
+- **Clearer application boundaries:** reuse decision capabilities without surrendering domain ownership or business authority.
+- **A path from outcomes to improvement:** connect later results to earlier decisions so calibration and learning can be designed as part of the system.
+- **More testable architecture:** verify contracts and failure behavior through repeatable scenarios and integration tests.
+
+These are architectural capabilities and plausible engineering benefits—not measured reductions in incidents, operating costs, decision errors, or customer churn. Those outcomes must be established in the context of a real deployment.
+
+## Integration without surrendering business ownership
+
+Signal's Reference Lab demonstrates Signal's own technical capabilities. A separate [Workbench integration case study](workbench-integration.md) demonstrates a consuming application using the released `@signal/decision@0.1.0` package in a commercial assessment workflow.
+
+Workbench retains authority over its commercial records, economic calculations, recommendations, approvals, audit history, and outcomes. The integration is package-level and CI-validated; it is not a Signal SDK/runtime integration, hosted service, production deployment, or evidence of improved commercial outcomes.
+
+Together, the two examples show both sides of the engineering proposition: a reusable decision foundation and an application that can adopt a domain package while retaining ownership of its business.
+
+## Evidence boundaries and remaining work
+
+A credible engineering case study should make the limits as visible as the results.
+
+**Verified or directly exercised**
+- Public Signal packages compose into a runnable reference application.
+- The tested lifecycle spans evidence, assessment, decision, authorization, action, outcome, and review.
+- PostgreSQL-backed correctness and recovery behavior is exercised in CI.
+- Idempotency, audit integrity, replay evidence, tenant-boundary checks, and resilience controls have automated verification.
+- Evaluation and benchmark artifacts are tied to repository commits and workflow runs.
+
+**Not established by this case study**
+- Production throughput, latency SLOs, long-duration soak behavior, or capacity under representative traffic.
+- A customer deployment, customer reference, or measured revenue, conversion, retention, incident, or decision-quality improvement.
+- Multi-region failover or cross-host contention under production load.
+- External identity-provider integration or a complete production authorization deployment.
+- External key custody, independent audit-checkpoint retention, or managed security certification.
+- Full historical replay execution and cross-version replay compatibility.
+- External telemetry scraping, trace export, on-call readiness, or operational alerting.
+- A deployed Reference Lab UI screenshot or demo recording; current visual evidence is the lifecycle diagram and linked CI artifacts.
+
+The Reference Lab itself does not claim broker-level delivery certification; the separate production-simulation workflow covers the broker crash/redelivery boundary. Six capabilities remain marked partial in the evaluation. A passing CI run is evidence for the tested revision and scenarios, not a substitute for deployment validation or real-world use.
+
+## Reproducing the evaluation
 
 From the Signal repository root:
 
-```bash
+~~~bash
 pnpm install --frozen-lockfile
 pnpm build:library
 pnpm --filter @signal/reference-lab db:migrate
@@ -79,16 +208,23 @@ node --test examples/signal-reference-lab/dist/test/*.test.js
 node examples/signal-reference-lab/dist/src/cli.js coverage
 node examples/signal-reference-lab/dist/src/cli.js evaluate --out evaluation.json
 node examples/signal-reference-lab/dist/src/cli.js benchmark --out benchmark.json
-```
+~~~
 
-The database commands require the isolated PostgreSQL service and `DATABASE_URL` configured as in [the Reference Lab README](../examples/signal-reference-lab/README.md).
+The database commands require the isolated PostgreSQL service and `DATABASE_URL` configured as described in the [Reference Lab README](../../examples/signal-reference-lab/README.md).
 
-## Evidence and interpretation
+## Evidence index
 
-- [Reference Lab source and reproduction instructions](../examples/signal-reference-lab/README.md)
-- [Workflow definition](../.github/workflows/reference-lab.yml)
-- [Completed CI run](https://github.com/DiogoAngelim/signal/actions/runs/42853111860)
-- [Integration and claim standard](application-integration-contract.md)
-- [Case-study selection and deferred application assessments](credibility-case-study-selection.md)
+- [Reference Lab source and reproduction instructions](../../examples/signal-reference-lab/README.md)
+- [Reference Lab workflow definition](../../.github/workflows/reference-lab.yml)
+- [Reference Lab CI result](https://github.com/DiogoAngelim/signal/actions/runs/42927061931)
+- [Production simulation result](https://github.com/DiogoAngelim/signal/actions/runs/42927061765)
+- [Engineering measurements and artifacts](https://github.com/DiogoAngelim/signal/actions/runs/42927061826)
+- [Security assurance result](https://github.com/DiogoAngelim/signal/actions/runs/42927061780)
+- [Replay and auditability model](../replay-auditability.md)
+- [Application integration contract](../application-integration-contract.md)
+- [Workbench application integration case study](workbench-integration.md)
+- [Credibility case-study selection](../credibility-case-study-selection.md)
 
-**Claim boundary:** Signal has a reproducible, CI-verified technical reference case. This evidence does not establish that Workbench or Stocks Optimizer currently execute through Signal, nor that Signal has been validated in production.
+## Next step
+
+If your product makes decisions that trigger consequential actions, Naubly can help assess one representative workflow: where evidence enters, how decisions are authorized, what happens on retries and failures, and whether outcomes can be traced back to the original decision. The first step is a focused engineering assessment—not a commitment to replace your existing architecture.
