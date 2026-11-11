@@ -4,13 +4,13 @@
 
 This is a deliberately narrow evidence plan. Signal should earn credibility through a small number of technically meaningful, reproducible case studies—not through the number of applications that import its packages.
 
-This assessment is based on repository source and workflow definitions inspected on 2026-11-10. It is a source-level assessment, not a claim that all workflows were executed during this review.
+This assessment combines repository inspection with completed CI evidence from 2026-11-10. Source-inspected, implemented, tested, and production-validated claims are kept distinct.
 
 ## Selection decision
 
 | Candidate | Decision relevance | Current evidence | Credibility role | Decision |
 |---|---|---|---|---|
-| Signal Reference Lab | High | A runnable application uses public Signal packages and defines 17 deterministic scenarios, including PostgreSQL-backed behavior. A dedicated Actions workflow provisions PostgreSQL, builds libraries, applies migrations, runs tests and coverage, and uploads evaluation/benchmark artifacts. | Primary reproducible technical case study | **Select now** |
+| Signal Reference Lab | High | A runnable application uses public Signal packages and defines 17 deterministic scenarios; 28/34 capabilities are directly exercised. PostgreSQL integration, lease renewal/fencing, broker crash recovery, and separate engineering benchmarks have passing CI evidence. | Primary reproducible technical case study | **Select now** |
 | Workbench | Very high | Separate application consumes the released `@signal/decision@0.1.0` package in its authenticated commercial assessment flow; persists Signal assessments; displays an evidence-review summary; includes 30 shared scenarios; and passed full CI (68 files, 663 tests, typecheck, migrations, audit, and build). No production deployment or outcome-labeled commercial dataset was verified. | Application integration case study; future external business-outcome case | **Select package-level integration case study now. Defer production and business-outcome claims.** |
 | Stocks Optimizer | High | Exists as a substantial application under `examples/stocks-optimizer`, with its own pnpm workspace and API CI workflow. Its workspace manifest does not declare Signal packages, and its workflow tests the app's own API server. The actual integration path into Signal was not established by this source review. | Conditional quantitative case study | **Defer pending proof of a real Signal runtime/domain-package path and independent financial test fixtures.** |
 | Liquidity Manager | Medium | A React/Vite application with Nubank-related dependencies; its manifest does not declare Signal packages. No distinct independently verifiable Signal decision use case was established in this review. | Low incremental value at present | **Exclude from this project.** |
