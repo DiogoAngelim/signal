@@ -7,10 +7,10 @@
   "types": "dist/index.d.ts",
   "scripts": {
     "prebuild": "node scripts/build-vercel-api.mjs",
-    "build": "vite build && tsc -p tsconfig.build.json",
+    "build": "node init && vite build && tsc -p tsconfig.build.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "lint": "pnpm run typecheck",
-    "dev": "vite --host 127.0.0.1",
+    "dev": "node init && vite --host 127.0.0.1",
     "preview": "vite preview --host 127.0.0.1",
     "test": "vitest run",
     "test:coverage": "vitest run --coverage",

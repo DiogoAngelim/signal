@@ -1,7 +1,6 @@
 # Signal — Engineering a foundation for reliable, continuously improving decisions
 
 **Built by:** Naubly  
-**For:** SaaS CTOs, engineering leaders, and product teams responsible for consequential software decisions  
 **What this demonstrates:** A reusable decision-processing foundation, verified through a reproducible reference application and automated engineering evidence  
 **Evidence boundary:** CI-verified technical results; no customer deployment, production certification, or measured customer-business outcome is claimed  
 **Updated:** 2026-11-10
@@ -229,36 +228,3 @@ The database commands require the isolated PostgreSQL service and `DATABASE_URL`
 ## Next step
 
 If your product makes decisions that trigger consequential actions, Naubly can help assess one representative workflow: where evidence enters, how decisions are authorized, what happens on retries and failures, and whether outcomes can be traced back to the original decision. The first step is a focused engineering assessment—not a commitment to replace your existing architecture.
-
----
-
-## Naubly Client Acquisition Score (NCAS)
-
-**Target buyer:** SaaS CTO or engineering leader responsible for a product with consequential, automated decisions.  
-**Relevant engagement:** Backend & Platform engineering, with potential follow-on work in reliability, integrations, and ongoing engineering partnership.  
-**Score:** **82 / 100 — Very high persuasive strength.**  
-**Interpretation:** This is an evidence-based assessment of how strongly this case study may influence a qualified buyer. It is not an 82% purchase probability. Actual purchase probability must be calibrated against prospect and sales outcomes for comparable buyer profiles. A score of 100 is reserved for confirmed hiring commitment.
-
-| Dimension | Score | Buyer-perspective assessment |
-|---|---:|---|
-| Problem relevance | **14 / 15** | Describes recognizable, expensive engineering failure modes in decision-heavy SaaS systems. |
-| Solution relevance | **13 / 15** | Explains a coherent architecture and lifecycle, while leaving room to make the fit to a specific buyer's stack and use case more concrete. |
-| Proof of capability | **12 / 15** | Strong reproducible tests, integration assertions, benchmark artifacts, commit provenance, and workflow links; no customer deployment or production outcomes. |
-| Trust and credibility | **14 / 15** | Explicit claim boundaries, limitations, at-least-once semantics, partial capabilities, and reproducibility materially reduce overclaiming. |
-| Expected business value | **11 / 15** | Connects architecture to explainability, safer recovery, ownership, and learning, but does not quantify customer-specific financial impact. |
-| Risk reduction | **9 / 10** | Makes failure modes, authorization boundaries, idempotency, and remaining risks concrete; production operational risks remain unverified. |
-| Competitive differentiation | **7 / 10** | The end-to-end decision lifecycle and separation of protocol/runtime/domain are distinctive, but no comparative benchmark against alternatives is provided. |
-| Purchase readiness | **2 / 5** | Includes a relevant next step, but lacks a named buyer outcome, engagement scope, timeline, commercial terms, and customer testimonial. |
-| **Total** | **82 / 100** | **Very high persuasive strength; not a calibrated probability of purchase.** |
-
-### What would increase the score
-
-The highest-value additions are not more technical claims. They are buyer-specific evidence:
-
-1. A short, recorded walkthrough of the Reference Lab showing a decision, authorization, retry/recovery, audit trail, and outcome review.
-2. A concrete example mapped to one target vertical or workflow, with the buyer's current failure mode and integration constraints.
-3. A scoped assessment offer with deliverables, expected timeline, decision criteria, and a clear commercial next step.
-4. A real customer engagement with permission to publish baseline conditions, delivered changes, and measured outcomes.
-5. A production-like load and soak report with stated workload, infrastructure, methodology, and reproducible results.
-
-Until those exist, the case study should sell the engineering capability and the quality of the evidence—not imply customer results that have not been measured.
