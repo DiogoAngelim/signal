@@ -23,7 +23,7 @@ on:
         description: "Tag for the GitHub Release, e.g. signal-library-v0.1.0"
         type: string
         required: true
-        default: "signal-library-v0.1.0"
+        default: "signal-library-v0.2.0"
 
 permissions:
   contents: read
