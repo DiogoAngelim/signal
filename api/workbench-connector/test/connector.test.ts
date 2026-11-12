@@ -162,18 +162,18 @@ describe("@signal/workbench-connector", () => {
     const unsubscribe = subscribeToSignalEvents(
       eventPort,
       { publishSignalEvent },
-      ["signal.finding.created"],
-      (envelope) => envelope.name === "signal.finding.created" ? event : null,
+      ["signal.finding.created.v1"],
+      (envelope) => envelope.name === "signal.finding.created.v1" ? event : null,
     );
     const envelope = createSignalEnvelope({
       kind: "event",
-      name: "signal.finding.created",
+      name: "signal.finding.created.v1",
       payload: { signalId: event.signalId },
     });
-    await handlers.get("signal.finding.created")?.(envelope);
+    await handlers.get("signal.finding.created.v1")?.(envelope);
     expect(publishSignalEvent).toHaveBeenCalledWith(event);
     unsubscribe();
-    expect(handlers.has("signal.finding.created")).toBe(false);
+    expect(handlers.has("signal.finding.created.v1")).toBe(false);
   });
 
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
