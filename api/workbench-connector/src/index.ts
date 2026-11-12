@@ -1,3 +1,5 @@
+import type { EventPort } from "@signal/ports";
+import type { SignalEnvelope } from "@signal/protocol";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
@@ -333,3 +335,27 @@ export function verifyWorkbenchSignature(raw: string, supplied: string, token: s
 
 export { createPostgresWorkbenchOutcomeSink } from "./postgres-outcome-sink";
 export type { CreatePostgresWorkbenchOutcomeSinkOptions } from "./postgres-outcome-sink";
+
+
+/**
+ * Connect Signal's durable event dispatch to Workbench. The mapper is explicit
+ * so the adapter never guesses owner, relationship, opportunity, source, or
+ * business meaning from arbitrary Signal payloads. A publish failure is
+ * re-thrown to the EventPort dispatcher so its outbox can retry the delivery.
+ */
+export function subscribeToSignalEvents(
+  eventPort: EventPort,
+  connector: Pick<WorkbenchConnector, "publishSignalEvent">,
+  eventNames: readonly string[],
+  mapEnvelope: (envelope: SignalEnvelope) => WorkbenchSignalEvent | null | Promise<WorkbenchSignalEvent | null>,
+): () => void {
+  const names = [...new Set(eventNames.map((name) => name.trim()).filter(Boolean))];
+  if (names.length === 0) throw new RangeError("At least one Signal event name is required.");
+  const unsubscribers = names.map((name) => eventPort.subscribe(name, async (envelope) => {
+    const event = await mapEnvelope(envelope);
+    if (event) await connector.publishSignalEvent(event);
+  }));
+  return () => {
+    for (const unsubscribe of unsubscribers) unsubscribe();
+  };
+}
