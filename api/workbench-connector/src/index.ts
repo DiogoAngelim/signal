@@ -73,6 +73,8 @@ const outcomePageSchema = z.object({
 type OutcomePage = z.infer<typeof outcomePageSchema>;
 
 export interface WorkbenchOutcomeSink {
+  /** Return the last durably committed cursor for this owner, or null. */
+  getCursor(ownerId: string): Promise<WorkbenchOutcomeCursor | null>;
   /**
    * Persist the complete page, deduplicate on (ownerId,eventId), and advance
    * the cursor in one durable transaction. Throwing must leave both unchanged.
@@ -264,7 +266,7 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
       if (!Number.isSafeInteger(maxPages) || maxPages < 1 || maxPages > 1_000) {
         throw new RangeError("maxPages must be an integer between 1 and 1000.");
       }
-      let cursor = input.cursor ? cursorSchema.parse(input.cursor) : null;
+      let cursor = input.cursor ? cursorSchema.parse(input.cursor) : await input.sink.getCursor(options.ownerId);
       let pages = 0;
       let accepted = 0;
       let duplicates = 0;
@@ -274,7 +276,7 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         const persisted = await input.sink.persistPage({
           ownerId: options.ownerId,
           previousCursor: cursor,
-          nextCursor: page.nextCursor,
+          nextCursor: page.nextCursor ?? cursor,
           events: page.events,
         });
         if (!Number.isSafeInteger(persisted.accepted) || persisted.accepted < 0 ||
@@ -285,10 +287,7 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         accepted += persisted.accepted;
         duplicates += persisted.duplicates;
         pages += 1;
-        if (!page.nextCursor) {
-          cursor = null;
-          break;
-        }
+        if (!page.nextCursor) break;
         if (cursor && page.nextCursor.after === cursor.after &&
             page.nextCursor.afterId === cursor.afterId &&
             page.nextCursor.afterChangeId === cursor.afterChangeId) {
