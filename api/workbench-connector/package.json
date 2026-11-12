@@ -23,7 +23,9 @@
   },
   "dependencies": {
     "zod": "^4.6.6",
-    "pg": "^8.21.0"
+    "pg": "^8.21.0",
+    "@signal/ports": "workspace:*",
+    "@signal/protocol": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^20.17.16",
