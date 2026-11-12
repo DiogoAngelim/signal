@@ -1,7 +1,9 @@
 import { createHmac } from "node:crypto";
+import { createSignalEnvelope } from "@signal/protocol";
 import { describe, expect, it, vi } from "vitest";
 import {
   createWorkbenchConnector,
+  subscribeToSignalEvents,
   type WorkbenchOutcomeEvent,
   type WorkbenchOutcomeCursor,
 } from "../src";
@@ -142,6 +144,36 @@ describe("@signal/workbench-connector", () => {
     expect(persistPage).toHaveBeenCalledTimes(2);
     expect(persistPage.mock.calls[1][0].previousCursor).toEqual(cursor);
     expect(persistPage.mock.calls[1][0].nextCursor).toEqual(cursor);
+  });
+
+
+  it("bridges only explicitly mapped Signal runtime events and propagates publish failures", async () => {
+    const handlers = new Map<string, (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>>();
+    const eventPort = {
+      dispatch: async () => undefined,
+      subscribe: (name: string, handler: (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>) => {
+        handlers.set(name, handler);
+        return () => { handlers.delete(name); };
+      },
+    };
+    const publishSignalEvent = vi.fn(async () => ({
+      accepted: true as const, duplicate: false, eventId: event.eventId, sourceRevision: event.sourceRevision,
+    }));
+    const unsubscribe = subscribeToSignalEvents(
+      eventPort,
+      { publishSignalEvent },
+      ["signal.finding.created"],
+      (envelope) => envelope.name === "signal.finding.created" ? event : null,
+    );
+    const envelope = createSignalEnvelope({
+      kind: "event",
+      name: "signal.finding.created",
+      payload: { signalId: event.signalId },
+    });
+    await handlers.get("signal.finding.created")?.(envelope);
+    expect(publishSignalEvent).toHaveBeenCalledWith(event);
+    unsubscribe();
+    expect(handlers.has("signal.finding.created")).toBe(false);
   });
 
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
