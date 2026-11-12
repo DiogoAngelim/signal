@@ -176,6 +176,18 @@ describe("@signal/workbench-connector", () => {
     expect(handlers.has("signal.finding.created.v1")).toBe(false);
   });
 
+  it("rejects unversioned Signal event subscription names", () => {
+    const eventPort = { dispatch: async () => undefined, subscribe: vi.fn(() => () => undefined) };
+    const connector = { publishSignalEvent: vi.fn() };
+    expect(() => subscribeToSignalEvents(
+      eventPort,
+      connector,
+      ["signal.finding.created"],
+      () => null,
+    )).toThrow(/versioned/);
+    expect(eventPort.subscribe).not.toHaveBeenCalled();
+  });
+
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
     expect(() => createWorkbenchConnector({ baseUrl: "http://workbench.example", ownerId, token })).toThrow(/HTTPS/);
     expect(() => createWorkbenchConnector({ baseUrl: "https://workbench.example", ownerId, token: "short" })).toThrow(/32 characters/);
