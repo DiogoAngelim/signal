@@ -132,13 +132,16 @@ describe("@signal/workbench-connector", () => {
       ownerId: string; previousCursor: WorkbenchOutcomeCursor | null;
       nextCursor: WorkbenchOutcomeCursor | null; events: readonly WorkbenchOutcomeEvent[];
     }) => ({ accepted: input.events.length, duplicates: 0 }));
+    const getCursor = vi.fn(async () => null);
     const connector = createWorkbenchConnector({
       baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
     });
-    const result = await connector.syncOutcomes({ sink: { persistPage } });
-    expect(result).toEqual({ pages: 2, accepted: 1, duplicates: 0, cursor: null });
+    const result = await connector.syncOutcomes({ sink: { getCursor, persistPage } });
+    expect(result).toEqual({ pages: 2, accepted: 1, duplicates: 0, cursor });
+    expect(getCursor).toHaveBeenCalledWith(ownerId);
     expect(persistPage).toHaveBeenCalledTimes(2);
     expect(persistPage.mock.calls[1][0].previousCursor).toEqual(cursor);
+    expect(persistPage.mock.calls[1][0].nextCursor).toEqual(cursor);
   });
 
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
