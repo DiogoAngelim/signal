@@ -305,3 +305,6 @@ export function verifyWorkbenchSignature(raw: string, supplied: string, token: s
   const value = supplied.replace(/^sha256=/i, "").trim();
   return safeEqualHex(signature(raw, token), value);
 }
+
+export { createPostgresWorkbenchOutcomeSink } from "./postgres-outcome-sink";
+export type { CreatePostgresWorkbenchOutcomeSinkOptions } from "./postgres-outcome-sink";
