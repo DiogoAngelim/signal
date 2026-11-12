@@ -144,6 +144,37 @@ function signature(raw: string, token: string): string {
   return createHmac("sha256", token).update(raw, "utf8").digest("hex");
 }
 
+async function readLimitedBody(response: Response, maxBytes: number): Promise<string> {
+  const reader = response.body?.getReader();
+  if (!reader) return "";
+  const chunks: Uint8Array[] = [];
+  let total = 0;
+  try {
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel();
+        throw new WorkbenchConnectorError("Workbench response exceeded the configured size limit.", {
+          status: response.status,
+          retryable: false,
+        });
+      }
+      chunks.push(value);
+    }
+  } finally {
+    reader.releaseLock();
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  for (const chunk of chunks) {
+    bytes.set(chunk, offset);
+    offset += chunk.byteLength;
+  }
+  return new TextDecoder().decode(bytes);
+}
+
 function safeEqualHex(left: string, right: string): boolean {
   if (!/^[a-f0-9]{64}$/i.test(left) || !/^[a-f0-9]{64}$/i.test(right)) return false;
   const a = Buffer.from(left, "hex");
@@ -194,13 +225,7 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
       );
     }
 
-    const body = await response.text();
-    if (Buffer.byteLength(body, "utf8") > maxResponseBytes) {
-      throw new WorkbenchConnectorError("Workbench response exceeded the configured size limit.", {
-        status: response.status,
-        retryable: false,
-      });
-    }
+    const body = await readLimitedBody(response, maxResponseBytes);
     if (!response.ok) {
       throw new WorkbenchConnectorError("Workbench rejected the connector request.", {
         status: response.status,
