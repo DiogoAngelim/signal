@@ -1,5 +1,5 @@
 import type { EventPort } from "@signal/ports";
-import type { SignalEnvelope } from "@signal/protocol";
+import { isSignalName, type SignalEnvelope } from "@signal/protocol";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
 
@@ -351,6 +351,9 @@ export function subscribeToSignalEvents(
 ): () => void {
   const names = [...new Set(eventNames.map((name) => name.trim()).filter(Boolean))];
   if (names.length === 0) throw new RangeError("At least one Signal event name is required.");
+  if (names.some((name) => !isSignalName(name))) {
+    throw new RangeError("Signal event names must use the versioned domain.action.vN format.");
+  }
   const unsubscribers = names.map((name) => eventPort.subscribe(name, async (envelope) => {
     const event = await mapEnvelope(envelope);
     if (event) await connector.publishSignalEvent(event);
