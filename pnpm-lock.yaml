@@ -240,6 +240,12 @@ importers:
 
   api/workbench-connector:
     dependencies:
+      '@signal/ports':
+        specifier: workspace:*
+        version: link:../ports
+      '@signal/protocol':
+        specifier: workspace:*
+        version: link:../protocol
       pg:
         specifier: ^8.21.0
         version: 8.23.1
