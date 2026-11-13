@@ -31,7 +31,7 @@ import {
   listDecisionOperations,
   replayDecision,
   simulateDecisionPaths,
-} from "@signal/sdk-node";
+} from "@signal/decision";
 
 const decisionStore = createInMemoryDecisionRecordStore();
 const sharedDecisionMemory: DecisionMemoryStore =
