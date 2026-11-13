@@ -3,11 +3,11 @@
   "compilerOptions": {
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "rootDir": "api",
+    "rootDir": ".",
     "outDir": "dist",
     "declaration": true,
     "types": ["node"]
   },
-  "include": ["api/**/*.ts"],
+  "include": ["api/**/*.ts", "src/**/*.ts"],
   "exclude": ["dist", "node_modules"]
 }
