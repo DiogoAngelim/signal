@@ -1,6 +1,6 @@
 /**
  * Narrow regression guard for the obfuscated payload signatures found in the
- * 2026-11-11 repository review. This is not a general malware scanner.
+ * 2026-11-11 repository review. This is not a general malware scanner and does not establish that the repository is free of other threats.
  */
 import { execFileSync } from "node:child_process";
 import { readFileSync } from "node:fs";
