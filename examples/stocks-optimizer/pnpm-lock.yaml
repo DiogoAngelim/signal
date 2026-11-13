@@ -747,6 +747,12 @@ importers:
         specifier: ^2.1.9
         version: 2.1.9(@types/node@25.9.1)(happy-dom@20.9.0)(lightningcss@1.32.0)
 
+  src/artifacts/signal-trace:
+    devDependencies:
+      typescript:
+        specifier: ^5.0.0
+        version: 5.9.3
+
 packages:
 
   '@ampproject/remapping@2.3.0':
