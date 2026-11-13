@@ -3,7 +3,7 @@
  * 2026-11-11 repository review. This is not a general malware scanner and does not establish that the repository is free of other threats.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync, readdirSync, statSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
 import { join, relative } from "node:path";
 
 const markers = [
