@@ -86,5 +86,5 @@ Do not automatically turn these events into Signal `OutcomeEvaluation` records. 
 ## Validation
 
 - Unit tests cover request signing, owner isolation, schema validation, cursor paging, and event subscription validation.
-- PostgreSQL integration tests run in Signal CI with the ephemeral PostgreSQL 16 service. They verify forced row-level security, atomic page/cursor persistence, immutable duplicate handling, tenant separation, and cursor race protection.
+- PostgreSQL integration tests run when `SIGNAL_TEST_DATABASE_URL` is configured; Signal CI supplies an isolated PostgreSQL 16 service. They verify forced row-level security, atomic page/cursor persistence, immutable duplicate handling, tenant separation, and cursor race protection.
 - No live database migration, credential provisioning, deployment, or external communication is performed by this package.
