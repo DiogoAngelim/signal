@@ -1,0 +1,13 @@
+{
+  "extends": "../../tsconfig.base.json",
+  "compilerOptions": {
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "rootDir": "api",
+    "outDir": "dist",
+    "declaration": true,
+    "types": ["node"]
+  },
+  "include": ["api/**/*.ts"],
+  "exclude": ["dist", "node_modules"]
+}
