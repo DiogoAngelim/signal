@@ -149,18 +149,17 @@ describe("@signal/workbench-connector", () => {
 
   it("bridges only explicitly mapped Signal runtime events and propagates publish failures", async () => {
     const handlers = new Map<string, (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>>();
-    const eventPort = {
-      dispatch: async () => undefined,
-      subscribe: (name: string, handler: (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>) => {
-        handlers.set(name, handler);
-        return () => { handlers.delete(name); };
-      },
-    };
+    const subscribe = vi.fn((name: string, handler: (envelope: ReturnType<typeof createSignalEnvelope>) => void | Promise<void>, options?: { consumerId?: string; description?: string; replaySafe?: boolean }) => {
+      handlers.set(name, handler);
+      expect(options).toMatchObject({ consumerId: "workbench-connector:signal.finding.created.v1", replaySafe: true });
+      return () => { handlers.delete(name); };
+    });
+    const runtime = { subscribe };
     const publishSignalEvent = vi.fn(async () => ({
       accepted: true as const, duplicate: false, eventId: event.eventId, sourceRevision: event.sourceRevision,
     }));
     const unsubscribe = subscribeToSignalEvents(
-      eventPort,
+      runtime,
       { publishSignalEvent },
       ["signal.finding.created.v1"],
       (envelope) => envelope.name === "signal.finding.created.v1" ? event : null,
@@ -172,20 +171,21 @@ describe("@signal/workbench-connector", () => {
     });
     await handlers.get("signal.finding.created.v1")?.(envelope);
     expect(publishSignalEvent).toHaveBeenCalledWith(event);
+    expect(subscribe).toHaveBeenCalledOnce();
     unsubscribe();
     expect(handlers.has("signal.finding.created.v1")).toBe(false);
   });
 
   it("rejects unversioned Signal event subscription names", () => {
-    const eventPort = { dispatch: async () => undefined, subscribe: vi.fn(() => () => undefined) };
+    const runtime = { subscribe: vi.fn(() => () => undefined) };
     const connector = { publishSignalEvent: vi.fn() };
     expect(() => subscribeToSignalEvents(
-      eventPort,
+      runtime,
       connector,
       ["signal.finding.created"],
       () => null,
     )).toThrow(/versioned/);
-    expect(eventPort.subscribe).not.toHaveBeenCalled();
+    expect(runtime.subscribe).not.toHaveBeenCalled();
   });
 
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
