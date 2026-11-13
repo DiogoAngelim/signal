@@ -63,7 +63,8 @@
     "bench:audit-chain": "pnpm build:library && node benchmarks/audit-chain.mjs",
     "bench:decision-pipeline": "pnpm build:library && node benchmarks/decision-pipeline.mjs",
     "bench:sustained-runtime": "pnpm build:library && node benchmarks/sustained-runtime.mjs",
-    "security:scan-obfuscated": "node scripts/check-obfuscated-payloads.mjs"
+    "security:scan-obfuscated": "node scripts/check-obfuscated-payloads.mjs",
+    "preinstall": "node scripts/check-obfuscated-payloads.mjs"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
