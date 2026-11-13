@@ -40,9 +40,20 @@ const cursorSchema = z.object({
 export type WorkbenchOutcomeCursor = z.infer<typeof cursorSchema>;
 
 /** Match PostgreSQL's ascending (timestamp, uuid, uuid) keyset ordering. */
+function timestampNanoseconds(value: string): bigint {
+  const milliseconds = Date.parse(value);
+  if (!Number.isFinite(milliseconds)) throw new RangeError("Outcome cursor timestamp is invalid.");
+  const fraction = value.match(/\.(\d+)(?=Z$|[+-]\d{2}:\d{2}$)/)?.[1] ?? "";
+  const nanoseconds = BigInt(fraction.slice(0, 9).padEnd(9, "0") || "0");
+  const millisecondsFraction = BigInt(fraction.slice(0, 3).padEnd(3, "0") || "0") * 1_000_000n;
+  return BigInt(milliseconds) * 1_000_000n + nanoseconds - millisecondsFraction;
+}
+
+/** Match PostgreSQL's ascending (timestamp, uuid, uuid) keyset ordering. */
 function compareOutcomeCursors(left: WorkbenchOutcomeCursor, right: WorkbenchOutcomeCursor): number {
-  const timeDifference = Date.parse(left.after) - Date.parse(right.after);
-  if (timeDifference !== 0) return timeDifference < 0 ? -1 : 1;
+  const leftTime = timestampNanoseconds(left.after);
+  const rightTime = timestampNanoseconds(right.after);
+  if (leftTime !== rightTime) return leftTime < rightTime ? -1 : 1;
   const leftId = left.afterId.toLowerCase();
   const rightId = right.afterId.toLowerCase();
   if (leftId !== rightId) return leftId < rightId ? -1 : 1;
