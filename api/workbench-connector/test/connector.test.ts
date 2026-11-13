@@ -39,7 +39,7 @@ function outcome(overrides: Partial<WorkbenchOutcomeEvent> = {}): WorkbenchOutco
     eventType: "workbench.outcome.recorded",
     outcomeId: "11111111-1111-4111-8111-111111111111",
     opportunityId: "22222222-2222-4222-8222-222222222222",
-    cashChangeCursorId: "00000000-0000-0000-0000-000000000000",
+    cashChangeCursorId: "22222222-2222-4222-8222-222222222222",
     channel: "agency",
     engagementType: "retainer",
     result: "won",
@@ -200,6 +200,37 @@ describe("@signal/workbench-connector", () => {
     });
     await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
       .rejects.toThrow(/cursor did not advance/i);
+    expect(persistPage).not.toHaveBeenCalled();
+  });
+
+  it("rejects a regressive cursor even when it is not identical to the committed cursor", async () => {
+    const fetchMock = vi.fn(async () => Response.json({
+      schemaVersion: 1, source: "workbench", events: [], nextCursor: {
+        ...cursor, after: "2026-11-12T11:59:00.000Z",
+      },
+    }));
+    const getCursor = vi.fn(async () => cursor);
+    const persistPage = vi.fn(async () => ({ accepted: 0, duplicates: 0 }));
+    const connector = createWorkbenchConnector({
+      baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
+    });
+    await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
+      .rejects.toThrow(/cursor did not advance/i);
+    expect(persistPage).not.toHaveBeenCalled();
+  });
+
+  it("requires the continuation cursor to identify the final event in its page", async () => {
+    const fetchMock = vi.fn(async () => Response.json({
+      schemaVersion: 1, source: "workbench", events: [outcome()],
+      nextCursor: { ...cursor, afterChangeId: "33333333-3333-4333-8333-333333333333" },
+    }));
+    const getCursor = vi.fn(async () => null);
+    const persistPage = vi.fn(async () => ({ accepted: 1, duplicates: 0 }));
+    const connector = createWorkbenchConnector({
+      baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
+    });
+    await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
+      .rejects.toThrow(/does not match the final event/i);
     expect(persistPage).not.toHaveBeenCalled();
   });
 
