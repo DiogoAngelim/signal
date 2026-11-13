@@ -39,7 +39,7 @@ const cursorSchema = z.object({
 
 export type WorkbenchOutcomeCursor = z.infer<typeof cursorSchema>;
 
-/** Match PostgreSQL's ascending (timestamp, uuid, uuid) keyset ordering. */
+/** Preserve sub-millisecond precision when comparing PostgreSQL timestamp cursors. */
 function timestampNanoseconds(value: string): bigint {
   const milliseconds = Date.parse(value);
   if (!Number.isFinite(milliseconds)) throw new RangeError("Outcome cursor timestamp is invalid.");
