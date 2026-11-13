@@ -322,6 +322,9 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         if (page.events.length > 0 && !page.nextCursor) {
           throw new WorkbenchConnectorError("Workbench returned outcome events without a continuation cursor.");
         }
+        if (cursor && page.nextCursor && compareOutcomeCursors(page.nextCursor, cursor) <= 0) {
+          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
+        }
         let previousEventCursor = cursor;
         for (const event of page.events) {
           const eventCursor = cursorForOutcome(event);
@@ -333,9 +336,6 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         if (page.events.length > 0 && page.nextCursor &&
             compareOutcomeCursors(page.nextCursor, cursorForOutcome(page.events[page.events.length - 1])) !== 0) {
           throw new WorkbenchConnectorError("Workbench continuation cursor does not match the final event in the page.");
-        }
-        if (cursor && page.nextCursor && compareOutcomeCursors(page.nextCursor, cursor) <= 0) {
-          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
         }
         const persisted = await input.sink.persistPage({
           ownerId: options.ownerId,
