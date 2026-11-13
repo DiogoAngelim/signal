@@ -1188,7 +1188,7 @@ export function loadSymbolsForMarket(market: string): string[] {
   try {
     const items = loadMarketList(normalized);
     const symbols = items
-      .map((item) => (item.symbol ?? item.ticker ?? "").trim())
+      .map((item) => item.symbol.trim())
       .filter(Boolean);
     if (symbols.length) return [...new Set(symbols)];
   } catch {
@@ -1200,7 +1200,7 @@ export function loadSymbolsForMarket(market: string): string[] {
     const allItems = exchangeCodes.flatMap((code) => loadStockList(code));
     const symbols = allItems
       .filter((item) => (item.market ?? "").trim().toUpperCase() === normalized)
-      .map((item) => (item.symbol ?? item.ticker ?? "").trim())
+      .map((item) => item.symbol.trim())
       .filter(Boolean);
     if (symbols.length) return [...new Set(symbols)];
   } catch {
