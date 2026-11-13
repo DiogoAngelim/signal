@@ -46,6 +46,15 @@ test
 spec
 schemas
 
+# Keep the dedicated Workbench host and its workspace dependencies in the build context
+!api
+!api/sdk-node
+!api/sdk-node/**
+!api/workbench-connector
+!api/workbench-connector/**
+!api/ports
+!api/ports/**
+
 # Allow the maritime-aware monorepo packages required by the Vercel build helper
 !packages
 !packages/decision
