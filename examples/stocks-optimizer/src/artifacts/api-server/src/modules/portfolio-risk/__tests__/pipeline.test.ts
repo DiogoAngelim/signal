@@ -59,6 +59,8 @@ const validatedSignals: ValidatedSignal[] = [
     strength: 0.8,
     confidence: 0.7,
     timestamp: Date.now(),
+    _validated: true,
+    _validationWarnings: [],
   },
   {
     asset: "TSLA",
@@ -66,6 +68,8 @@ const validatedSignals: ValidatedSignal[] = [
     strength: 0.6,
     confidence: 0.5,
     timestamp: Date.now(),
+    _validated: true,
+    _validationWarnings: [],
   },
   {
     asset: "GOOG",
@@ -73,6 +77,8 @@ const validatedSignals: ValidatedSignal[] = [
     strength: 0.3,
     confidence: 0.2,
     timestamp: Date.now(),
+    _validated: true,
+    _validationWarnings: [],
   },
 ];
 
@@ -240,6 +246,8 @@ test("Risk Engine: rejects signals below minimum confidence", () => {
         strength: 0.8,
         confidence: 0.05,
         timestamp: Date.now(),
+        _validated: true,
+        _validationWarnings: [],
       },
     ],
     equity: 100_000,
@@ -313,6 +321,8 @@ test("Invariant: Position contains only financial decision data", () => {
         strength: 0.8,
         confidence: 0.7,
         timestamp: Date.now(),
+        _validated: true,
+        _validationWarnings: [],
       },
     ],
     equity: 100_000,
@@ -342,6 +352,8 @@ test("Invariant: Risk engine is the ONLY place with financial decisions", () => 
         strength,
         confidence,
         timestamp: Date.now(),
+        _validated: true,
+        _validationWarnings: [],
       },
     ],
     equity,

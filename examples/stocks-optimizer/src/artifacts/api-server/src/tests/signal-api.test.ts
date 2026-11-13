@@ -550,7 +550,7 @@ test("unsafe production signal API config is rejected by environment validation"
     process.env.NODE_ENV = "production";
     process.env.SIGNAL_STORAGE_DRIVER = "memory";
     process.env.SIGNAL_API_ALLOW_DEV_KEY = "true";
-    process.env.SIGNAL_SECRET_ENCRYPTION_KEY = undefined;
+    delete process.env.SIGNAL_SECRET_ENCRYPTION_KEY;
     process.env.SIGNAL_API_KEYS = "plain:admin";
 
     const report = validateSignalEnvironment();
