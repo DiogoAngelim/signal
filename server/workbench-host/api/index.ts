@@ -110,6 +110,7 @@ export default async function handler(request: IncomingMessage, response: Server
     }
     try {
       const input = workbenchSignalEventSchema.parse(await readJson(request));
+      getConnector();
       const result = await runtime.execute<WorkbenchSignalEvent>({
         kind: "event",
         name: EVENT_NAME,
@@ -134,8 +135,8 @@ export default async function handler(request: IncomingMessage, response: Server
     } catch (error) {
       const status = typeof error === "object" && error !== null && "statusCode" in error
         ? Number((error as { statusCode: unknown }).statusCode)
-        : 400;
-      send(response, Number.isInteger(status) && status >= 400 && status < 600 ? status : 400, {
+        : (error instanceof Error && error.message.startsWith("Missing required environment variable:") ? 503 : 503);
+      send(response, Number.isInteger(status) && status >= 400 && status < 600 ? status : 503, {
         message: error instanceof Error ? error.message : "Invalid Signal event.",
       });
     }
