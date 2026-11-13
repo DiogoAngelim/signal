@@ -47,6 +47,7 @@ integration("PostgreSQL Workbench outcome inbox", () => {
   let roleName = "";
   let roleCreated = false;
   let sink: ReturnType<typeof createPostgresWorkbenchOutcomeSink> | undefined;
+  let scopedPool: Pool | undefined;
   let scopedConnectionString = "";
 
   beforeAll(async () => {
@@ -72,11 +73,13 @@ integration("PostgreSQL Workbench outcome inbox", () => {
     scopedUrl.username = roleName;
     scopedUrl.password = password;
     scopedConnectionString = scopedUrl.toString();
+    scopedPool = new Pool({ connectionString: scopedConnectionString, max: 2 });
     sink = createPostgresWorkbenchOutcomeSink({ connectionString: scopedConnectionString });
   });
 
   afterAll(async () => {
     if (sink) await sink.close();
+    if (scopedPool) await scopedPool.end();
     await admin.query("DELETE FROM signal_workbench_outcome_events WHERE tenant_id = ANY($1::text[])", [[ownerA, ownerB]]);
     await admin.query("DELETE FROM signal_workbench_outcome_cursors WHERE tenant_id = ANY($1::text[])", [[ownerA, ownerB]]);
     if (roleCreated) {
@@ -99,6 +102,23 @@ integration("PostgreSQL Workbench outcome inbox", () => {
 
     expect(await sink!.getCursor(ownerA)).toEqual(cursor);
     expect(await sink!.getCursor(ownerB)).toBeNull();
+
+    // Verify the database policy itself, not only the adapter's owner filter.
+    const scopedClient = await scopedPool!.connect();
+    try {
+      await scopedClient.query("BEGIN");
+      await scopedClient.query("SELECT set_config('signal.tenant_id', $1, true)", [ownerB]);
+      const visible = await scopedClient.query<{ count: string }>(
+        "SELECT count(*)::text AS count FROM signal_workbench_outcome_events",
+      );
+      expect(visible.rows[0].count).toBe("0");
+      await scopedClient.query("ROLLBACK");
+    } catch (error) {
+      await scopedClient.query("ROLLBACK").catch(() => undefined);
+      throw error;
+    } finally {
+      scopedClient.release();
+    }
 
     await expect(sink!.persistPage({
       ownerId: ownerA,
