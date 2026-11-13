@@ -203,6 +203,40 @@ describe("@signal/workbench-connector", () => {
     expect(persistPage).not.toHaveBeenCalled();
   });
 
+  it("preserves microsecond ordering when UUIDs sort in the opposite direction", async () => {
+    const previousCursor: WorkbenchOutcomeCursor = {
+      after: "2026-11-12T12:00:00.000001Z",
+      afterId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+      afterChangeId: "ffffffff-ffff-4fff-8fff-ffffffffffff",
+    };
+    const latest = outcome({
+      occurredAt: "2026-11-12T12:00:00.000002Z",
+      outcomeId: "11111111-1111-4111-8111-111111111111",
+      cashChangeCursorId: "11111111-1111-4111-8111-111111111111",
+    });
+    const nextCursor: WorkbenchOutcomeCursor = {
+      after: latest.occurredAt,
+      afterId: latest.outcomeId,
+      afterChangeId: latest.cashChangeCursorId,
+    };
+    const pages = [
+      { schemaVersion: 1, source: "workbench", events: [latest], nextCursor },
+      { schemaVersion: 1, source: "workbench", events: [], nextCursor: null },
+    ];
+    const fetchMock = vi.fn(async () => Response.json(pages.shift()));
+    const getCursor = vi.fn(async () => previousCursor);
+    const persistPage = vi.fn(async (input: {
+      ownerId: string; previousCursor: WorkbenchOutcomeCursor | null;
+      nextCursor: WorkbenchOutcomeCursor | null; events: readonly WorkbenchOutcomeEvent[];
+    }) => ({ accepted: input.events.length, duplicates: 0 }));
+    const connector = createWorkbenchConnector({
+      baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
+    });
+    await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
+      .resolves.toMatchObject({ pages: 2, accepted: 1, cursor: nextCursor });
+    expect(persistPage).toHaveBeenCalledTimes(2);
+  });
+
   it("rejects a regressive cursor even when it is not identical to the committed cursor", async () => {
     const fetchMock = vi.fn(async () => Response.json({
       schemaVersion: 1, source: "workbench", events: [], nextCursor: {
