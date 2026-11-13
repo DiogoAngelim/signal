@@ -136,6 +136,9 @@ importers:
 
   api/idempotency-postgres:
     dependencies:
+      '@signal/ports':
+        specifier: workspace:*
+        version: link:../ports
       '@signal/protocol':
         specifier: workspace:*
         version: link:../protocol
@@ -237,9 +240,6 @@ importers:
 
   api/workbench-connector:
     dependencies:
-      '@signal/ports':
-        specifier: workspace:*
-        version: link:../ports
       '@signal/protocol':
         specifier: workspace:*
         version: link:../protocol
