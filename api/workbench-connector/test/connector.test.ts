@@ -188,6 +188,35 @@ describe("@signal/workbench-connector", () => {
     expect(runtime.subscribe).not.toHaveBeenCalled();
   });
 
+
+  it("rejects a non-advancing outcome cursor before committing the page", async () => {
+    const fetchMock = vi.fn(async () => Response.json({
+      schemaVersion: 1, source: "workbench", events: [outcome()], nextCursor: cursor,
+    }));
+    const getCursor = vi.fn(async () => cursor);
+    const persistPage = vi.fn(async () => ({ accepted: 1, duplicates: 0 }));
+    const connector = createWorkbenchConnector({
+      baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
+    });
+    await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
+      .rejects.toThrow(/cursor did not advance/i);
+    expect(persistPage).not.toHaveBeenCalled();
+  });
+
+  it("rejects outcome events without a continuation cursor before persistence", async () => {
+    const fetchMock = vi.fn(async () => Response.json({
+      schemaVersion: 1, source: "workbench", events: [outcome()], nextCursor: null,
+    }));
+    const getCursor = vi.fn(async () => null);
+    const persistPage = vi.fn(async () => ({ accepted: 1, duplicates: 0 }));
+    const connector = createWorkbenchConnector({
+      baseUrl: "https://workbench.example", ownerId, token, fetch: fetchMock as typeof fetch,
+    });
+    await expect(connector.syncOutcomes({ sink: { getCursor, persistPage } }))
+      .rejects.toThrow(/without a continuation cursor/i);
+    expect(persistPage).not.toHaveBeenCalled();
+  });
+
   it("requires HTTPS outside localhost and sufficiently strong owner credentials", () => {
     expect(() => createWorkbenchConnector({ baseUrl: "http://workbench.example", ownerId, token })).toThrow(/HTTPS/);
     expect(() => createWorkbenchConnector({ baseUrl: "https://workbench.example", ownerId, token: "short" })).toThrow(/32 characters/);
