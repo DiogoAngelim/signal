@@ -39,6 +39,37 @@ const cursorSchema = z.object({
 
 export type WorkbenchOutcomeCursor = z.infer<typeof cursorSchema>;
 
+/** Preserve sub-millisecond precision when comparing PostgreSQL timestamp cursors. */
+function timestampNanoseconds(value: string): bigint {
+  const milliseconds = Date.parse(value);
+  if (!Number.isFinite(milliseconds)) throw new RangeError("Outcome cursor timestamp is invalid.");
+  const fraction = value.match(/\.(\d+)(?=Z$|[+-]\d{2}:\d{2}$)/)?.[1] ?? "";
+  const nanoseconds = BigInt(fraction.slice(0, 9).padEnd(9, "0") || "0");
+  const millisecondsFraction = BigInt(fraction.slice(0, 3).padEnd(3, "0") || "0") * 1_000_000n;
+  return BigInt(milliseconds) * 1_000_000n + nanoseconds - millisecondsFraction;
+}
+
+/** Match PostgreSQL's ascending (timestamp, uuid, uuid) keyset ordering. */
+function compareOutcomeCursors(left: WorkbenchOutcomeCursor, right: WorkbenchOutcomeCursor): number {
+  const leftTime = timestampNanoseconds(left.after);
+  const rightTime = timestampNanoseconds(right.after);
+  if (leftTime !== rightTime) return leftTime < rightTime ? -1 : 1;
+  const leftId = left.afterId.toLowerCase();
+  const rightId = right.afterId.toLowerCase();
+  if (leftId !== rightId) return leftId < rightId ? -1 : 1;
+  const leftChangeId = left.afterChangeId.toLowerCase();
+  const rightChangeId = right.afterChangeId.toLowerCase();
+  return leftChangeId === rightChangeId ? 0 : leftChangeId < rightChangeId ? -1 : 1;
+}
+
+function cursorForOutcome(event: WorkbenchOutcomeEvent): WorkbenchOutcomeCursor {
+  return {
+    after: event.occurredAt,
+    afterId: event.outcomeId,
+    afterChangeId: event.cashChangeCursorId,
+  };
+}
+
 const decimal = z.string().regex(/^-?\d+(?:\.\d+)?$/).nullable();
 
 export const workbenchOutcomeEventSchema = z.object({
@@ -299,6 +330,24 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
 
       while (pages < maxPages) {
         const page = await this.pollOutcomePage(cursor, pageSize);
+        if (page.events.length > 0 && !page.nextCursor) {
+          throw new WorkbenchConnectorError("Workbench returned outcome events without a continuation cursor.");
+        }
+        if (cursor && page.nextCursor && compareOutcomeCursors(page.nextCursor, cursor) <= 0) {
+          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
+        }
+        let previousEventCursor = cursor;
+        for (const event of page.events) {
+          const eventCursor = cursorForOutcome(event);
+          if (previousEventCursor && compareOutcomeCursors(eventCursor, previousEventCursor) <= 0) {
+            throw new WorkbenchConnectorError("Workbench outcome events are not strictly ordered after the committed cursor.");
+          }
+          previousEventCursor = eventCursor;
+        }
+        if (page.events.length > 0 && page.nextCursor &&
+            compareOutcomeCursors(page.nextCursor, cursorForOutcome(page.events[page.events.length - 1])) !== 0) {
+          throw new WorkbenchConnectorError("Workbench continuation cursor does not match the final event in the page.");
+        }
         const persisted = await input.sink.persistPage({
           ownerId: options.ownerId,
           previousCursor: cursor,
@@ -314,11 +363,6 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         duplicates += persisted.duplicates;
         pages += 1;
         if (!page.nextCursor) break;
-        if (cursor && page.nextCursor.after === cursor.after &&
-            page.nextCursor.afterId === cursor.afterId &&
-            page.nextCursor.afterChangeId === cursor.afterChangeId) {
-          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
-        }
         cursor = page.nextCursor;
         if (page.events.length === 0) break;
       }

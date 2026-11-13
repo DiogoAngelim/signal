@@ -24,7 +24,7 @@ Do not use one owner's token for another owner. Do not log tokens or signed head
 
 ## Signal runtime event publishing
 
-The host must supply an explicit, versioned event list and mapper. The mapper owns the relationship/opportunity mapping and must return `null` for events that should not be exported. Never derive owner or opportunity identity from untrusted arbitrary text.
+The host must supply an explicit, versioned event list and mapper. The mapper owns the relationship/opportunity mapping and must return `null` for events that should not be exported. It must derive a stable `eventId` from the source envelope and a monotonically increasing `sourceRevision` for each `signalId`; do not generate random IDs on retry. Never derive owner or opportunity identity from untrusted arbitrary text.
 
 ```ts
 import { createSignalRuntime } from "@signal/sdk-node";
@@ -75,7 +75,7 @@ try {
 }
 ```
 
-Call `syncOutcomes` from the host's own durable scheduler or worker. The library intentionally does not create a timer or background process. The sink stores each page and its next cursor in one transaction; callers must not replace it with an in-memory cursor if restart-safe polling is required.
+Call `syncOutcomes` from the host's own durable scheduler or worker. The library intentionally does not create a timer or background process. The sink stores each page and its next cursor in one transaction; callers must not replace it with an in-memory cursor if restart-safe polling is required. The connector rejects non-advancing cursors and event pages without a continuation cursor before the sink can commit them.
 
 ## Outcome semantics and learning safeguards
 
