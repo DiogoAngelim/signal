@@ -24,7 +24,7 @@
     "cors": "^2.8.6",
     "drizzle-orm": "catalog:",
     "express": "^5.2.1",
-    "nodemailer": "^9.1.0",
+    "nodemailer": "^10.0.6",
     "papaparse": "^5.5.3",
     "pg": "catalog:",
     "pino": "^9.14.0",
