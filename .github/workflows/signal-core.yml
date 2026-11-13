@@ -72,6 +72,8 @@ jobs:
 
       - run: pnpm --filter @signal/idempotency-postgres exec vitest run --fileParallelism=false
 
+      - run: pnpm --filter @signal/workbench-connector exec vitest run --fileParallelism=false
+
       - run: pnpm --filter @signal/sdk-node test
 
       - run: pnpm --filter @signal/binding-http test
