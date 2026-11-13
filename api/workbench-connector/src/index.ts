@@ -1,4 +1,3 @@
-import type { EventPort } from "@signal/ports";
 import { isSignalName, type SignalEnvelope } from "@signal/protocol";
 import { createHmac, timingSafeEqual } from "node:crypto";
 import { z } from "zod";
@@ -343,8 +342,16 @@ export type { CreatePostgresWorkbenchOutcomeSinkOptions } from "./postgres-outco
  * business meaning from arbitrary Signal payloads. A publish failure is
  * re-thrown to the EventPort dispatcher so its outbox can retry the delivery.
  */
+export interface SignalEventSubscriber {
+  subscribe(
+    name: string,
+    handler: (envelope: SignalEnvelope) => void | Promise<void>,
+    options?: { consumerId?: string; description?: string; replaySafe?: boolean },
+  ): () => void;
+}
+
 export function subscribeToSignalEvents(
-  eventPort: EventPort,
+  runtime: SignalEventSubscriber,
   connector: Pick<WorkbenchConnector, "publishSignalEvent">,
   eventNames: readonly string[],
   mapEnvelope: (envelope: SignalEnvelope) => WorkbenchSignalEvent | null | Promise<WorkbenchSignalEvent | null>,
@@ -354,9 +361,13 @@ export function subscribeToSignalEvents(
   if (names.some((name) => !isSignalName(name))) {
     throw new RangeError("Signal event names must use the versioned domain.action.vN format.");
   }
-  const unsubscribers = names.map((name) => eventPort.subscribe(name, async (envelope) => {
+  const unsubscribers = names.map((name) => runtime.subscribe(name, async (envelope) => {
     const event = await mapEnvelope(envelope);
     if (event) await connector.publishSignalEvent(event);
+  }, {
+    consumerId: `workbench-connector:${name}`,
+    description: "Publish selected Signal events to the owner-scoped Workbench integration.",
+    replaySafe: true,
   }));
   return () => {
     for (const unsubscribe of unsubscribers) unsubscribe();
