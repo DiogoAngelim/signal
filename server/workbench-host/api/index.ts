@@ -1,5 +1,6 @@
 import { createHmac, timingSafeEqual } from "node:crypto";
 import type { IncomingMessage, ServerResponse } from "node:http";
+import { ZodError } from "zod";
 import {
   createSignalRuntime,
 } from "@signal/sdk-node";
@@ -135,7 +136,7 @@ export default async function handler(request: IncomingMessage, response: Server
     } catch (error) {
       const status = typeof error === "object" && error !== null && "statusCode" in error
         ? Number((error as { statusCode: unknown }).statusCode)
-        : (error instanceof Error && error.message.startsWith("Missing required environment variable:") ? 503 : 503);
+        : error instanceof ZodError ? 400 : 503;
       send(response, Number.isInteger(status) && status >= 400 && status < 600 ? status : 503, {
         message: error instanceof Error ? error.message : "Invalid Signal event.",
       });
