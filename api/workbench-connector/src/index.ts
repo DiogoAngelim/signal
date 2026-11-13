@@ -299,6 +299,15 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
 
       while (pages < maxPages) {
         const page = await this.pollOutcomePage(cursor, pageSize);
+        if (page.events.length > 0 && !page.nextCursor) {
+          throw new WorkbenchConnectorError("Workbench returned outcome events without a continuation cursor.");
+        }
+        if (cursor && page.nextCursor &&
+            page.nextCursor.after === cursor.after &&
+            page.nextCursor.afterId === cursor.afterId &&
+            page.nextCursor.afterChangeId === cursor.afterChangeId) {
+          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
+        }
         const persisted = await input.sink.persistPage({
           ownerId: options.ownerId,
           previousCursor: cursor,
@@ -314,11 +323,6 @@ export function createWorkbenchConnector(options: CreateWorkbenchConnectorOption
         duplicates += persisted.duplicates;
         pages += 1;
         if (!page.nextCursor) break;
-        if (cursor && page.nextCursor.after === cursor.after &&
-            page.nextCursor.afterId === cursor.afterId &&
-            page.nextCursor.afterChangeId === cursor.afterChangeId) {
-          throw new WorkbenchConnectorError("Workbench outcome cursor did not advance.");
-        }
         cursor = page.nextCursor;
         if (page.events.length === 0) break;
       }
