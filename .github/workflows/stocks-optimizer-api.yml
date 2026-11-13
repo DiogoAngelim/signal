@@ -32,6 +32,9 @@ jobs:
           cache: pnpm
           cache-dependency-path: examples/stocks-optimizer/pnpm-lock.yaml
 
+      - name: Scan tracked source for known obfuscated payload signatures
+        run: node ../../scripts/check-obfuscated-payloads.mjs
+
       - run: pnpm install --frozen-lockfile
 
       - run: pnpm --filter @workspace/api-server db:migrate:validate
