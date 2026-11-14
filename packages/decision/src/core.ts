@@ -32,6 +32,8 @@ export {
 } from "./learning-judgment";
 export { applyOutcomeFeedback, evaluateOutcome } from "./outcomes";
 export { evaluateDecision } from "./pipeline";
+export { diagnoseNativeDecisionPermission } from "./permission-diagnostics";
+export type { NativeVetoReason, NativePermissionDiagnosis } from "./permission-diagnostics";
 export {
   compactRealityPayload,
   createRealitySnapshot,
