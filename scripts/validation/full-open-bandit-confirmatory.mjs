@@ -354,6 +354,8 @@ async function evaluateTest(filepath, model) {
   const methods = {random: createPolicyStats(),
     featureOnly: createPolicyStats(), signalGoverned: createPolicyStats()};
   const forecastRecords = [];
+  const nativeApiForecastLimit = 100000;
+  const sampleRandom = rng(20261115);
   let n = 0, clicks = 0, allowed = 0, scaleSum = 0, nonzeroProposals = 0;
   let brierModel = 0, brierBaseline = 0, logModel = 0, logBaseline = 0, sumCalibProb = 0;
   const eceBounds = [0,.5,.75,1,1.25,1.5,2,3,5,10,Infinity];
@@ -383,8 +385,16 @@ async function evaluateTest(filepath, model) {
     const probLogged = clamp(
       rawProbability(r, model, r.action) * model.calibrationFactor, 0.000001, 0.5);
     const baseline = model.globalCtr;
-    forecastRecords.push({ id: String(record.rowCount),
-      probability: probLogged, outcome: click });
+    // The native Signal forecast API limits each evaluation to 100,000 records.
+    // This unbiased reservoir selection uses only row order and a frozen seed;
+    // the native API is a cross-check, not the full-holdout primary result.
+    const rec = { id: String(record.rowCount), probability: probLogged, outcome: click };
+    if (forecastRecords.length < nativeApiForecastLimit) {
+      forecastRecords.push(rec);
+    } else {
+      const slot = Math.floor(sampleRandom() * (n + 1));
+      if (slot < nativeApiForecastLimit) forecastRecords[slot] = rec;
+    }
     const gain = (click - baseline) ** 2 - (click - probLogged) ** 2;
     brierBaseline += (click - baseline) ** 2;
     brierModel += (click - probLogged) ** 2;
@@ -475,6 +485,7 @@ async function evaluateTest(filepath, model) {
     },
     forecast: {
       officialSignalMetrics: officialForecast,
+      officialAPISample: {n: forecastRecords.length, method: "outcome-blind deterministic uniform reservoir", seed: 20261115},
       brier: brierModel/n, baselineBrier: brierBaseline/n,
       brierImprovement, brierImprovementCI95HourBootstrap: clustered.brierImprovementCI95,
       logLoss: logModel/n, baselineLogLoss: logBaseline/n,
