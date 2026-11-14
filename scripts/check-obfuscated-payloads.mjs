@@ -3,7 +3,8 @@
  * 2026-11-11 repository review. This is not a general malware scanner and does not establish that the repository is free of other threats.
  */
 import { execFileSync } from "node:child_process";
-import { readFileSync } from "node:fs";
+import { readFileSync, readdirSync } from "node:fs";
+import { join, relative } from "node:path";
 
 const markers = [
   ["KAUi", "TqPiXdWs"].join(""),
@@ -11,9 +12,31 @@ const markers = [
   ["ZNiyx", "RmnWHXYIQsqaASbzm"].join(""),
 ].map((value) => Buffer.from(value, "utf8"));
 
-const files = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })
-  .split("\0")
-  .filter(Boolean);
+function listFilesWithoutGit(root) {
+  const output = [];
+  const ignored = new Set([".git", ".vercel", "node_modules", "dist", "coverage"]);
+  function visit(directory) {
+    for (const entry of readdirSync(directory, { withFileTypes: true })) {
+      if (entry.isDirectory() && ignored.has(entry.name)) continue;
+      const absolute = join(directory, entry.name);
+      if (entry.isDirectory()) visit(absolute);
+      else if (entry.isFile()) output.push(relative(root, absolute));
+    }
+  }
+  visit(root);
+  return output;
+}
+
+let files;
+try {
+  files = execFileSync("git", ["ls-files", "-z"], { encoding: "utf8" })
+    .split("\0")
+    .filter(Boolean);
+} catch {
+  // Vercel's source archive omits .git. Scan the deployed source tree instead
+  // of failing before dependency installation.
+  files = listFilesWithoutGit(process.cwd());
+}
 
 const findings = [];
 for (const file of files) {
@@ -36,5 +59,5 @@ if (findings.length > 0) {
   for (const file of findings) console.error(` - ${file}`);
   process.exitCode = 1;
 } else {
-  console.log(`Obfuscated-payload scan passed (${files.length} tracked files checked).`);
+  console.log(`Obfuscated-payload scan passed (${files.length} ${process.env.CI ? "source" : "tracked"} files checked).`);
 }
