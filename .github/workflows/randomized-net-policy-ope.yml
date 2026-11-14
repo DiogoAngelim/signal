@@ -1,0 +1,46 @@
+name: Signal native veto diagnosis and randomized net-value OPE (research)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "packages/decision/**"
+      - "scripts/validation/randomized-net-policy-ope.mjs"
+      - "docs/validation/native-veto-and-randomized-net-ope.md"
+      - ".github/workflows/randomized-net-policy-ope.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-randomized-net-policy-ope-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  net-value-research:
+    name: Native veto invariants and synthetic randomized net OPE
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Verify native decision package type contract
+        run: pnpm --filter @signal/decision typecheck
+      - name: Verify native gate regression suite and diagnostics
+        run: pnpm --filter @signal/decision test
+      - name: Build real published Signal decision engines
+        run: pnpm --filter @signal/decision build
+      - name: Verify risk optimizer parity, native veto and off-policy invariants
+        run: node scripts/validation/randomized-net-policy-ope.mjs --self-test
+      - name: Explicit scientific boundary
+        run: |
+          echo "SYNTHETIC INVARIANTS ONLY: no real profit, randomized Signal software, trial enrollment, production deployment, causal effect or verified advantage."
