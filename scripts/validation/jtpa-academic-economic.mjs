@@ -116,6 +116,7 @@ function parseData(text){
 }
 function stats(values){
   assert(values.length>=2);
+  assert(values.every(v=>Number.isFinite(v)),"non-finite evaluation or diagnostic value");
   const n=values.length,sum=values.reduce((a,b)=>a+b,0),mean=sum/n;
   const variance=values.reduce((acc,v)=>acc+(v-mean)**2,0)/(n-1);
   return {n,mean,variance,sd:Math.sqrt(variance)};
@@ -126,7 +127,7 @@ function buildGroups(rows){
     const group=groups.get(r.hsorged);
     assert(group,"unexpected preearn segment");
     group.arms[r.z2].push(r.earnings);
-    group.covariates[r.z2].push({sex:r.sex,edu:r.edu,prevearn:r.prevearn,d2:r.d2});
+    group.covariates[r.z2].push({male:r.male,married:r.married,age2225:r.age2225,d2:r.d2});
     group.n++;
   }
   return groups;
