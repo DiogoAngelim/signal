@@ -59,3 +59,59 @@ node scripts/validation/lenta-calibration-real-outcomes.mjs \
 ```
 
 The workflow removes raw and derived row-level source files and uploads **only aggregate research diagnostics**. Independent source checksums and model version/dataset source labels accompany the report. Actual revealed metric values must be taken from the passed run, not guessed.
+
+## Actual held-out experiment — executed, not simulated
+
+**Validated on GitHub Actions [run #43609203618](https://github.com/DiogoAngelim/signal/actions/runs/43609203618).** The true public Lenta source checksum was reverified and all 74 existing/new decision-package tests passed. The fully frozen 23-feature models were fit using only **83,737** training observations; separate **26,694** calibration observations trained the conventional and Signal calibration methods; only then were **26,641** individually hashed test records assessed.
+
+Original real data contain **687,029** observations (515,892 treated, 171,137 control), **74,368** source positive campaign responses, and **612,661** nonresponses.
+
+### Proper scoring on real out-of-sample outcomes
+
+These are **binary campaign response** Brier scores (lower is better), not dollar values. No test-data tuning was done:
+
+| Frozen method | Control, n=6,693 | Treated, n=19,948 |
+| --- | ---: | ---: |
+| Regularized logistic regression | 0.08114182 | 0.08528986 |
+| Uncalibrated histogram gradient boosting | **0.07981356** | 0.08372739 |
+| Conventional Platt logistic calibration | 0.07988694 | 0.08372711 |
+| Conventional sklearn isotonic calibration | 0.08026527 | **0.08369926** |
+| Optional Signal shrunken isotonic calibration | 0.08034539 | 0.08391675 |
+
+Primary **paired difference in Brier error**, defined *conventional sklearn isotonic Brier MINUS Signal Brier* (positive favors Signal):
+
+| Historical assignment | Estimated Brier improvement | Paired 95% bootstrap |
+| --- | ---: | --- |
+| Control | **−0.00008012** | [−0.00084238, +0.00073670] |
+| Treated | **−0.00021749** | [−0.00041765, +0.00004144] |
+
+Both primary intervals include zero, and their point estimates are negative; **Signal did NOT establish a predictive-calibration improvement over a serious, equally informed conventional isotonic calibration method**.
+
+Additional comparison with **raw gradient boosting** for controls: conventional raw Brier MINUS Signal Brier was **−0.00053183**, bootstrap interval [−0.00102617, −0.00000905], showing worse Brier error in the Signal candidate in this unadjusted exploratory comparison. These intervals are pointwise, not multiplicity adjusted. Source records may share households or customers and the sampling unit cannot be independently verified from this sanitized dataset.
+
+### Actual Signal quantitative adviser on held-out real response
+
+The benchmark called the actual compiled Signal `evaluateQuantitativeDecision` API **26,641 times** using separately predicted probability of binary campaign response, and independently checked that its risk-neutral `argmax` matched the same-information conventional optimum with **zero mathematical contradictions**. Its actual native safety/governance gate was not invoked because original evidence/authorization metadata were absent. No assumed profit margin or campaign-cost conversion was applied.
+
+Frozen, exploratory inverse-propensity-weighted historical response estimate per evaluated randomized record:
+
+| Frozen policy | Estimated response per unit |
+| --- | ---: |
+| Signal shrunken calibrated policy | 0.10614558 |
+| Conventional sklearn isotonic policy | 0.10550661 |
+| Conventional Platt policy | 0.10467131 |
+| Uncalibrated boosted policy | 0.10443730 |
+| Conventional logistic policy | 0.10520085 |
+| Always send treatment | **0.10852395** |
+| Never send treatment | 0.10126279 |
+
+The **Signal vs conventional isotonic** paired IPS difference is **+0.00063897** response events per RCT record, percentile bootstrap **[−0.00297248, +0.00485391]**. The interval includes zero; it does **not** establish an incremental response advantage, let alone financial profit. Both methods used the same raw features, calibration labels and feasible actions. Effective action disagreement between Signal and conventional isotonic was **15.6225%** and versus Platt **27.1874%**. Policy disagreement alone was not sufficient evidence of benefit.
+
+Propensities were derived from global 515,892/687,029 treated and 171,137/687,029 control ratios. Original randomization strata and possible household clusters were not externally verified; policy IPS results are therefore **exploratory conditional estimates**, not a certified randomized-policy economic causal effect.
+
+### Operational recommendation after the negative test
+
+**Keep the optional Signal calibrator experimental and disabled by default.** Its presence does not amend the native governance/veto system. Do not modify its hyperparameters based on this revealed held-out result and rerun the same test as though newly confirmatory. To show positive empirical value, an independently frozen *new* model/feature/evidence-improvement hypothesis requires a genuinely fresh external real outcome source, predeclared training/calibration/test separation and a strong comparator. Account for development cost and measurement/custody of any actual software expenses.
+
+No costs were allocated from synthetic pricing assumptions, no actual money was observed, no real Signal software was randomized or deployed, and **`CAUSAL_INCREMENTAL_NET_PROFIT_PROVEN=false`**.
+
