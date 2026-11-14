@@ -273,7 +273,7 @@ function selfTest(){
   assert.notEqual(first.manifest,other.manifest,
     "independent secret ought to yield distinct allocation");
   assert.throws(()=>build(f.c,f.source.replace(",0,0,1,1,1",",1,0,1,1,1"),
-    f.key,f.assignedAt,f.now),/native action scale/);
+    f.key,f.assignedAt,f.now),/partial native scale/);
   assert.throws(()=>build(f.c,f.source.replace(",0,0,1,1,1",",0,0,1,0,1"),
     f.key,f.assignedAt,f.now),/consent-attested/);
   assert.throws(()=>build(f.c,f.source,f.key,
