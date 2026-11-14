@@ -223,11 +223,14 @@ function fitFrozenPolicies(training, test) {
   const trainGroups=groupByArm(training);
   const testGroups=groupByArm(test);
   const rows=[];
+  const structurallyAbsent=[];
   let disagreeTestN=0, totalTestN=0;
   for (const key of CELL_KEYS) {
     const g=trainGroups.get(key);
     const h=testGroups.get(key);
-    assert(h.n>0,"empty test segment "+key);
+    // Outcome-blind amendment A: omit only genuinely structural zero cells.
+    if(g.n===0 && h.n===0){structurallyAbsent.push(key);continue;}
+    assert(g.n>0 && h.n>0,"unsupported train/test segment "+key);
     assert(g.arms.every(x=>x.length>=MIN_CELL_COUNT),
       "insufficient training group/arm count for "+key);
     assert(h.arms.every(x=>x.length>=MIN_CELL_COUNT),
@@ -302,7 +305,7 @@ function fitFrozenPolicies(training, test) {
     globalArgmax:ARM_IDS[globalArgmax],
     disagreementTestN:disagreeTestN,
     disagreementRate:disagreeTestN/test.length,
-    testGroups};
+    structurallyAbsent,testGroups};
 }
 function policyAction(row,variant){
   if (variant==="signal") return row.signalIndex;
@@ -383,6 +386,7 @@ function sampleRatioGroups(testGroups){
   for(const key of CELL_KEYS){
     const c=testGroups.get(key);
     const counts=c.arms.map(a=>a.length);
+    if(c.n===0){out.push({segment:key,n:0,structurallyAbsent:true});continue;}
     const expected=c.n/3;
     const chi2=counts.reduce((s,n)=>s+(n-expected)**2/expected,0);
     out.push({segment:key,n:c.n,treatmentCounts:counts,
@@ -469,6 +473,7 @@ async function main(){
       costs:"Zero (actual email costs/margins unobserved)"
     },
     fittedTrainingGlobalArmMeans:fitted.globalByArm,
+    structurallyAbsentContexts:fitted.structurallyAbsent,
     fixedContextGroups:fitted.rows.map(({signalIndex,contextualArgmaxIndex,
       globalArgmaxIndex,...r})=>r),
     actionDisagreement:{
