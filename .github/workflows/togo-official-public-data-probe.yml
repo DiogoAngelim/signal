@@ -59,3 +59,47 @@ jobs:
       - name: Always fail closed on causal interpretation
         run: |
           echo "Probe never observes or randomizes Signal software; no net-profit result inferred."
+
+  accessible-real-monetary-rct-source-check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Fetch fixed-version open Karlan-List 50,083-donor field-experiment data
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/karlan"
+          git -C "$RUNNER_TEMP/karlan" init -q
+          git -C "$RUNNER_TEMP/karlan" remote add origin "https://github.com/rsm-kvootla/ABTest-DonationStrategy-KarlanList.git"
+          git -C "$RUNNER_TEMP/karlan" fetch --quiet --depth 1 origin c0e2e8211a57d18239c7017dd57f7f57ef73becd
+          git -C "$RUNNER_TEMP/karlan" checkout -q FETCH_HEAD
+          data="$RUNNER_TEMP/karlan/statadata.csv"
+          test -s "$data"
+          echo "DONATION_SOURCE_REPOSITORY_SHA=c0e2e8211a57d18239c7017dd57f7f57ef73becd"
+          echo "DONATION_SOURCE_CSV_SHA256=$(sha256sum "$data" | cut -d ' ' -f 1)"
+          python3 - "$data" <<'PY'
+          import csv,sys
+          path=sys.argv[1]
+          with open(path,encoding="utf-8-sig",newline="") as f:
+              reader=csv.DictReader(f)
+              names=reader.fieldnames
+              assert names and len(names)==len(set(names))
+              n=0
+              arms={}
+              for row in reader:
+                  n+=1
+                  if "treatment" in row:
+                      t=row["treatment"]
+                      arms[t]=arms.get(t,0)+1
+          print("REAL_RANDOMIZED_DONOR_RECORDS",n)
+          print("ORIGINAL_DATA_COLUMNS",",".join(names))
+          print("RANDOMIZED_ARMS",arms)
+          assert n==50083,"Source does not match published 50,083 donor experiment"
+          assert arms.get("1",0)==33396 and arms.get("0",0)==16687, "Published arm counts mismatch"
+          print("SOURCE_INTEGRITY_PASS: real published randomized campaign with dollar donation measurements; no Signal policy claim")
+          PY
+          rm -rf "$RUNNER_TEMP/karlan"
+      - name: Independent causal conclusion guard
+        run: |
+          echo "The original randomization assigned matching-grant offers, not Signal decision software. Gross donations are not automatically net profit."
