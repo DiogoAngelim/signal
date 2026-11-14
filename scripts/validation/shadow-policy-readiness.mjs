@@ -18,7 +18,7 @@ const COLUMNS=[
 ];
 const CONFIG_FIELDS=[
   "candidate_id","model_version_baseline","model_version_signal",
-  "minimum_shadow_units","minimum_policy_disagreement_rate",
+  "action_codes","minimum_shadow_units","minimum_policy_disagreement_rate",
   "minimum_signal_allowed_rate","baseline_net_utility_sd_usd",
   "minimum_detectable_net_gain_usd","allocation_signal",
   "design_effect","expected_independent_units_per_day","observation_days"
@@ -86,6 +86,13 @@ function checkConfig(x){
   for(const key of ["candidate_id","model_version_baseline","model_version_signal"])
     nonempty(x[key],key);
   assert(x.model_version_signal!==x.model_version_baseline,"policy versions must differ");
+  assert(Array.isArray(x.action_codes)&&x.action_codes.length>=2&&
+    x.action_codes.length<=20,"frozen action_codes list (2..20) required");
+  assert(x.action_codes.every(v=>typeof v==="string" &&
+    /^[a-z][a-z0-9_-]{0,39}$/.test(v)) &&
+    new Set(x.action_codes).size===x.action_codes.length &&
+    x.action_codes.includes("wait"),
+    "action codes must be short, distinct, non-sensitive vocabulary including wait");
   uint(x.minimum_shadow_units,"minimum_shadow_units",30,200000);
   finite(x.minimum_policy_disagreement_rate,"minimum_policy_disagreement_rate",0,1);
   finite(x.minimum_signal_allowed_rate,"minimum_signal_allowed_rate",0,1);
@@ -123,6 +130,8 @@ function summarize(config,source){
     const time=utc(r.proposal_at,"proposal_at");observedTimes.push(time);
     const baseline=nonempty(r.baseline_action,"baseline_action");
     const signal=nonempty(r.signal_effective_action,"signal_effective_action");
+    assert(config.action_codes.includes(baseline)&&config.action_codes.includes(signal),
+      "unknown or non-frozen domain action code");
     assert(r.signal_action_allowed==="0"||r.signal_action_allowed==="1",
       "invalid native Signal permission");
     const isAllowed=r.signal_action_allowed==="1";
@@ -220,7 +229,7 @@ function summarize(config,source){
 function testConfig(){
   return {
     candidate_id:"shadow-fixture-only",model_version_baseline:"baseline-test-v1",
-    model_version_signal:"signal-test-v1",
+    model_version_signal:"signal-test-v1",action_codes:["wait","action-a","action-b"],
     minimum_shadow_units:60,minimum_policy_disagreement_rate:.1,
     minimum_signal_allowed_rate:.3,
     baseline_net_utility_sd_usd:12,minimum_detectable_net_gain_usd:2,
@@ -261,6 +270,8 @@ function selfTest(){
     /nonzero scale/);
   assert.throws(()=>summarize(c,data.replace("signal-test-v1","wrong-version")),
     /shadow Signal version drift/);
+  assert.throws(()=>summarize(c,data.replace(",action-a,action-a,",",personal-case-123,action-a,")),
+    /unknown or non-frozen domain action code/);
   assert.throws(()=>summarize(c,data+"\n"+data.split("\n")[1]),
     /duplicate independent shadow/);
   assert.throws(()=>summarize(c,data.replace(",0,0,wait",",0,0.3,wait")),
