@@ -1,35 +1,59 @@
--- Workbench acquisition trial-readiness counts, read-only.
--- Do not run against production without an independently approved read-only scope.
--- Executes no mutation and selects NO owner IDs, names, financial amounts,
--- contact details, free text or row-level opportunity records.
---
--- Multi-tenant counts are global to the selected database branch, NOT
--- automatically evidence that a single approved owner has sufficient cases.
--- A real trial requires authorized owner-specific audit, external cost and
--- currency reconciliation, and immutable pre-outcome policy logs.
-SELECT
-  (SELECT count(*) FROM public.opportunities) AS opportunity_rows,
-  (SELECT count(DISTINCT owner_id) FROM public.opportunities) AS distinct_owners,
-  (SELECT count(DISTINCT (owner_id, relationship_id)) FROM public.opportunities)
-    AS distinct_owner_company_units,
-  (SELECT count(DISTINCT (owner_id, relationship_id))
+-- Research-only, branch-scoped Workbench acquisition trial readiness.
+-- READ ONLY: a single SELECT, aggregate counts only. No row-level outputs,
+-- owner IDs, relationship IDs, names, cash amounts, or free text.
+-- First-opportunity age is only a proxy for an eligible trial observation.
+-- Global counts may span multiple owners and MUST NOT certify a single-owner trial.
+-- For real trial eligibility, independent source attestation, USD/FX reconciliation,
+-- consent, a frozen policy and human approval are still mandatory.
+WITH company_units AS (
+ SELECT owner_id, relationship_id,
+        COUNT(*) AS opportunity_count,
+        MIN(created_at) AS first_opportunity_at
+ FROM public.opportunities
+ GROUP BY owner_id, relationship_id
+),
+opportunity_status AS (
+ SELECT COALESCE(jsonb_object_agg(status, n), '{}'::jsonb) AS counts
+ FROM (
+   SELECT status, COUNT(*) AS n
    FROM public.opportunities
-   WHERE created_at <= current_timestamp - INTERVAL '90 days')
-    AS company_units_at_least_90_days_old,
-  (SELECT count(*) FROM public.outcomes) AS recorded_outcome_rows,
-  (SELECT count(*) FROM public.outcomes
-   WHERE result IN ('won','lost')) AS recorded_terminal_outcomes,
-  (SELECT count(*) FROM public.outcomes
+   GROUP BY status
+ ) s
+)
+SELECT
+ CURRENT_TIMESTAMP AS audited_at,
+ (SELECT COUNT(*) FROM public.opportunities) AS opportunity_rows,
+ (SELECT COUNT(DISTINCT owner_id) FROM public.opportunities) AS distinct_owners,
+ (SELECT COUNT(*) FROM public.relationships) AS relationship_rows,
+ (SELECT COUNT(*) FROM company_units) AS distinct_owner_company_units,
+ (SELECT COUNT(*) FROM company_units WHERE opportunity_count > 1)
+   AS company_units_with_multiple_opportunities,
+ (SELECT COUNT(*) FROM company_units WHERE first_opportunity_at <=
+   CURRENT_TIMESTAMP - INTERVAL '90 days') AS company_units_first_seen_90_days_ago,
+ (SELECT MIN(created_at) FROM public.opportunities) AS first_opportunity_at,
+ (SELECT MAX(created_at) FROM public.opportunities) AS latest_opportunity_at,
+ (SELECT counts FROM opportunity_status) AS opportunity_status_counts,
+ (SELECT COUNT(*) FROM public.decisions) AS decision_rows,
+ (SELECT COUNT(*) FROM public.assessments) AS assessment_rows,
+ (SELECT COUNT(*) FROM public.assessments
+   WHERE expected_revenue IS NOT NULL AND direct_cost IS NOT NULL
+   AND sales_hours IS NOT NULL AND delivery_hours IS NOT NULL
+   AND hourly_opportunity_cost IS NOT NULL AND win_probability IS NOT NULL)
+   AS assessments_with_six_forecast_inputs,
+ (SELECT COUNT(*) FROM public.evidence) AS evidence_rows,
+ (SELECT COUNT(*) FROM public.outcomes) AS outcome_rows,
+ (SELECT COUNT(*) FROM public.outcomes WHERE result IN ('won','lost'))
+   AS terminal_outcome_rows,
+ (SELECT COUNT(*) FROM public.outcomes
    WHERE result IN ('won','lost')
-     AND actual_revenue IS NOT NULL
-     AND actual_cost IS NOT NULL
-     AND actual_sales_hours IS NOT NULL
-     AND actual_delivery_hours IS NOT NULL) AS terminal_outcomes_with_basic_actuals,
-  (SELECT count(*) FROM public.cash_receipts) AS receipt_and_reversal_rows,
-  (SELECT count(DISTINCT (owner_id, opportunity_id)) FROM public.cash_receipts)
-    AS opportunities_with_cash_records,
-  (SELECT count(*) FROM public.commercial_activities) AS commercial_activity_rows,
-  (SELECT count(*) FROM public.acquisition_opportunity_scores)
-    AS qualification_score_snapshots,
-  (SELECT count(*) FROM public.assessments) AS assessments,
-  (SELECT count(*) FROM public.evidence) AS evidence_rows;
+   AND actual_revenue IS NOT NULL AND actual_cost IS NOT NULL
+   AND actual_sales_hours IS NOT NULL AND actual_delivery_hours IS NOT NULL)
+   AS terminal_outcomes_with_basic_actuals,
+ (SELECT COUNT(*) FROM public.cash_receipts) AS receipt_or_reversal_rows,
+ (SELECT COUNT(DISTINCT (owner_id, opportunity_id))
+   FROM public.cash_receipts) AS opportunities_with_cash_records,
+ (SELECT COUNT(*) FROM public.commercial_activities) AS commercial_activity_rows,
+ (SELECT COUNT(*) FROM public.acquisition_opportunity_scores)
+   AS qualification_score_snapshots,
+ (SELECT COUNT(*) FROM public.signal_integration_events)
+   AS recorded_signal_integration_events;
