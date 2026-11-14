@@ -1,0 +1,73 @@
+{
+  "schema": "signal-net-economic-attribution-2026-11-14-v1",
+  "claim": "Signal software generates a positive incremental causal net-profit effect over an equally informed conventional optimizer",
+  "verdict": "NOT_PROVEN",
+  "verified_incremental_signal_net_profit": false,
+  "independent_RCT_trials_randomizing_signal_software": 0,
+  "hillstrom": {
+    "test_n": 38240,
+    "selected_action": "Mens E-Mail",
+    "delta_gross_spend_usd": 0.85319,
+    "ci95": [
+      0.4612,
+      1.2452
+    ],
+    "p": 0.00001989,
+    "policy_agreement_with_conventional": 1,
+    "incremental_gross_spend_usd": 0,
+    "observed_real_costs": false
+  },
+  "contextual_hillstrom": {
+    "test_n": 38240,
+    "disagreements": 8413,
+    "delta_vs_equal_contextual_gross_usd": 0.20203,
+    "ci95": [
+      -0.01102,
+      0.41509
+    ],
+    "p": 0.06309,
+    "delta_vs_strong_global_gross_usd": -0.18953,
+    "exploratory": true
+  },
+  "academic_JTPA": {
+    "test_n": 5865,
+    "policy_disagreements": 0,
+    "incremental_policy_gross_earnings_usd": 0
+  },
+  "ZOZO_women": {
+    "test_n": 232447,
+    "native_allowed_actions": 0
+  },
+  "observed_live_neon_project_counts": {
+    "workbench_v3": {
+      "opportunities": 0,
+      "outcomes": 0,
+      "cash_receipts": 0
+    },
+    "workbench_production": {
+      "signal_decision_records": 0,
+      "signal_outcomes": 0,
+      "commercial_outcomes": 0,
+      "cash_receipts": 0
+    }
+  },
+  "conditional_treatment_margin_example": {
+    "assumed_margin": 0.35,
+    "assumed_unit_cost_usd": 0.02,
+    "expected_net_usd": 0.278616,
+    "conditional_ci95": [
+      0.14142,
+      0.41582
+    ],
+    "observed_profit": false,
+    "incremental_over_same_action_baseline": false
+  },
+  "direct_real_profit_dataset_candidate": {
+    "source": "https://microdata.worldbank.org/catalog/2860",
+    "experimental_firms": 1500,
+    "individual_records_analyzed": false,
+    "signal_software_randomization": false
+  },
+  "eligible_for_claim": false,
+  "production_changes_made": false
+}
