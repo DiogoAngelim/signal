@@ -170,7 +170,7 @@ function verifyAttestation(inputs,privateConfig,pubkeyPem){
   return {signedAt:at,attestorPublicKeySHA256:sha(key.export({type:"spki",format:"der"})),
     attestationSHA256:sha(inputs.attestation)};
 }
-function process(inputs,pubkeyPem){
+function assembleLedger(inputs,pubkeyPem){
   const cfg=JSON.parse(inputs.config);
   studyConfig(cfg);
   const custody=verifyAttestation(inputs,cfg,pubkeyPem);
@@ -416,7 +416,7 @@ function fixture(n=80){
 }
 async function selfTest(){
   const f=fixture();
-  const result=process(f.inputs,f.pub);
+  const result=assembleLedger(f.inputs,f.pub);
   assert.equal(result.summary.randomizedUnits,80);
   assert.deepEqual(result.summary.assignedArms,{signal:40,baseline:40});
   assert.equal(result.summary.exposure.nonadherent,0);
@@ -425,15 +425,15 @@ async function selfTest(){
   assert(result.csv.startsWith(OUTPUT.join(",")+"\n"));
   assert.equal(result.csv.trim().split("\n").length,81);
   assert(!result.csv.includes("synthetic-company"),"source identities must not leak");
-  assert.deepEqual(process(f.inputs,f.pub),result);
+  assert.deepEqual(assembleLedger(f.inputs,f.pub),result);
   const change=(key,fn)=>{
     const copy={...f.inputs},rows=copy[key].trim().split("\n").map(JSON.parse);
     rows[0]=fn({...rows[0]});copy[key]=rows.map(JSON.stringify).join("\n")+"\n";
     return copy;
   };
-  assert.throws(()=>process(change("finances",r=>({...r,receipt_cents:9999})),f.pub),
+  assert.throws(()=>assembleLedger(change("finances",r=>({...r,receipt_cents:9999})),f.pub),
     /custodian source hash mismatch/);
-  assert.throws(()=>process({...f.inputs,attestation:f.inputs.attestation.replace(
+  assert.throws(()=>assembleLedger({...f.inputs,attestation:f.inputs.attestation.replace(
     /"signature_base64":"[^"]+"/,'"signature_base64":"AAAA"')},f.pub),
     /signature mismatch/);
   // Re-sign only to exercise substantive data-contract failures, not bypass them.
@@ -447,21 +447,21 @@ async function selfTest(){
     return {copy,pub:kp.publicKey.export({type:"spki",format:"pem"})};
   };
   let x=resigned("finances",r=>({...r,currency:"BRL"}));
-  assert.throws(()=>process(x.copy,x.pub),/unreviewed currency/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/unreviewed currency/);
   x=resigned("finances",r=>({...r,refund_cents:null}));
-  assert.throws(()=>process(x.copy,x.pub),/noninteger refund_cents/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/noninteger refund_cents/);
   x=resigned("finances",r=>({...r,period_complete:false}));
-  assert.throws(()=>process(x.copy,x.pub),/must be independently reconciled/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/must be independently reconciled/);
   x=resigned("finances",r=>({...r,statement_at:"2024-01-10T00:00:00Z"}));
-  assert.throws(()=>process(x.copy,x.pub),/statement cannot predate/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/statement cannot predate/);
   x=resigned("exposures",r=>({...r,delivered_arm:"baseline"}));
-  assert.throws(()=>process(x.copy,x.pub),/wrong-arm/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/wrong-arm/);
   x=resigned("exposures",r=>({...r,human_approved_at:null}));
-  assert.throws(()=>process(x.copy,x.pub),/invalid UTC human approval/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/invalid UTC human approval/);
   x=resigned("exposures",r=>({...r,consent_at:"2024-01-05T00:00:00Z"}));
-  assert.throws(()=>process(x.copy,x.pub),/post-assignment consent/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/post-assignment consent/);
   x=resigned("exposures",r=>({...r,effective_action:"wait"}));
-  assert.throws(()=>process(x.copy,x.pub),/wait cannot be recorded as a completed action/);
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/wait cannot be recorded as a completed action/);
   // The finalized format must ACTUALLY feed the existing prospective
   // intention-to-treat analysis, rather than only matching declared headers.
   // All files remain temporary and contain SYNTHETIC, not participant, data.
@@ -512,7 +512,7 @@ async function main(){
     input[name]=await readFile(paths[name],"utf8");
   }
   const pub=await readFile(paths["trusted-pubkey"],"utf8");
-  const {csv,summary}=process(input,pub);
+  const {csv,summary}=assembleLedger(input,pub);
   const csvFile=outsideRepo(arg(args,"--finalized"));
   const reportFile=outsideRepo(arg(args,"--summary"));
   assert(csvFile!==reportFile,"cannot overwrite private trial source with summary");
