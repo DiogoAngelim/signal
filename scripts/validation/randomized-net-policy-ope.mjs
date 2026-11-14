@@ -118,6 +118,21 @@ function jsonl(bytes, shape, name) {
 }
 function checkModel(model, c) {
   assert(model && typeof model === "object", "missing economic model");
+  const allowedModelKeys=["modelVersion","unit","probabilityEvidence","states",
+    "actions","riskPolicy","annualDiscountRate","payoffHorizonYears"];
+  assert(Object.keys(model).every(k=>allowedModelKeys.includes(k)),
+    "unexpected economic model field (possible post-outcome leakage)");
+  for (const state of model.states??[]) exact(state,["id","probability"],"economic state");
+  for (const action of model.actions??[]){
+    const allowed=["id","upfrontCost","opportunityCost","prohibited","payoffs"];
+    assert(Object.keys(action).every(k=>allowed.includes(k)),
+      "unexpected economic action field (possible post-outcome leakage)");
+    for(const p of action.payoffs??[])
+      exact(p,["stateId","amount"],"economic state payoff");
+  }
+  const allowedRisk=["tailMass","downsidePenalty","minimumWorstCase","minimumLowerTailMean"];
+  assert(model.riskPolicy && Object.keys(model.riskPolicy).every(k=>allowedRisk.includes(k)),
+    "unexpected risk policy field");
   assert.equal(model.modelVersion, c.signal_version, "Signal model version drift");
   assert.equal(model.unit, UNIT, "monetary model unit drift");
   assert(["estimated","externally_validated"].includes(model.probabilityEvidence),
@@ -263,7 +278,7 @@ function metric(rows,name) {
     ipsNetUSDPerUnit:rows.reduce((s,r)=>s+r.net*r.weights[name],0)/n,
     snipsNetUSDPerUnit:rows.reduce((s,r)=>s+r.net*r.weights[name],0)/sw,
     effectiveSampleSize:sw**2/sq,
-    maxImportanceWeight:Math.max(...rows.map(r=>r.weights[name])),
+    maxImportanceWeight:rows.reduce((max,r)=>Math.max(max,r.weights[name]),0),
     meanWeight:sw/n
   };
 }
