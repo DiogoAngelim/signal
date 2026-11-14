@@ -1,0 +1,35 @@
+name: Signal processor-free independent finance bridge (synthetic only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/independent-bank-finance-bridge.mjs"
+      - "scripts/validation/independent-software-profit-ledger.mjs"
+      - "scripts/validation/prospective-policy-trial-audit.mjs"
+      - "docs/validation/processor-free-finance-bridge.md"
+      - ".github/workflows/independent-bank-finance-bridge.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-processor-free-finance-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  bank-books-signature-itt:
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test Stripe-free bank, bookkeeping, closeout and signed ITT pipeline
+        run: node scripts/validation/independent-bank-finance-bridge.mjs --self-test
+      - name: Assert no non-research external side effects
+        run: |
+          echo "SYNTHETIC ONLY: no payment system, bank account, Stripe, Workbench, independent partner, randomized Signal exposure or authentic money observed."
+          echo "No production enrollment, deployment, live advice or causal net-profit claim is authorized."
