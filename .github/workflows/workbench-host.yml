@@ -1,0 +1,32 @@
+name: Workbench host
+on:
+  push:
+    branches:
+      - feat/workbench-runtime-host
+  pull_request:
+    paths:
+      - "server/workbench-host/**"
+      - "api/workbench-connector/**"
+      - "api/sdk-node/**"
+      - "api/runtime/**"
+      - "api/protocol/**"
+      - "pnpm-lock.yaml"
+      - "pnpm-workspace.yaml"
+      - ".github/workflows/workbench-host.yml"
+jobs:
+  verify:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @signal/workbench-host... build
+      - run: pnpm --filter @signal/workbench-host test
+      - run: pnpm --filter @signal/workbench-connector test
+      - run: pnpm --filter @signal/workbench-connector typecheck
