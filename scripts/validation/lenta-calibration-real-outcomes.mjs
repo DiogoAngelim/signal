@@ -170,7 +170,7 @@ function evaluate(calibration,holdout,info,strict=true){
     "split integrity mismatch");
   const calIds=new Set(cal.map(r=>r.id));
   assert(!test.some(r=>calIds.has(r.id)),"test label leakage: overlapping calibration source IDs");
-  assert(ARMS.every(arm=>test.filter(r=>r.arm===arm).length>=1000),
+  assert(ARMS.every(arm=>test.filter(r=>r.arm===arm).length>=(strict?1000:250)),
     "missing independent control or treated test support");
   const {fitted,fitElapsedMs}=trainCalibrators(cal,strict?3000:300);
   const forecastScores={};const data={};
