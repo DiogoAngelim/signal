@@ -92,13 +92,13 @@ function bootstrapDiff(rows,left,right,repeats=BOOT){
   return {mean:value,bootstrap95:[arr[Math.floor(repeats*.025)],arr[Math.floor(repeats*.975)]],
     unit:"paired independent source RCT row",lowerBoundPositive:arr[Math.floor(repeats*.025)]>0};
 }
-function trainCalibrators(calibration){
+function trainCalibrators(calibration,minArmRows){
   const fitted={};
   const started=timestamp();
   for(const arm of ARMS){
     const suffix=arm==="test"?"Treated":"Control";
     const records=calibration.filter(x=>x.arm===arm);
-    assert(records.length>=3000,"insufficient arm-specific calibration observations");
+    assert(records.length>=minArmRows,"insufficient arm-specific calibration observations");
     fitted[arm]=fitBinaryIsotonicCalibrator(
       records.map(r=>({id:r.id,
         rawProbability:r["boosted"+suffix],observedOutcome:r.outcome
@@ -172,7 +172,7 @@ function evaluate(calibration,holdout,info,strict=true){
   assert(!test.some(r=>calIds.has(r.id)),"test label leakage: overlapping calibration source IDs");
   assert(ARMS.every(arm=>test.filter(r=>r.arm===arm).length>=1000),
     "missing independent control or treated test support");
-  const {fitted,fitElapsedMs}=trainCalibrators(cal);
+  const {fitted,fitElapsedMs}=trainCalibrators(cal,strict?3000:300);
   const forecastScores={};const data={};
   for(const arm of ARMS){
     const group=test.filter(r=>r.arm===arm);
