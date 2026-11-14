@@ -1,0 +1,37 @@
+name: Independent software RCT financial ledger integrity (synthetic only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/independent-software-profit-ledger.mjs"
+      - "scripts/validation/prospective-policy-trial-audit.mjs"
+      - "docs/validation/independent-software-profit-trial.md"
+      - ".github/workflows/independent-software-profit-ledger.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-independent-software-profit-ledger-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  independent-exposure-finance-safety:
+    name: Validate external software exposure and cost reconciliation contracts
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Validate exact ledger schemas, independent Ed25519 signature and net-USD accounting
+        run: node scripts/validation/independent-software-profit-ledger.mjs --self-test
+      - name: Validate existing prospective ITT financial auditor
+        run: node scripts/validation/prospective-policy-trial-audit.mjs --self-test
+      - name: Confirm no external side effects or causal attribution
+        run: |
+          echo "SYNTHETIC FIXTURES ONLY. This workflow does not run a real randomized Signal deployment or verify realized net profit."
+          echo "An externally approved partner, real pre-exposure enrollment, independent trusted signing key, dated assignment custody and complete observed financial ledgers are mandatory."
