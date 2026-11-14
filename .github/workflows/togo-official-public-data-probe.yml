@@ -1,0 +1,61 @@
+name: Signal Togo official research data access probe (no raw export)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/togo-official-public-data-probe.yml"
+      - "scripts/validation/togo-public-package/**"
+      - "docs/validation/togo-public-package-access.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: togo-official-rct-public-probe-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  public-archive-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 7
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Check only the original official public replication-archive endpoints
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/togo-probe"
+          archive="$RUNNER_TEMP/togo-probe/official.zip"
+          found=0
+          for url in \
+            "https://reproducibility.worldbank.org/catalog/237/download/693/PP_TGO_2024_272.zip" \
+            "https://reproducibility.worldbank.org/index.php/catalog/237/download/693/PP_TGO_2024_272.zip" \
+            "https://reproducibility.worldbank.org/catalog/237/download/693"
+          do
+            rm -f "$archive"
+            echo "Probing official World Bank public archive URL path (no cookies/credentials)"
+            if curl -fL --silent --show-error --retry 1 --connect-timeout 10 --max-time 60 --output "$archive" "$url" && \
+              [[ "$(head -c 2 "$archive")" == "PK" ]] && unzip -tqq "$archive"
+            then
+              found=1
+              echo "OFFICIAL_ARCHIVE_ACCESS=available"
+              echo "ORIGINAL_ARCHIVE_SHA256=$(sha256sum "$archive" | cut -d ' ' -f 1)"
+              echo "OFFICIAL_ARCHIVE_SIZE_BYTES=$(stat -c%s "$archive")"
+              echo "Anonymized research Stata file names in source package:"
+              unzip -Z -1 "$archive" | grep -E '(BL_raw_an_old|FU[1-4]_raw_an_old|final_dataset_.*v2|Togoanalysisdata)\.dta$' || true
+              echo "**Official World Bank archive reached and passes ZIP integrity check.**" >> "$GITHUB_STEP_SUMMARY"
+              echo "SHA-256: `$(sha256sum "$archive" | cut -d ' ' -f 1)`" >> "$GITHUB_STEP_SUMMARY"
+              echo "Research input still requires variable review, proper randomized evaluation and economic-cost treatment. No Signal causal claim." >> "$GITHUB_STEP_SUMMARY"
+              break
+            fi
+          done
+          if [[ "$found" != 1 ]]; then
+            echo "OFFICIAL_ARCHIVE_ACCESS=unavailable"
+            echo "**Official public ZIP not retrievable from this runner.** No data analysis or outcome assertion was run." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          rm -rf "$RUNNER_TEMP/togo-probe"
+      - name: Always fail closed on causal interpretation
+        run: |
+          echo "Probe never observes or randomizes Signal software; no net-profit result inferred."
