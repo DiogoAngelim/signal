@@ -389,7 +389,7 @@ async function selfTest(){
     replaceIn(f.transactions,",12000,",",-12000,"),
     f.costs,f.closeouts),/nonnegative integer/);
   assert.throws(()=>scrutinize(f.config,f.manifest,
-    f.transactions+"\n"+f.transactions.trim().split("\n")[1]+"\n",
+    f.transactions+f.transactions.trim().split("\n")[1]+"\n",
     f.costs,f.closeouts),/duplicate bank transaction/);
   assert.throws(()=>scrutinize(f.config,f.manifest,f.transactions,
     replaceIn(f.costs,",500,20,5000",",500,,5000"),
