@@ -35,14 +35,29 @@ jobs:
           j=json.load(open(sys.argv[1]))
           files=j.get("data",{}).get("latestVersion",{}).get("files",[])
           print("OFFICIAL_FILE_COUNT",len(files))
+          print("OFFICIAL_GUESTBOOK_ID",j.get("data",{}).get("latestVersion",{}).get("guestbookId"))
+          print("OFFICIAL_VERSION_TERMS_OF_USE",str(j.get("data",{}).get("latestVersion",{}).get("termsOfUse",""))[:250])
           for record in files:
               f=record.get("dataFile",{})
-              print("OFFICIAL_FILE",f.get("filename"),"id",f.get("id"),"bytes",f.get("filesize"),"md5",f.get("md5"))
+              print("OFFICIAL_FILE",f.get("filename"),"id",f.get("id"),"bytes",f.get("filesize"),"md5",f.get("md5"),"restricted",record.get("restricted"))
           PY
           fi
           archive="$work/egypt-rct-official.zip"
           status=$(curl -L -sS --retry 1 --connect-timeout 10 --max-time 90 -w '%{http_code}' -o "$archive" "$base/api/access/datafile/3348775" || true)
           echo "HARVARD_DATAVERSE_DIRECT_FILE_HTTP=$status"
+          if [[ "$status" != "200" ]] && [[ -f "$archive" ]]; then
+            echo "DATAVERSE_ERROR_TYPE=$(file --brief --mime-type "$archive")"
+            if [[ "$(file --brief --mime-type "$archive")" == "application/json" ]]; then
+              python3 - "$archive" <<'PY'
+          import json,sys
+          try:
+              j=json.load(open(sys.argv[1]))
+              print("DATAVERSE_ERROR_STATUS",j.get("status"))
+              print("DATAVERSE_ERROR_MESSAGE",str(j.get("message",""))[:320])
+          except (ValueError,OSError) as e: print("DATAVERSE_NON_JSON_ERROR",type(e).__name__)
+          PY
+            fi
+          fi
           if [[ "$status" == "200" ]]; then
             echo "DIRECT_FILE_MD5=$(md5sum "$archive" | cut -d ' ' -f1)"
             [[ "$(md5sum "$archive" | cut -d ' ' -f1)" == "d34d30d45bbabcb5bd21eec31c89a613" ]] || { echo "Checksum mismatch: refuse data"; exit 1; }
