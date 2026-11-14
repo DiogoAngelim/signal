@@ -70,8 +70,12 @@ function replay(rows) {
       events.push({ id: row.id, kind: "closed", at: row.closed });
     }
   }
-  events.sort((a, b) => a.at.localeCompare(b.at) ||
-    (a.kind === "created" ? -1 : 1) || a.id.localeCompare(b.id));
+  events.sort((a, b) => {
+    const timeOrder = a.at.localeCompare(b.at);
+    if (timeOrder) return timeOrder;
+    const kindOrder = a.kind === b.kind ? 0 : a.kind === "created" ? -1 : 1;
+    return kindOrder || a.id.localeCompare(b.id);
+  });
   const open = new Set();
   let invalidTransitions = 0;
   for (const event of events) {
