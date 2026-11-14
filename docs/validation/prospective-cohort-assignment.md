@@ -14,7 +14,7 @@ Read-only aggregate-only SQL on **2026-11-14** found:
 - Workbench V3 database, default branch: **0** opportunities, **0** relationships, **0** assessed decisions, **0** financial outcomes, **0** cash receipt rows.
 - Legacy Workbench production database, default branch: **0** Signal decision records, **0** Signal outcome rows, **0** commercial outcomes, **0** cash receipt rows.
 
-These counts apply only to the audited stores, not other external systems. No raw business identifiers, owners, customer data or financial amounts were retrieved. Therefore **there is currently no eligible source cohort, observed real baseline monetary variance, or experimental software-assignment history** in those stores. Current verdict: `PRE_ENROLLMENT_BLOCKED_NO_REAL_COHORT`. No trial could responsibly be enrolled from them.
+The canonical Workbench V3 read-only readiness SQL was executed successfully at **2026-11-14T13:45:48.995Z**, corroborating these zeros. Its pre-migration schema also lacked the optional `acquisition_opportunity_scores` and `signal_integration_events` relations; the fixed query now reports **table-presence=false** instead of failing or misrepresenting absence as zero entries. These counts apply only to the audited stores, not other external systems. No raw business identifiers, owners, customer data or financial amounts were retrieved. Therefore **there is currently no eligible source cohort, observed real baseline monetary variance, or experimental software-assignment history** in those stores. Current verdict: `PRE_ENROLLMENT_BLOCKED_NO_REAL_COHORT`. No trial could responsibly be enrolled from them.
 
 ## Frozen study definition
 
