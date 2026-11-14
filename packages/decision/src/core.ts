@@ -139,5 +139,7 @@ export type {
 
 export { evaluateQuantitativeDecision, evaluateInformationValue, stressTestProbabilityCases } from "./quantitative-decision";
 export type { QuantitativeState, StatePayoff, QuantitativeAction, QuantitativeRiskPolicy, QuantitativeDecisionModel, QuantitativeActionResult, QuantitativeDecisionResult, InformationObservation, InformationValueResult, ProbabilityStressCase, ProbabilityStressResult, ProbabilityEvidence } from "./quantitative-decision";
+export { fitBinaryIsotonicCalibrator, applyBinaryIsotonicCalibrator } from "./binary-calibration";
+export type { BinaryCalibrationObservation, BinaryCalibrationFitOptions, BinaryCalibrationKnot, FittedBinaryIsotonicCalibrator } from "./binary-calibration";
 export { evaluateBinaryForecasts, compareFullFeedbackPolicies } from "./scientific-evaluation";
 export type { EvaluationSplit, BinaryForecastRecord, BinaryForecastEvaluationInput, BinaryForecastEvaluationResult, ForecastBucket, FullFeedbackDecisionRecord, FeedbackProvenance, PolicyComparisonInput, PolicyComparisonResult } from "./scientific-evaluation";
