@@ -7,6 +7,7 @@ on:
       - ".github/workflows/egypt-public-profit-rct.yml"
       - "scripts/validation/egypt-profit-rct/**"
       - "docs/validation/egypt-profit-rct-*.md"
+      - "scripts/validation/equal-information-net-profit-bound.mjs"
   workflow_dispatch:
 
 permissions:
@@ -74,3 +75,26 @@ jobs:
             echo "Official Harvard Dataverse ZIP unavailable from runner; no outcome analysis was attempted." >> "$GITHUB_STEP_SUMMARY"
           fi
           echo "A published profit RCT does NOT randomize Signal software; this is only a source probe."
+
+  mathematical-profit-bound:
+    name: Actual Signal vs independently calculated same-information profit optimum
+    runs-on: ubuntu-latest
+    timeout-minutes: 9
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build unchanged actual Signal quantitative decision implementation
+        run: pnpm --filter @signal/decision build
+      - name: Independently verify same-information risk parity and expected-net optimum
+        run: node scripts/validation/equal-information-net-profit-bound.mjs
+      - name: Interpretation boundary
+        run: |
+          echo "The algebraic expected-utility optimum assumes correct input model. Synthetic assertions do not demonstrate observed net-profit or Signal software causal effects."
