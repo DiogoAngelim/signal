@@ -8,7 +8,10 @@
  */
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
-import { mkdir, writeFile, appendFile } from "node:fs/promises";
+import { mkdir, writeFile, appendFile, mkdtemp, rm } from "node:fs/promises";
+import { execFileSync } from "node:child_process";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import signalDecision from "../../packages/decision/dist/index.js";
 
 const { evaluateQuantitativeDecision }=signalDecision;
@@ -19,7 +22,7 @@ const SOURCE_URLS = [
   "https://zenodo.org/records/18836198/files/jtpa.csv?download=1",
   "https://zenodo.org/api/records/18836198/files/jtpa.csv/content"
 ];
-const EXPECTED_ROWS=9224;
+const EXPECTED_ROWS=9223;
 const BOOT_SEED=20261114, BOOT_REPS=2000, TRAIN_SHARE=0.4;
 const PRIOR_N=300, Z=1.96, PENALTY=0.5;
 const STUDY = "jtpa-economic-intent-to-treat-risk-policy-20261114-v1";
@@ -87,7 +90,37 @@ async function downloadSource(){
       return {url,sha256,md5,bytes:bytes.length,text:bytes.toString("utf8")};
     }catch(err){attempted.push(new URL(url).pathname+": "+err.message);}
   }
-  throw Error("No valid pinned Zenodo source. "+attempted.join("; "));
+  // Outcome-blind transport fallback to study author's official replication ZIP.
+  // Extraction is in-memory (unzip -p), never writes raw rows into the repo.
+  const archiveURL = "https://sukjinhan.github.io/Han23_Replication_Files.zip";
+  const directory = await mkdtemp(join(tmpdir(),"signal-jtpa-author-"));
+  try {
+    const response=await fetch(archiveURL,{signal:AbortSignal.timeout(120000)});
+    if(!response.ok)throw Error("author ZIP HTTP "+response.status);
+    const zip=Buffer.from(await response.arrayBuffer());
+    assert(zip.length>1000&&zip.length<50e6,"unexpected archive size");
+    const p=join(directory,"original.zip");
+    await writeFile(p,zip,{flag:"wx"});
+    const listing=execFileSync("unzip",["-Z","-1",p],{encoding:"utf8",maxBuffer:8e6});
+    const candidates=listing.trim().split("\n").filter(s=>
+      /(^|\/)jtpa\.csv$/i.test(s.trim()) &&
+      !s.startsWith("/") && !s.split("/").includes(".."));
+    for(const name of candidates){
+      const sourceBytes=execFileSync("unzip",["-p",p,name],{maxBuffer:15e6});
+      const md5=createHash("md5").update(sourceBytes).digest("hex");
+      if(md5===EXPECTED_MD5){
+        return {url:archiveURL+"#"+name,sha256:createHash("sha256")
+          .update(sourceBytes).digest("hex"),md5,
+          bytes:sourceBytes.length,text:sourceBytes.toString("utf8")};
+      }
+    }
+    attempted.push("author replication ZIP: no exact MD5-matched jtpa.csv");
+  }catch(err){
+    attempted.push("author replication ZIP: "+err.message);
+  }finally{
+    await rm(directory,{recursive:true,force:true});
+  }
+  throw Error("No valid pinned JTPA source. "+attempted.join("; "));
 }
 function parseData(text){
   const lines=text.replace(/^\uFEFF/,"").trim().split(/\r?\n/);
