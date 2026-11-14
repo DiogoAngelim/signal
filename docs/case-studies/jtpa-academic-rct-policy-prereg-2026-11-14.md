@@ -63,3 +63,12 @@ At source ingestion in CI [43594401620](https://github.com/DiogoAngelim/signal/a
 
 Correct only the type acceptance for **non-policy** descriptive balance covariates \`married\` and \`age2225\` to accept finite values within [0,1], while **retaining strict 0/1 checks** for \`instrument\` (randomized assignment), \`treatment\` (actual takeup), \`hsorged\` (the one policy input), and \`male\` (diagnostic baseline value). No rows are removed, no post-treatment variable is allowed into the policy, and the fixed comparison, confidence thresholds, fitted algorithm, train/test split and source hash remain unchanged. Any future methodological success claim remains **exploratory**, not a blind prospective experiment.
 
+
+
+## Amendment C — preprogram imputed binary source feature, no treatment effect yet computed
+
+Run [43594466325](https://github.com/DiogoAngelim/signal/actions/runs/43594466325) reached source parsing and halted **before training or evaluating any decision** because \`hsorged\` contains non-integer fractional values in the pinned academic research CSV. In other words, the field is not a clean individual-level observed 0/1 diploma flag for every record, despite its categorical name. The original frozen source has exact Git blob integrity and 9,872 rows; no record has been removed.
+
+For this **exploratory compatibility analysis only**, preserve the same single preprogram diploma/GED covariate but deterministically convert its recorded \`hsorged\` value to a binary model group by the pre-specified simple classification threshold **\`hsorged>=0.5\`**, with \`<0.5\` in the other group. Accept recorded \`hsorged\` values only in [0,1], and report the fraction of genuinely non-integer raw values in each group (aggregate counts only). No assignment, income, treatment or outcome information is used for this conversion. No changes to the fixed risk penalty, prior, action choices, benchmarks, estimand, CI, sample split, sample exclusions or economic gates.
+
+The meaning of the resulting binary group is an approximation for some participants; **do not claim it is verified actual diploma status** or that this yields fully preregistered confirmatory evidence. For non-policy balance diagnostics, \`male\` is also treated as a numeric 0..1 field instead of requiring an integer, while the randomized offer assignment \`instrument\` and actual participation \`treatment\` continue to require exact 0/1 values.
