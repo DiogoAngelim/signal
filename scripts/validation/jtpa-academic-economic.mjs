@@ -96,17 +96,19 @@ function parseData(text){
     const cells=parseCsv(lines[i]);
     assert.equal(cells.length,21,"invalid row column count");
     const v=k=>cells[idx.get(k)];
+    const rawHsorged=number(v("hsorged"),"recorded diploma/GED numeric",0,1);
     const row={
       fold:partition(i-1),
       male:number(v("male"),"male",0,1),
       married:number(v("married"),"married",0,1),
       age2225:number(v("age2225"),"age2225",0,1),
-      hsorged:number(v("hsorged"),"hsorged",0,1),
+      hsorged:rawHsorged>=0.5?1:0,
+      hsorgedFractional:rawHsorged!==0&&rawHsorged!==1,
       z2:number(v("instrument"),"randomized instrument",0,1),
       d2:number(v("treatment"),"nonrandomized enrollment",0,1),
       earnings:number(v("income"),"30-month earnings",0,10000000)
     };
-    for(const key of ["male","hsorged","z2","d2"])
+    for(const key of ["hsorged","z2","d2"])
       assert(Number.isInteger(row[key]),"not a binary source value "+key);
     out.push(row);
   }
@@ -322,7 +324,9 @@ async function main(){
     frozenGitCommit:REVISION,file:"jtpa.csv",source:source.url,
     expectedGitBlobSha1:EXPECTED_GIT_BLOB_SHA1,observedGitBlobSha1:source.gitBlob,
     observedSha256:source.sha256,
-    bytes:source.bytes,allRecords:data.length,trainN:train.length,testN:test.length
+    bytes:source.bytes,allRecords:data.length,trainN:train.length,testN:test.length,
+    fractionalRecordedDiplomaValues:data.filter(x=>x.hsorgedFractional).length,
+    diplomaGroupingRule:"hsorged numeric >=0.5 -> group 1, else 0; exploratory amendment C"
   };
   
 const report={
