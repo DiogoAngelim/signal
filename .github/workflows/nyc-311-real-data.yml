@@ -1,0 +1,45 @@
+name: Signal NYC 311 real-data replay
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/nyc-311.mjs"
+      - "packages/decision/**"
+      - ".github/workflows/nyc-311-real-data.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: nyc311-validation-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  nyc311:
+    name: Real 311 event replay and evidence checks
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @signal/decision build
+      - name: Validate real NYC 311 lifecycle, evidence lineage and temporal boundaries
+        run: node scripts/validation/nyc-311.mjs
+      - name: Upload JSON evidence (no addresses, coordinates, or narrative text)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: nyc311-real-data-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/nyc-311-report.json
+          if-no-files-found: warn
+          retention-days: 30
