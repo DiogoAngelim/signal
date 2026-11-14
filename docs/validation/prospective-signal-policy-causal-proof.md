@@ -38,6 +38,32 @@ The data file contains **one finalized row per uniquely assigned experimental un
 - \`effective_action\` records real-world outcome of execution, and \`policy_adherent\` is audited against the frozen arm-specific plan; overrides stay in the ITT analysis.
 - Data must not contain outcome-derived features in the decision input; auditing feature-lineage and external finance must be done separately.
 
+## Mandatory pre-outcome assignment manifest and ITT denominator reconciliation
+
+The finalized outcome CSV alone is insufficient: omission of a randomized person from both arms (or disproportionate missingness) can produce a misleading positive causal estimate. The offline analyzer now **requires** a separate assignment manifest, created before outcomes become observable and independently anchored to a timestamped append-only/WORM log.
+
+Manifest schema, exact column order:
+
+\`unit_hash,registered_trial_id,assigned_arm,assigned_at,decision_at,baseline_action,signal_action,baseline_model_version,signal_model_version,decision_input_sha256\`
+
+- One record for **every** randomized eligible unit, including subsequent wait/abstention, refusal, inaction, overrides, zero realized benefit, and harm. No post-randomization exclusion.
+- Record and freeze both candidate actions and versions **before** assigned arm can affect execution. \`decision_input_sha256\` is the SHA-256 of an independently specified canonical **pre-decision evidence snapshot**; do not hash raw PII into report artifacts. Its presence is validated, but its fidelity to real features requires external audit.
+- The manifest's full-file SHA-256 must be anchored outside the mutable source system at a time **before any outcome is visible**. Merely presenting an identical manifest and outcomes after the fact is not evidence of preregistration or authenticity. Use database immutability and a trusted external timestamp/signature to verify.
+- The analyzer rejects **any count mismatch, unexpected or duplicate outcome, missing assignment, changed arm, changed decision timestamp, changed trial ID, drifted policy version, or changed baseline/Signal proposal**. Every assigned subject must have exactly one finalized outcome. Fail rather than impute, silently drop, or selectively analyze incomplete cases.
+- Reference formats use full 64-hex pseudonymous unit and evidence digests. A hash does not guarantee anonymization; use a secret and privacy-approved canonicalization outside the analytics process. Do not upload raw personal data.
+- This protects against some accidental data loss or tampering **only when the independently produced manifest is authentic**. The analyzer records its digest and explicitly marks \`independentlyTimestamped:false\` because it cannot verify external attestation. Independent verification is still mandatory.
+
+Reproduction (requires **real** finalized observed trial records, not synthetic tests):
+
+\`\`\`sh
+node scripts/validation/prospective-policy-trial-audit.mjs \
+  --config registered-trial.json \
+  --manifest pre-outcome-assignments.csv \
+  --data finalized-observed-outcomes.csv
+\`\`\`
+
+No such real registered experiment or manifest is present in this repository. The CI only runs synthetic negative/positive fixtures.
+
 ## Operating model, no deployment, limitations
 
 This repository can provide an **offline analysis tool and self-tests** for eligible prospective data, but cannot create experimental subjects, randomize user traffic, measure future outcomes, or certify production effects from historical logs alone. The trial cannot be declared complete without a mutually exclusive randomization of actual live policy exposure and actual downstream monetary and safety data.
