@@ -30,6 +30,11 @@
 - Utility sensitivity is scenario-only: `utility per impression = v_click * IPS_click_probability - c_exploit * mean(epsilon)`, with fixed grid `v_click in [1, 5, 20]` and `c_exploit in [0, 0.001, 0.01]`. Monetary meaning is NOT verified: costs and click value are invented and clearly reported as sensitivity. Breakeven costs can be calculated; do not call any numbers actual USD revenue or causal improvement.
 - No cherry-picked position, date, confidence threshold or ranker variant may replace the primary estimate. Report any zero action rates / pervasive wait as a first-class failure of usefulness. Fail on download, metadata, row, or timestamp inconsistencies; never silently substitute sample data.
 
+
+### Implementation-bound native API cap (non-policy, before evaluation result)
+
+The exported \`evaluateBinaryForecasts\` implementation in \`packages/decision/src/scientific-evaluation.ts\` hard-rejects more than **100,000 records**. This is an API limit, not a statistical sample-size requirement. Therefore the primary holdout policy IPS, Brier, log-loss, calibration reliability and hour-cluster uncertainty are accumulated from **all** eligible test impressions. For an additional direct verification using Signal's native binary-forecast API, use an outcome-blind deterministic reservoir sample of exactly 100,000 test impressions, using seed **20261115**. Record its size and sampling mechanism, and label its native API output a *sampled secondary check*, never the full-holdout result. No policy setting, deadline, utility hypothesis, stopping rule or test-label-selected parameter is changed by this compatibility rule.
+
 ## Reproducibility and safeguards
 
 Run `pnpm --filter @signal/decision build` then `node scripts/validation/full-open-bandit-confirmatory.mjs`. The workflow must use a fresh public download, no Neon or production credentials, no application writes, no Vercel deployment, and an aggregate-only JSON artifact at `artifacts/validation/full-open-bandit-confirmatory-report.json`. Raw user features or hashes must not be logged or exported.
