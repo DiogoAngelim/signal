@@ -275,7 +275,7 @@ async function main(){
     signalVersusComparators:result.signalVsAlternatives,
     realCashObserved:result.realObservedMonetaryOutcomes,
     netFirmProfitObserved:!result.sourceEarningsNotBusinessNetProfit,
-    actualSoftwareRandomized:!result.causalSignalSoftwareNetProfitVerified,
+    actualSoftwareRandomized:false,
     softwareCausalProfitProven:result.causalSignalSoftwareNetProfitVerified
   }));
 }
