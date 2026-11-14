@@ -23,6 +23,7 @@ const FILENAME =
   "Kevin_Hillstrom_MineThatData_E-MailAnalytics_DataMiningChallenge_2008.03.20.csv";
 const URLS = [
   "https://raw.githubusercontent.com/W-Tran/uplift-modelling/0b9b1787a33a0f67bd66dda6910b08fa67c1564d/data/hillstrom/" + FILENAME,
+  "http://www.minethatdata.com/" + FILENAME,
   "https://www.minethatdata.com/" + FILENAME,
 ];
 const STUDY_ID = "hillstrom-rct-training-only-quantitative-signal-20261114-v1";
