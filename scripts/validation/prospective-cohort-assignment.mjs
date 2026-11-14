@@ -290,8 +290,8 @@ function selfTest(){
     "2024-01-03T12:00:00Z",f.now),/assignment time in future/);
   assert.throws(()=>build(f.c,f.source,f.key,
     "2023-12-02T12:00:00Z",f.now),/assignment must follow registration/);
-  assert.throws(()=>build(f.c,f.source.replace(/,wait,0,0,1,1,1/g,
-    ",monitor,0,0,1,1,1"),f.key,f.assignedAt,f.now),/denial must remain wait/);
+  assert.throws(()=>build(f.c,f.source.replace(",monitor,wait,",",monitor,monitor,"),
+    f.key,f.assignedAt,f.now),/denial must remain wait/);
   assert.throws(()=>build({...f.c,minimum_policy_disagreement_rate:.5},
     f.source,f.key,f.assignedAt,f.now),/disagreement too small/);
   assert.throws(()=>build(f.c,f.source,f.key,f.assignedAt,
