@@ -31,19 +31,52 @@ const sha=s=>createHash("sha256").update(s).digest("hex");
 const finite=(x,name)=>{const n=Number(x);assert(typeof x==="string"&&x.trim()!==""&&Number.isFinite(n),name+" invalid");return n;};
 const kbin=(s,limit1,limit2)=>{if(s===""||!Number.isFinite(Number(s)))return "missing";const x=Number(s);return x<=limit1?"low":x<=limit2?"mid":"high";};
 const key=r=>"hpa:"+kbin(r.hpa,25,100)+"|freq:"+kbin(r.freq,4,4)+"|dormant:"+(r.dormant==="0"?"0":r.dormant==="1"?"1":"missing");
+function csvTable(src){
+  // RFC 4180 quoting: source contains quoted values and potentially embedded
+  // commas/newlines. Parsing by split(",") would corrupt experiment rows.
+  assert(!src.includes("\u0000"),"NUL byte in CSV");
+  const rows=[];
+  let row=[],cell="",quoted=false,closed=false;
+  const pushCell=()=>{row.push(cell);cell="";closed=false;};
+  const pushRow=()=>{pushCell();rows.push(row);row=[];};
+  for(let i=0;i<src.length;i++){
+    const c=src[i];
+    if(quoted){
+      if(c==='"'){
+        if(src[i+1]==='"'){cell+='"';i++;}
+        else {quoted=false;closed=true;}
+      }else cell+=c;
+    } else if(c==='"'){
+      assert(cell===""&&!closed,"invalid unquoted double quote in CSV");
+      quoted=true;
+    } else if(c===',')pushCell();
+    else if(c==='\n')pushRow();
+    else if(c==='\r'){
+      assert(src[i+1]==='\n',"unexpected bare carriage return");
+    } else {
+      assert(!closed,"nondelimiter after closing CSV quote");
+      cell+=c;
+    }
+  }
+  assert(!quoted,"unterminated quoted field");
+  if(row.length||cell.length)pushRow();
+  if(rows.length&&rows[0][0].charCodeAt(0)===0xfeff)
+    rows[0][0]=rows[0][0].slice(1);
+  return rows;
+}
 function readReal(s,strict=true){
   if(strict)assert.equal(sha(s),SOURCE_HASH,"real donor file checksum mismatch; stop before looking at outcomes");
   assert(Buffer.byteLength(s,"utf8")<25*1024*1024,"unexpected source size");
-  const lines=s.trim().split(/\r?\n/);
-  assert.equal(lines.length-1,strict?N:lines.length-1,"source RCT record count mismatch");
-  const heads=lines[0].split(",");
+  const lines=csvTable(s);
+  if(strict)assert.equal(lines.length-1,N,"source RCT record count mismatch");
+  const heads=lines[0];
   assert(heads.length>=40 && new Set(heads).size===heads.length,"unexpected data schema");
   for(const name of ["treatment","amount","hpa","freq","dormant","gave"])assert(heads.includes(name),"missing verified source field "+name);
   const ix=Object.fromEntries(heads.map((x,i)=>[x,i]));
   const data=[],count={control:0,match:0},donorCount={control:0,match:0};
   for(let i=1;i<lines.length;i++){
-    const arr=lines[i].split(",");
-    assert(arr.length===heads.length,"unsupported quoted/multiline CSV; fail closed (no fabricated rows)");
+    const arr=lines[i];
+    assert(arr.length===heads.length,"source RCT row width mismatch: no fabricated data");
     const a=arr[ix.treatment],amount=finite(arr[ix.amount],"observed donation amount");
     assert(a==="0"||a==="1","randomized treatment arm must be 0 or 1");
     assert(amount>=0&&amount<1e7,"negative/unreasonable donation receipt; stop for adjudication");
@@ -222,6 +255,9 @@ function selfTest(){
       ...Array.from({length:35},()=>"0")].join(","));
   }
   const s=rows.join("\n")+"\n";
+  const quoted='treatment,amount,hpa,freq,dormant,gave\n1,"12,34",20,2,0,1\n';
+  assert.equal(csvTable(quoted)[1][1],"12,34","CSV quoted-comma decoding failed");
+  assert.throws(()=>csvTable('a,b\n"unterminated'),/unterminated/);
   const out=analyze(s,false);
   assert(out.design.trainN>4000&&out.design.holdoutN>3000);
   assert.equal(out.disagreements.signalVsConventionalRisk,0);
