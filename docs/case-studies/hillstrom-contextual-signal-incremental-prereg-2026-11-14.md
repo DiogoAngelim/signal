@@ -41,6 +41,12 @@ Original experiment's randomized treatment assignment is an instrumental **loggi
 - No customer data/rows uploaded, no email sent, no production systems/Neon connected, no deployments initiated by the validation runner. Existing automatic Vercel PR preview hooks may run independently.
 - No result from this source is transportable to current marketing or Workbench decision outcomes without a new external validation.
 
+## Protocol amendment A (structural coverage only, before any real test outcome read)
+
+The first runtime job attempting the public data (`43593020639`) stopped at the first **pre-treatment-only** coverage check: `0|0|0` has no observations in the test. The code aborted before any held-out spend was used to calculate estimates. The original plan of exactly eight *populated* groups cannot hold for structurally impossible covariate combinations.
+
+**Updated support rule (fixed now, still outcome-blind):** Enumerate the same eight precommitted `mens|womens|newbie` cells. Exclude a cell from the estimator and fitted policy **only if both train and test have 0 observations in that cell**; record it as structurally absent. If either fold has positive observations but the other has zero, or any observed arm within a populated cell has fewer than the precommitted 30 training/test customers, **fail the entire study** rather than silently merge or reweight it. All original model parameters, risk penalty, data split, core hypotheses, uncertainty thresholds, and selected outcomes remain unchanged. Report 8 enumerated cells and actual populated subset. This is a post-preregistration amendment visible in commit history and further supports *exploratory-only* interpretation. No post-hoc attempt to obtain positive results is permitted.
+
 ## Falsification and next gate
 
 If the policy is identical to contextual argmax, the primary contrast is identically 0. If it differs but loses or has a CI crossing 0, explicitly report failed superiority. To obtain **independent confirmatory causal evidence of incremental policy value**, precommit the same policies and rerun on an entirely separate still-untouched randomized dataset with comparable spend outcomes, or prospectively randomize a live decision workflow to baseline vs Signal governance with actual measured costs and outcomes.
