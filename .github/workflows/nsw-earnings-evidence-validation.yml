@@ -1,0 +1,92 @@
+name: NSW real monetary earnings RCT: independent evidence and equal-information policy validation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/nsw-earnings-evidence-validation.yml"
+      - "scripts/validation/nsw_earnings_evidence_prep.py"
+      - "scripts/validation/nsw-earnings-evidence-policy.mjs"
+      - "docs/validation/nsw-real-earnings-information-value.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-nsw-evidence-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  genuine-monetary-rct:
+    name: Independently hold out true randomized NSW dollar earnings
+    runs-on: ubuntu-latest
+    timeout-minutes: 17
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build unchanged published Signal quantitative decision API
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @signal/decision build
+          node scripts/validation/nsw-earnings-evidence-policy.mjs --self-test
+      - name: Install fixed conventional predictors
+        run: python -m pip install --disable-pip-version-check -q "numpy==2.2.6" "scikit-learn==1.7.2"
+      - name: Verify pinned public origin, train ONLY on separate real historical participants
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "NSW_TEMP_DATA_DIR=$tmp" >> "$GITHUB_ENV"
+          source="https://raw.githubusercontent.com/vincentarelbundock/Rdatasets/1dcc2bf5f955cc1224a3e1307256e1fe86b68dae/csv/causaldata/nsw_mixtape.csv"
+          curl -fLSs --retry 2 --connect-timeout 10 --max-time 90 -o "$tmp/original_nsw.csv" "$source"
+          echo "ORIGINAL_NSW_FILE_SHA256=$(sha256sum "$tmp/original_nsw.csv" | cut -d ' ' -f 1)"
+          python scripts/validation/nsw_earnings_evidence_prep.py \
+            "$tmp/original_nsw.csv" "$tmp/heldout-predictions.jsonl" "$tmp/source-metadata.json"
+      - name: Evaluate original Signal and equally informed strong conventional policies on heldout earnings
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/validation/nsw-earnings-evidence-policy.mjs \
+            "$NSW_TEMP_DATA_DIR/heldout-predictions.jsonl" \
+            "$NSW_TEMP_DATA_DIR/source-metadata.json"
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const study=JSON.parse(fs.readFileSync(
+            "artifacts/validation/nsw-real-earnings-evidence-value.json","utf8"));
+          if(study.causalSignalSoftwareNetProfitVerified || !study.sourceEarningsNotBusinessNetProfit)
+            throw Error("Research must not create fake software net-profit claim");
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            "**Real randomized dollar earnings, NOT net business profit.**\n\n"+
+            "Historical NSW: "+study.originalRCTN+" units. Frozen test: "+
+              study.heldoutN+" participants.\n\n"+
+            "Same-information Signal–conventional uncertainty-guard policy: "+
+            JSON.stringify(study.signalVsAlternatives.conventionalIdenticalGuard
+              .pairedDoublyRobustUsdPerPerson)+"\n\n"+
+            "No observed training or software costs; no randomized Signal software adoption.\n");
+          NODE
+      - name: Delete individual historical source and fitted pseudonymous outcomes
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${NSW_TEMP_DATA_DIR:-}" ]]; then
+            rm -rf "$NSW_TEMP_DATA_DIR"
+          fi
+      - name: Upload aggregate non-identifying outcomes only
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-real-nsw-monetary-policy-aggregate-only
+          path: artifacts/validation/nsw-real-earnings-evidence-value.json
+          if-no-files-found: error
+          retention-days: 14
