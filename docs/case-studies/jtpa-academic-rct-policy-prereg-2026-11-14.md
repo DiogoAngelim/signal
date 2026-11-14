@@ -55,3 +55,11 @@ Initial authenticated GitHub Actions attempt [#43594337829](https://github.com/D
 
 The only resulting implementation correction is the source-integrity expectation from 9,223 to **9,872 records**. All observations in the pinned academic CSV are retained; no observation is selected/dropped based on its earnings or randomized assignment. **No Signal policy, outcome, comparison baseline, training split fraction, predictor, prior, payoff states, risk penalty, minimum economic effect, inferential procedure, or bootstrap seed has changed**. This is an explicit post-first-commit metadata amendment; future interpretations remain **exploratory**. Do not misrepresent this file as Han's 9,223-row sample.
 
+
+
+## Amendment B — baseline diagnostic covariate representation only, no outcomes evaluated
+
+At source ingestion in CI [43594401620](https://github.com/DiogoAngelim/signal/actions/runs/43594401620), the pinned scholarly Git blob and all 9,872 rows passed integrity checks. Parsing stopped **before any spending/earnings evaluation or trained policy selection** on the assumption \`married\` must be a literal 0/1. The immutable academic CSV actually contains fractional imputed/nonbinary values in that named **pre-existing diagnostic field** (some rows have a value of 0.21116).
+
+Correct only the type acceptance for **non-policy** descriptive balance covariates \`married\` and \`age2225\` to accept finite values within [0,1], while **retaining strict 0/1 checks** for \`instrument\` (randomized assignment), \`treatment\` (actual takeup), \`hsorged\` (the one policy input), and \`male\` (diagnostic baseline value). No rows are removed, no post-treatment variable is allowed into the policy, and the fixed comparison, confidence thresholds, fitted algorithm, train/test split and source hash remain unchanged. Any future methodological success claim remains **exploratory**, not a blind prospective experiment.
+
