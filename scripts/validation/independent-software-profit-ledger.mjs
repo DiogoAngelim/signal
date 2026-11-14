@@ -456,11 +456,13 @@ async function selfTest(){
   assert.throws(()=>assembleLedger(x.copy,x.pub),/statement cannot predate/);
   x=resigned("exposures",r=>({...r,delivered_arm:"baseline"}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/wrong-arm/);
-  x=resigned("exposures",r=>({...r,human_approved_at:null}));
+  x=resigned("exposures",r=>({...r,effective_action:"manual",
+    action_at:"2024-01-04T00:04:00Z",human_approved_at:null}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/invalid UTC human approval/);
   x=resigned("exposures",r=>({...r,consent_at:"2024-01-05T00:00:00Z"}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/post-assignment consent/);
-  x=resigned("exposures",r=>({...r,effective_action:"wait"}));
+  x=resigned("exposures",r=>({...r,effective_action:"wait",
+    action_at:"2024-01-04T00:04:00Z"}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/wait cannot be recorded as a completed action/);
   // The finalized format must ACTUALLY feed the existing prospective
   // intention-to-treat analysis, rather than only matching declared headers.
