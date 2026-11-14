@@ -256,7 +256,7 @@ function makeTest(){
     const hashUnit=sha("fictional-company-"+i);
     lines.push([hashUnit,"2024-01-02T11:59:00Z","monitor",
       i%3===0?"wait":"monitor",sha("input-"+i),sha("evidence-"+i),
-      "0","0","1","1","1"].join(","));
+      i%3===0?"0":"1",i%3===0?"0":"1","1","1","1"].join(","));
   }
   return {c,source:lines.join("\n")+"\n",key:secret("ab".repeat(32)),
     assignedAt:"2024-01-02T12:00:00Z",now:Date.parse("2024-01-02T12:00:10Z")};
