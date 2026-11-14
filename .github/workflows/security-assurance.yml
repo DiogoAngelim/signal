@@ -9,6 +9,8 @@ on:
       - "examples/**"
       - "package.json"
       - "scripts/check-core-audit.mjs"
+      - "scripts/check-obfuscated-payloads.mjs"
+      - "scripts/check-obfuscated-payloads.test.mjs"
       - "pnpm-lock.yaml"
       - "pnpm-workspace.yaml"
       - ".github/workflows/security-assurance.yml"
@@ -46,6 +48,10 @@ jobs:
           node-version: 20
           cache: pnpm
           cache-dependency-path: pnpm-lock.yaml
+      - name: Verify obfuscated payload scanner in tracked and detached checkouts
+        run: |
+          node scripts/check-obfuscated-payloads.mjs
+          node scripts/check-obfuscated-payloads.test.mjs
       - name: Resolve patched core dependency graph
         run: pnpm install --no-frozen-lockfile
       - name: Validate patched core workspace
