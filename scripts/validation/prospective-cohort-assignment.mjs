@@ -121,6 +121,11 @@ function secret(value) {
     "secret must be 32..64 bytes of independently generated hexadecimal entropy");
   return Buffer.from(value,"hex");
 }
+function keyCommitment(key) {
+  // The digest, not the key, can be independently notarized BEFORE receiving a
+  // real cohort. Revealing it does not reveal a uniformly random 256-bit key.
+  return sha(Buffer.concat([Buffer.from("signal-trial-key-commit-v1\\0"),key]));
+}
 function assignArm(key,trialId,unitHash,p) {
   const bytes=createHmac("sha256",key)
     .update("signal-software-trial-arm-v1\0"+trialId+"\0"+unitHash)
@@ -214,6 +219,7 @@ function build(c,source,key,assignedAt,now=Date.now()) {
     randomization:{method:"independent secret HMAC-SHA256 per frozen relationship unit",
       fixedAllocationSignal:p,armCounts,standardizedSampleRatioDeviation:srmZ,
       reRandomizedOrRebalanced:false,secretPublished:false,
+      assignmentKeyCommitmentSHA256:keyCommitment(key),
       keyCustodyIndependentlyVerified:false},
     readiness:{
       minimumArmCountsSatisfied:sufficientCounts,
@@ -264,6 +270,10 @@ function selfTest(){
   assert.equal(first.report.sourceAudit.policyDisagreementCount,54);
   assert.equal(first.report.readiness.actualOutcomeTrackingStarted,false);
   assert.equal(first.report.readiness.readyForEnrollment,false);
+  assert.equal(first.report.randomization.assignmentKeyCommitmentSHA256,
+    keyCommitment(f.key));
+  assert.notEqual(first.report.randomization.assignmentKeyCommitmentSHA256,
+    keyCommitment(secret("cd".repeat(32))));
   assert(!JSON.stringify(first.report).includes(f.key.toString("hex")),
     "must never expose randomization secret");
   const rows=csvRows(first.manifest,MANIFEST,"assignment manifest");
@@ -303,6 +313,13 @@ function outsideRepo(path) {
 async function main(){
   const argv=process.argv.slice(2);
   if(argv.includes("--self-test")) return selfTest();
+  if(argv.includes("--key-commitment")){
+    const key=secret(process.env.SIGNAL_TRIAL_ASSIGNMENT_KEY_HEX);
+    console.log(JSON.stringify({assignmentKeyCommitmentSHA256:keyCommitment(key),
+      independentExternalTimestampVerified:false,
+      instructions:"Anchor this commitment externally BEFORE seeing the cohort or labels."}));
+    return;
+  }
   const key=secret(process.env.SIGNAL_TRIAL_ASSIGNMENT_KEY_HEX);
   const configSource=await readFile(flag(argv,"--config"),"utf8");
   const cohortSource=await readFile(flag(argv,"--cohort"),"utf8");
@@ -318,7 +335,7 @@ async function main(){
   await writeFile(reportFile,JSON.stringify(report,null,2)+"\n",
     {encoding:"utf8",flag:"wx",mode:0o600});
   console.log(JSON.stringify({trialId:report.trialId,sourceSHA256:report.preoutcomeCohortSHA256,
-    manifestSHA256:report.manifestSHA256,armCounts:report.randomization.armCounts,
+    manifestSHA256:report.manifestSHA256,assignmentKeyCommitmentSHA256:report.randomization.assignmentKeyCommitmentSHA256,armCounts:report.randomization.armCounts,
     policyDisagreementFraction:report.sourceAudit.policyDisagreementFraction,
     readyForEnrollment:false,independentlyAuthenticated:false},null,2));
 }
