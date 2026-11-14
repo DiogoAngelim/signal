@@ -60,7 +60,8 @@ function parseTimestamp(value) {
   const iso = value.includes("T") ? value : value.replace(" ", "T");
   const timestamp = Date.parse(iso.endsWith("Z") ? iso : iso + "Z");
   assert(Number.isFinite(timestamp) && timestamp >= START && timestamp < END,
-    "out-of-range or invalid timestamp");
+    "out-of-range or invalid timestamp (source timestamp only): " + JSON.stringify(value) +
+      " parsedUTC=" + (Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : "invalid"));
   return timestamp;
 }
 function phase(timestamp) {
