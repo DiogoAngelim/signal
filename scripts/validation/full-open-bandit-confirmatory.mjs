@@ -58,7 +58,8 @@ function ci(values) {
 }
 function parseTimestamp(value) {
   const iso = value.includes("T") ? value : value.replace(" ", "T");
-  const timestamp = Date.parse(iso.endsWith("Z") ? iso : iso + "Z");
+  const hasTimeZone = /(?:Z|[+-][0-9]{2}:[0-9]{2})$/.test(iso);
+  const timestamp = Date.parse(hasTimeZone ? iso : iso + "Z");
   assert(Number.isFinite(timestamp) && timestamp >= START && timestamp < END,
     "out-of-range or invalid timestamp (source timestamp only): " + JSON.stringify(value) +
       " parsedUTC=" + (Number.isFinite(timestamp) ? new Date(timestamp).toISOString() : "invalid"));
@@ -518,6 +519,8 @@ async function selfTest() {
   }
   const b = bootstrap(hour);
   assert(Math.abs(b.signalMinusFeatureCI95[0] - 0.001) < 1e-12);
+  assert(parseTimestamp("2019-11-24 00:00:00.686850+00:00") ===
+    Date.parse("2019-11-24T00:00:00.686Z"), "microsecond timestamp with explicit zone");
   assert(parseTimestamp("2019-11-29 00:00:00") === CAL_END);
   console.log("SELF TEST PASS: fixed-input decision, independent label, zero-scale invariant, hourly CI");
 }
