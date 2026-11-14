@@ -1,0 +1,46 @@
+name: Signal Workbench production cohort audit safety (synthetic)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/workbench-production-cohort-preflight.sql"
+      - "scripts/validation/workbench-production-cohort-preflight.mjs"
+      - "docs/validation/workbench-production-cohort-preflight.md"
+      - ".github/workflows/workbench-production-cohort-preflight.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-workbench-prod-cohort-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  read-only-preflight:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Reject unsafe, row-level and fabricated aggregate cohort inputs
+        run: node scripts/validation/workbench-production-cohort-preflight.mjs --self-test
+      - name: Assert SQL contains no data modifications
+        run: |
+          node --input-type=module <<'NODE'
+          import { readFileSync } from "node:fs";
+          import assert from "node:assert/strict";
+          const sql=readFileSync("scripts/validation/workbench-production-cohort-preflight.sql","utf8");
+          const sanitized=sql.replace(/--[^\n]*/g,"").trim().toLowerCase();
+          assert(sanitized.startsWith("with company as"),"Expected exactly one aggregate SELECT CTE");
+          assert(!/\b(insert|update|delete|create|alter|drop|truncate|grant|revoke|execute|call|copy|do|vacuum)\b/i.test(sanitized),"Writes prohibited");
+          assert(!/;\s*\S/.test(sanitized),"Multiple SQL statements prohibited");
+          assert(sanitized.endsWith(";"),"Expected one terminated SELECT");
+          console.log("SELF_TEST_PASS: aggregation-only nonmutating SQL source");
+          NODE
+      - name: Explicit evidence boundary
+        run: |
+          echo "Synthetic checks only. No authenticated production connection, real trial, consent, causal profit proof or deployment."
