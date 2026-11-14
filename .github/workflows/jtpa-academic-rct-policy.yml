@@ -1,0 +1,50 @@
+name: Signal academic pinned JTPA randomized earnings policy evaluation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/jtpa-academic-economic.mjs"
+      - "docs/case-studies/jtpa-academic-rct-policy-prereg-2026-11-14.md"
+      - ".github/workflows/jtpa-academic-rct-policy.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-academic-jtpa-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  external-rct:
+    name: Independent real JTPA randomized earnings test - native Signal policy
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install frozen workspace dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build actual Signal quantitative decision package
+        run: pnpm --filter @signal/decision build
+      - name: Offline invariants and comparison bootstrap tests
+        run: node scripts/validation/jtpa-academic-economic.mjs --self-test
+      - name: Verify immutable academic Git blob and evaluate frozen independent RCT
+        run: node scripts/validation/jtpa-academic-economic.mjs
+      - name: Upload aggregate-only scientific results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-academic-jtpa-rct-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/jtpa-academic-economic-report.json
+          if-no-files-found: warn
+          retention-days: 30
