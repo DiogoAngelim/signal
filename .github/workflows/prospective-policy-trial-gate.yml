@@ -1,0 +1,39 @@
+name: Signal prospective randomized policy proof analyzer (self-tests only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/prospective-policy-trial-audit.mjs"
+      - "scripts/validation/shadow-policy-readiness.mjs"
+      - "docs/validation/shadow-policy-readiness.md"
+      - "docs/validation/prospective-signal-policy-causal-proof.md"
+      - ".github/workflows/prospective-policy-trial-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-prospective-rct-audit-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  offline-gate-tests:
+    name: Fail-closed randomized trial audit invariants - synthetic fixtures ONLY
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test CSV integrity, randomized ITT and safety gates using synthetic fixture only
+        run: node scripts/validation/prospective-policy-trial-audit.mjs --self-test
+      - name: Test pre-outcome shadow feasibility and conditional sample sizing (synthetic only)
+        run: node scripts/validation/shadow-policy-readiness.mjs --self-test
+      - name: Declare limitations
+        run: |
+          echo "NO EMPIRICAL TRIAL CONDUCTED"
+          echo "Passing synthetic tests only establishes analyzer test behavior."
+          echo "A real preregistered randomized trial and independent safety/economic review are required."
