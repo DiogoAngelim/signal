@@ -1,0 +1,46 @@
+name: Signal actual decision policy randomized feedback
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/actual-policy-ope.mjs"
+      - "packages/decision/**"
+      - ".github/workflows/actual-policy-randomized-ope.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-actual-policy-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  actual-policy-ope:
+    name: Signal native decision gate on randomized logged outcomes
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Build actual Signal decision implementation
+        run: pnpm --filter @signal/decision build
+      - name: Evaluate native decision policy on precommitted randomized data
+        run: node scripts/validation/actual-policy-ope.mjs
+      - name: Publish complete aggregate-only evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-actual-policy-ope-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/actual-policy-ope-report.json
+          if-no-files-found: warn
+          retention-days: 30
