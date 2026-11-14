@@ -1,0 +1,50 @@
+name: Signal native gate development-period diagnostics (no holdout rewards)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/native-gate-development-diagnostics.mjs"
+      - "docs/case-studies/native-gate-development-diagnostics-2026-11-14.md"
+      - ".github/workflows/native-gate-development-diagnostics.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-native-gate-diagnostics-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  development-mechanism:
+    name: Public train/development-only native gate mechanism - no policy retune
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install frozen dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build actual native decision entrypoint
+        run: pnpm --filter @signal/decision build
+      - name: Test actual gate behavior on synthetic fixtures only
+        run: node scripts/validation/native-gate-development-diagnostics.mjs --self-test
+      - name: Diagnose historical development-period native wait mechanisms only
+        run: node scripts/validation/native-gate-development-diagnostics.mjs
+      - name: Preserve aggregate-only diagnostic evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-native-development-gates-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/native-gate-development-diagnostics.json
+          if-no-files-found: warn
+          retention-days: 30
