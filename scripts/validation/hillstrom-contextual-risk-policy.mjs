@@ -413,7 +413,7 @@ function selfTest(){
   for(const key of CELL_KEYS) {
     const [mens,womens,newbie]=key.split("|").map(Number);
     for(let arm=0;arm<3;arm++){
-      for(let i=0;i<90;i++)train.push({mens,womens,newbie,
+      for(let i=0;i<701;i++)train.push({mens,womens,newbie,
         arm,spend:(arm+1)+i%3});
       for(let i=0;i<60;i++)test.push({mens,womens,newbie,
         arm,spend:(arm+1)+i%3});
