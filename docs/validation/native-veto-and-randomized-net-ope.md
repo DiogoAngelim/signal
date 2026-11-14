@@ -62,6 +62,21 @@ ESS(target) = (sum_i weight_i)^2 / sum_i weight_i^2
 
 The **pre-outcome action policy is computed and hashed before the outcomes are parsed**, though the script cannot prove that source files were independently archived before real outcomes. Paired 95% percentile intervals resample the entire declared `cluster_hash` groups, not individual action rows. Report source digests, group count, IPS/SNIPS, ESS and maximum weight, native gate veto reasons, full/partial native permissions, real effective disagreements, a frozen positive economic threshold, and both primary and secondary policy comparisons. A healthy ESS and a positive lower 95% limit are **necessary screens, not certification**.
 
+## Safe next step when native policy abstains
+
+The new opt-in, pure `adviseEvidenceRecovery` combines the actual native permission
+diagnosis with `evaluateInformationValue`, the caller's proposed evidence
+likelihoods, and acquisition/review cost. When the native gate denies or only
+permits a reduced scale, and the evidence assessment supplies a next-best
+evidence question, **positive risk-neutral net expected information value**
+may yield `consider_human_evidence_review` rather than indefinite opaque
+abstention. Nonpositive estimated information value, absent source question
+or unvalidated negative cost remains paused. It never purchases evidence,
+sends messages, changes the native gate, or permits action; the information
+value is entirely conditional on supplied likelihoods, not measured impact.
+Genuine new evidence must be assessed through the full native pipeline
+again before any domain-approved execution.
+
 ## Strong limitations and mandatory safety boundary
 
 - Randomized historical **action** logs identify an action-policy value only under consistency, logging positivity, correct propensity, sufficient overlap, exchangeability and appropriate clustering. They **did not** assign real firms to **using Signal versus not using Signal**.
