@@ -58,6 +58,23 @@ export function evaluateDecision(
     ),
   });
   const outcome = input.outcome ? evaluateOutcome(input.outcome) : undefined;
+  // A zero-scale recommendation is an abstention, even if coherence alone
+  // would permit action. Never expose permission without executable scale.
+  const proposedActionScale = finalActionScale(
+    coherence.actionScale,
+    simulation.recommendedAction,
+    wisdom.decision,
+    assessment,
+  );
+  const actionAllowed =
+    proposedActionScale > 0 &&
+    actionPermitted(
+      coherence.actionAllowed,
+      simulation.recommendedAction,
+      wisdom.decision,
+      assessment,
+    );
+  const actionScale = actionAllowed ? proposedActionScale : 0;
   const preliminaryRecord = createDecisionRecord({
     decisionId: input.decisionId,
     source: input.source,
@@ -73,14 +90,7 @@ export function evaluateDecision(
     prediction: predictionScenarios,
     simulation,
     wisdom,
-    action: actionPermitted(
-      coherence.actionAllowed,
-      simulation.recommendedAction,
-      wisdom.decision,
-      assessment,
-    )
-      ? input.action
-      : undefined,
+    action: actionAllowed ? input.action : undefined,
     outcome,
     assessment,
     retentionTier: input.retentionTier,
@@ -111,18 +121,8 @@ export function evaluateDecision(
     accountabilitySummary:
       accountability.humanExplanation || guide[5]?.text || record.humanSummary,
     decisionReplayAvailable: true,
-    actionAllowed: actionPermitted(
-      coherence.actionAllowed,
-      simulation.recommendedAction,
-      wisdom.decision,
-      assessment,
-    ),
-    actionScale: finalActionScale(
-      coherence.actionScale,
-      simulation.recommendedAction,
-      wisdom.decision,
-      assessment,
-    ),
+    actionAllowed,
+    actionScale,
   };
 }
 
