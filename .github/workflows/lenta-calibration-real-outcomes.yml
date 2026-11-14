@@ -1,0 +1,145 @@
+name: Independent Lenta real-data calibration benchmark (research)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/lenta-calibration-real-outcomes.yml"
+      - "packages/decision/src/binary-calibration.ts"
+      - "packages/decision/src/binary-calibration.test.ts"
+      - "packages/decision/src/index.ts"
+      - "packages/decision/src/core.ts"
+      - "scripts/validation/lenta-calibration-real-outcomes.mjs"
+      - "scripts/validation/lenta_real_prep.py"
+      - "docs/validation/independent-lenta-calibration.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-lenta-calibration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  published-lenta-source-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Retrieve official scikit-uplift public source privately, verify published MD5
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(mktemp -d)"
+          trap 'rm -rf "$source_dir"' EXIT
+          file="$source_dir/lenta.csv.gz"
+          url="https://sklift.s3.eu-west-2.amazonaws.com/lenta_dataset.csv.gz"
+          curl -fLSs --retry 2 --connect-timeout 20 --max-time 400 -o "$file" "$url"
+          md5="$(md5sum "$file" | cut -d ' ' -f 1)"
+          echo "LENTA_SOURCE_MD5=$md5"
+          if [[ "$md5" != "6ab28ff0989ed8b8647f530e2e86452f" ]]; then
+            echo "MD5 differs from sklift's published hash; do not process data"
+            exit 1
+          fi
+          echo "LENTA_SOURCE_SHA256=$(sha256sum "$file" | cut -d ' ' -f 1)"
+          echo "LENTA_SOURCE_SIZE_BYTES=$(stat -c%s "$file")"
+          python3 - "$file" <<'PY'
+          import csv,gzip,sys,collections
+          path=sys.argv[1]
+          with gzip.open(path,mode='rt',encoding='utf-8-sig',newline='',errors='strict') as src:
+              rows=csv.DictReader(src)
+              print('LENTA_SOURCE_COLUMN_COUNT',len(rows.fieldnames or []))
+              print('LENTA_SOURCE_COLUMNS',','.join(rows.fieldnames or []))
+              groups=collections.Counter()
+              responses=collections.Counter()
+              n=0
+              for r in rows:
+                  n+=1
+                  groups[r.get('group','<MISSING>')]+=1
+                  responses[r.get('response_att','<MISSING>')]+=1
+              print('LENTA_REAL_ROWS',n)
+              print('LENTA_REAL_ARMS',dict(groups))
+              print('LENTA_REAL_RESPONSE',dict(responses))
+          PY
+          echo "Authenticated source archive from public scikit-uplift metadata; only aggregates logged, no individual records stored in repository." >> "$GITHUB_STEP_SUMMARY"
+
+  independent-lenta-heldout-calibration:
+    name: "Real randomized responses: Signal calibration versus strong conventional estimators"
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - name: Build and test actual Signal decision package, with no native gate changes
+        run: |
+          pnpm install --frozen-lockfile
+          pnpm --filter @signal/decision typecheck
+          pnpm --filter @signal/decision test
+          pnpm --filter @signal/decision build
+          node scripts/validation/lenta-calibration-real-outcomes.mjs --self-test
+      - name: Install pinned conventional statistical baselines
+        run: python -m pip install --disable-pip-version-check -q "numpy==2.2.6" "scikit-learn==1.7.2"
+      - name: Obtain original real source; train frozen statistical baselines without held-out outcomes
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$(mktemp -d)"
+          echo "LENTA_TEMP_RESEARCH_DIR=$tmp" >> "$GITHUB_ENV"
+          url="https://sklift.s3.eu-west-2.amazonaws.com/lenta_dataset.csv.gz"
+          curl -fLSs --retry 2 --connect-timeout 20 --max-time 400 -o "$tmp/lenta_dataset.csv.gz" "$url"
+          python scripts/validation/lenta_real_prep.py "$tmp/lenta_dataset.csv.gz" "$tmp/derived"
+      - name: Execute real held-out Signal calibrator and actual quantitative decision engine
+        shell: bash
+        run: |
+          set -euo pipefail
+          tmp="$LENTA_TEMP_RESEARCH_DIR"
+          node scripts/validation/lenta-calibration-real-outcomes.mjs \
+            "$tmp/derived/lenta-calibration.jsonl" \
+            "$tmp/derived/lenta-test.jsonl" \
+            "$tmp/derived/lenta-prep-aggregate.json"
+          node --input-type=module <<'NODE'
+          import fs from "node:fs";
+          const result=JSON.parse(fs.readFileSync(
+            "artifacts/validation/lenta-calibration-real-outcomes-aggregate.json","utf8"));
+          console.log("SCIENTIFIC_BOUNDARY",JSON.stringify({
+            realSource:result.realSourceAuthenticatedByChecksums,
+            registeredMethod:true,
+            observedMoney:result.realizedNetProfitObserved,
+            randomizedSoftware:result.randomizedSignalSoftwareExposure,
+            causalProfit:result.causalSignalNetProfitSuperiorityProven,
+            sameInformationContradictions:result.sameInformationArgmaxContradictions
+          }));
+          fs.appendFileSync(process.env.GITHUB_STEP_SUMMARY,
+            "**Real Lenta randomized binary response, not net profit.**\n\n"+
+            "Holdout: "+result.splitCounts.test+" independent row observations, real-source SHA-256: "+
+            result.sourceSHA256+"\n\n"+
+            "Brier scores by arm, native Signal and strong conventional: "+
+            JSON.stringify(result.forecastScores)+"\n\n"+
+            "**Zero real monetary outcomes, zero historical randomized Signal adoption, zero causal profit proof.**\n");
+          NODE
+      - name: Remove all transient original and derived individual-level data
+        if: always()
+        shell: bash
+        run: |
+          if [[ -n "${LENTA_TEMP_RESEARCH_DIR:-}" ]]; then
+            rm -rf "$LENTA_TEMP_RESEARCH_DIR"
+          fi
+      - name: Upload only aggregate non-identifying validation statistics
+        if: success()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-real-lenta-calibration-aggregate-only
+          path: artifacts/validation/lenta-calibration-real-outcomes-aggregate.json
+          if-no-files-found: error
+          retention-days: 14
