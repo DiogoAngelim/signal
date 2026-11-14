@@ -6,7 +6,7 @@
 
 - **Data provenance:** Cattaneo, Jansson & Ma (2024), *Local Regression Distribution Estimators*, Journal of Econometrics, 240(2), 105074; research replication repository \`nppackages-replication/CJM_2024_JOE\` referencing the original Abadie, Angrist & Imbens (2002) Job Training Partnership Act randomized experiment.
 - Frozen GitHub repository commit \`e98d6cba1853b607e16e63d29aff7635f04b47ad\`; file \`jtpa.csv\` size **658,746 bytes**, exact **Git blob SHA-1 \`c26124a0716b5d7b44c2c357087c7136752a0aa7\`**. Source \`https://raw.githubusercontent.com/nppackages-replication/CJM_2024_JOE/e98d6cba1853b607e16e63d29aff7635f04b47ad/jtpa.csv\`. Hash Git blob from raw bytes, compare, and abort on mismatch; record independently observed SHA-256. No need to trust the hosting branch tip.
-- Expected **9,223 participant rows** (same historical experimental population as the journal's JTPA application); schema exactly 21 columns. If source differs, fail the entire study. Historical records were independently collected but subsequent published datasets may include selected complete cases—interpret inference only within the analysed sample.
+- Expected **9,872 participant rows** in this academic replication file (broader/different inclusion from Han's 9,223-person application); schema exactly 21 columns. If source differs, fail the entire study. Historical records were independently collected but subsequent published datasets may include selected complete cases—interpret inference only within the analysed sample.
 - **Outcome:** \`income\` (30-month actual gross labor earnings USD). **Randomized assigned treatment:** \`instrument\` (1 = assigned job-training offer, 0 = control). \`treatment\` is post-randomization actual program enrollment; **NEVER** estimate causal effect by grouping on enrollment.
 - Fixed pre-offer decision covariate: \`hsorged\` = existing high school diploma/GED indicator. Do not use sex, racial, ethnic or other sensitive markers as policy features. Full dataset covers preprogram other fields for descriptions only; do not use \`logincome\`, which depends on post-treatment earnings.
 
@@ -47,3 +47,11 @@ node scripts/validation/jtpa-academic-economic.mjs
 \`\`\`
 
 Machine-readable aggregate only: \`artifacts/validation/jtpa-academic-economic-report.json\`.
+
+
+## Amendment A — immutable source population count, no statistical outcomes inspected
+
+Initial authenticated GitHub Actions attempt [#43594337829](https://github.com/DiogoAngelim/signal/actions/runs/43594337829) successfully downloaded and **verified the exact preregistered Git blob**, then halted **at the row-count assertion before parsing any participant outcomes**. The pinned academic source has **9,872 data records** rather than the previously assumed 9,223. The 9,223 count comes from *Han's selected JTPA application subset* and does not describe this Cattaneo/Jansson/Ma academic CSV. These are related archived representations of the **same original JTPA trial**, not identical included populations.
+
+The only resulting implementation correction is the source-integrity expectation from 9,223 to **9,872 records**. All observations in the pinned academic CSV are retained; no observation is selected/dropped based on its earnings or randomized assignment. **No Signal policy, outcome, comparison baseline, training split fraction, predictor, prior, payoff states, risk penalty, minimum economic effect, inferential procedure, or bootstrap seed has changed**. This is an explicit post-first-commit metadata amendment; future interpretations remain **exploratory**. Do not misrepresent this file as Han's 9,223-row sample.
+
