@@ -1,0 +1,43 @@
+name: Signal economic advice and native permission shadow replay (synthetic only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/economic-shadow-authorization.mjs"
+      - "docs/validation/economic-shadow-authorization.md"
+      - ".github/workflows/economic-shadow-authorization.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-economic-shadow-research-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  economic-native-shadow:
+    name: Verify independent economic baseline and native veto invariants (synthetic)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install frozen workspace
+        run: pnpm install --frozen-lockfile
+      - name: Build real published quantitative and native Signal engines
+        run: pnpm --filter @signal/decision build
+      - name: Verify economic utility ranking, evidence chronology, wait and zero/partial scale denial
+        run: node scripts/validation/economic-shadow-authorization.mjs --self-test
+      - name: Declare proof boundary
+        run: |
+          echo "Synthetic test only. No real sources, deployment, policy A/B assignment, outcomes, profit or verified causal superiority."
