@@ -60,8 +60,10 @@ function authorized(request: IncomingMessage, secretName: string): boolean {
   const expected = process.env[secretName] ?? "";
   const suppliedHeader = request.headers.authorization ?? "";
   const supplied = suppliedHeader.startsWith("Bearer ") ? suppliedHeader.slice(7) : "";
-  if (expected.length < 32 || supplied.length !== expected.length) return false;
-  return timingSafeEqual(Buffer.from(supplied), Buffer.from(expected));
+  if (expected.length < 32 || !supplied) return false;
+  const expectedBytes = Buffer.from(expected, "utf8");
+  const suppliedBytes = Buffer.from(supplied, "utf8");
+  return expectedBytes.length === suppliedBytes.length && timingSafeEqual(suppliedBytes, expectedBytes);
 }
 
 async function readJson(request: IncomingMessage): Promise<unknown> {
@@ -90,16 +92,8 @@ function send(response: ServerResponse, status: number, body: unknown): void {
 export async function handleWorkbenchHostRequest(request: IncomingMessage, response: ServerResponse, endpoint: string): Promise<void> {
 
   if (request.method === "GET" && endpoint === "/health") {
-    send(response, 200, {
-      status: "ok",
-      runtime: runtime.runtimeName,
-      workbenchConfigured: Boolean(
-        process.env.WORKBENCH_BASE_URL &&
-        process.env.WORKBENCH_OWNER_ID &&
-        process.env.WORKBENCH_SIGNAL_TOKEN
-      ),
-      outcomeStoreConfigured: Boolean(process.env.SIGNAL_WORKBENCH_DATABASE_URL),
-    });
+    // Liveness only. Do not expose credential/configuration presence to anonymous clients.
+    send(response, 200, { status: "ok", probe: "liveness" });
     return;
   }
 
@@ -124,7 +118,9 @@ export async function handleWorkbenchHostRequest(request: IncomingMessage, respo
         },
       });
       if (!result.ok) {
-        send(response, result.error.retryable ? 503 : 400, { message: result.error.message });
+        send(response, result.error.retryable ? 503 : 400, {
+          message: result.error.retryable ? "Signal event delivery unavailable." : "Signal event rejected.",
+        });
         return;
       }
       send(response, 202, {
@@ -137,7 +133,7 @@ export async function handleWorkbenchHostRequest(request: IncomingMessage, respo
         ? Number((error as { statusCode: unknown }).statusCode)
         : error instanceof ZodError ? 400 : 503;
       send(response, Number.isInteger(status) && status >= 400 && status < 600 ? status : 503, {
-        message: error instanceof Error ? error.message : "Invalid Signal event.",
+        message: status === 413 ? "Request body is too large." : status === 400 ? "Invalid Signal event." : "Signal event unavailable.",
       });
     }
     return;
@@ -165,7 +161,7 @@ export async function handleWorkbenchHostRequest(request: IncomingMessage, respo
       });
     } catch (error) {
       send(response, 503, {
-        message: error instanceof Error ? error.message : "Outcome synchronization failed.",
+        message: "Outcome synchronization unavailable.",
       });
     } finally {
       await sink?.close().catch(() => undefined);

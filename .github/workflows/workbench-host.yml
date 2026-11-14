@@ -25,7 +25,8 @@ jobs:
         with:
           node-version: 24
           cache: pnpm
-      - run: pnpm install --no-frozen-lockfile
+      - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @signal/workbench-host... build
+      - run: pnpm --filter @signal/workbench-host test
       - run: pnpm --filter @signal/workbench-connector test
       - run: pnpm --filter @signal/workbench-connector typecheck

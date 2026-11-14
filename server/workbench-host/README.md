@@ -4,7 +4,7 @@ A dedicated Node.js host for the signed Signal ↔ Workbench connector.
 
 ## Routes
 
-- `GET /api/health` — reports runtime readiness without exposing configuration values.
+- `GET /api/health` — **process liveness only**, returning a generic status; it does not prove credentials, Workbench reachability, database readiness, or integration health.
 - `POST /api/events` — accepts one versioned Signal lifecycle event, dispatches it through Signal Runtime, and publishes it to Workbench using the owner-specific HMAC credential.
 - `GET /api/sync/outcomes` — polls one owner-scoped Workbench outcome page and atomically persists the page and cursor to the dedicated PostgreSQL inbox. It is intended for Vercel Cron once the owner credential is provisioned.
 
@@ -35,3 +35,9 @@ The `/sync/outcomes` route processes one page per invocation so it can be called
 ## Deployment state
 
 The Vercel project is configured as a preview-only Node.js function in `gru1`, rooted at this package and including its monorepo workspace dependencies. The dedicated outcome database and independent ingress/cron secrets are scoped to the host preview branch. The cron schedule remains intentionally inactive until the owner-specific Workbench token is provisioned and authenticated end-to-end validation passes.
+
+## Preproduction security and release gates
+
+The host must fail closed on malformed/missing bearer credentials, including non-ASCII/byte-length mismatches. Its unauthenticated liveness response must not disclose whether individual secrets or backing services are configured. Error responses must not disclose private connector or database error strings. The offline `node:test` suite covers these request boundaries without calling Workbench or a database.
+
+A successful host build, code-level test or process liveness response is **not** evidence of signed event delivery, actual outcome reconciliation, independent audit custody, operational readiness or causal software profit. Do not enable cron, live Signal actions or migrations until authenticated preview integration and independent owner approval have passed. Reconcile this branch against current `main` and the stricter scanner fix in Signal PR #84 before merging; do not replace its fail-closed detached-source guard with the older broad Git-error fallback in this branch.

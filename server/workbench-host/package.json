@@ -6,7 +6,8 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "pnpm run typecheck"
+    "lint": "pnpm run typecheck",
+    "test": "node --test test/*.test.mjs"
   },
   "dependencies": {
     "@signal/sdk-node": "workspace:*",
