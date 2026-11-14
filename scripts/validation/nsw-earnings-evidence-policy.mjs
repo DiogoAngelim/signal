@@ -273,7 +273,8 @@ async function main(){
     decisionsDifferVsExpectedMean:result.policyActionDisagreementVsRidgeMean,
     heldoutDRMeanEarnings:result.meanRealEarningsPolicyDR,
     signalVersusComparators:result.signalVsAlternatives,
-    realCashObserved:result.realObservedMonetaryOutcomes,
+    historicalMonetaryEarningsObserved:result.realObservedMonetaryOutcomes,
+    bankVerifiedRealCashReceiptsObserved:false,
     netFirmProfitObserved:!result.sourceEarningsNotBusinessNetProfit,
     actualSoftwareRandomized:false,
     softwareCausalProfitProven:result.causalSignalSoftwareNetProfitVerified
