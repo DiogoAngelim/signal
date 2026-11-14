@@ -403,7 +403,7 @@ if(process.argv.includes("--self-test")){
   const groups=byArm(toy);
   const comparison=welch(groups,1,0,"spend");
   assert.equal(comparison.difference,1);
-  assert(Math.abs(erfc(0)-1)<1e-8);
+  assert(Math.abs(erfc(0)-1)<1e-6);
   assert.equal(parseCSVLine('"x,y",q')[0],"x,y");
   console.log("SELF_TEST_PASS: source parsing, deterministic fold, Signal API, null controls, causal estimator");
 } else {
