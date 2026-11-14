@@ -193,6 +193,7 @@ function scrutinize(configSource,manifestSource,transactionSource,
   }
   const totalRows=[];
   let receiptTotal=0,costTotal=0,zeroUnits=0,refundUnits=0;
+  const seenCostRecords=new Set();
   const digestInputs=sha([
     "signal-processor-free-bank-ledger-v1",
     sha(configSource),sha(manifestSource),sha(transactionSource),
@@ -203,7 +204,10 @@ function scrutinize(configSource,manifestSource,transactionSource,
     const c=costs.get(unit),end=closeouts.get(unit),cash=booked.get(unit);
     assert(c&&end&&cash,"missing financial outcome source for randomized unit");
     const bookkeepingSource=hex(c.bookkeeping_sha256,"cost source");
-    hex(c.cost_record_sha256,"cost record");
+    const costId=hex(c.cost_record_sha256,"cost record");
+    assert(!seenCostRecords.has(costId),
+      "duplicate original bookkeeping cost record across randomized units");
+    seenCostRecords.add(costId);
     assert(bookkeepingSource===hex(end.bookkeeping_sha256,"verified bookkeeping source"),
       "bookkeeping cost digest disagrees with closeout");
     const outcome=utc(end.outcome_at,"outcome_at");
@@ -391,6 +395,13 @@ async function selfTest(){
   assert.throws(()=>scrutinize(f.config,f.manifest,
     f.transactions+f.transactions.trim().split("\n")[1]+"\n",
     f.costs,f.closeouts),/duplicate bank transaction/);
+  const duplicateBooks=f.costs.trimEnd().split("\n");
+  const duplicateSecondRow=duplicateBooks[2].split(",");
+  duplicateSecondRow[2]=duplicateBooks[1].split(",")[2];
+  duplicateBooks[2]=duplicateSecondRow.join(",");
+  assert.throws(()=>scrutinize(f.config,f.manifest,f.transactions,
+    duplicateBooks.join("\n")+"\n",f.closeouts),
+    /duplicate original bookkeeping cost record/);
   assert.throws(()=>scrutinize(f.config,f.manifest,f.transactions,
     replaceIn(f.costs,",500,20,5000",",500,,5000"),
     f.closeouts),/nonnegative integer/);
