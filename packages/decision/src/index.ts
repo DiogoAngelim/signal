@@ -37,6 +37,8 @@ export {
   registerDecisionOperations,
 } from "./operations";
 export { evaluateDecision } from "./pipeline";
+export { diagnoseNativeDecisionPermission } from "./permission-diagnostics";
+export type { NativeVetoReason, NativePermissionDiagnosis } from "./permission-diagnostics";
 export {
   bestPurposeScenario,
   generatePredictionScenarios,
