@@ -13,8 +13,11 @@
  */
 import assert from "node:assert/strict";
 import { createHash, createPublicKey, generateKeyPairSync, sign, verify } from "node:crypto";
-import { readFile, writeFile } from "node:fs/promises";
-import { isAbsolute, resolve, sep } from "node:path";
+import { readFile, writeFile, mkdtemp, rm } from "node:fs/promises";
+import { isAbsolute, resolve, sep, join } from "node:path";
+import { tmpdir } from "node:os";
+import { spawnSync } from "node:child_process";
+import { fileURLToPath } from "node:url";
 
 const MANIFEST=["unit_hash","registered_trial_id","assigned_arm","assigned_at",
   "decision_at","baseline_action","signal_action","baseline_model_version",
@@ -411,7 +414,7 @@ function fixture(n=80){
   const pub=keypair.publicKey.export({type:"spki",format:"pem"});
   return {inputs,pub,exposure,finances,cfg};
 }
-function selfTest(){
+async function selfTest(){
   const f=fixture();
   const result=process(f.inputs,f.pub);
   assert.equal(result.summary.randomizedUnits,80);
@@ -459,6 +462,31 @@ function selfTest(){
   assert.throws(()=>process(x.copy,x.pub),/post-assignment consent/);
   x=resigned("exposures",r=>({...r,effective_action:"wait"}));
   assert.throws(()=>process(x.copy,x.pub),/wait cannot be recorded as a completed action/);
+  // The finalized format must ACTUALLY feed the existing prospective
+  // intention-to-treat analysis, rather than only matching declared headers.
+  // All files remain temporary and contain SYNTHETIC, not participant, data.
+  const tmp=await mkdtemp(join(tmpdir(),"signal-independent-itt-fixture-"));
+  try {
+    const c=join(tmp,"frozen.json"),m=join(tmp,"manifest.csv"),
+      d=join(tmp,"finalized.csv");
+    await Promise.all([
+      writeFile(c,f.inputs.config),writeFile(m,f.inputs.manifest),
+      writeFile(d,result.csv)
+    ]);
+    const analyzer=fileURLToPath(new URL(
+      "./prospective-policy-trial-audit.mjs",import.meta.url));
+    const run=spawnSync(process.execPath,[
+      analyzer,"--config",c,"--manifest",m,"--data",d
+    ],{cwd:tmp,encoding:"utf8",timeout:30000,maxBuffer:1024*1024});
+    assert.equal(run.status,0,"downstream ITT analyzer failed: "+
+      (run.stderr??"")+" "+(run.stdout??""));
+    const audit=JSON.parse(await readFile(join(tmp,
+      "artifacts/validation/prospective-policy-trial-report.json"),"utf8"));
+    assert.equal(audit.randomizedUnitCount,80,
+      "downstream ITT unexpectedly excluded synthetic participants");
+    assert.equal(audit.evidenceIntegrity.externalAuditVerified,false,
+      "automated analysis cannot self-certify external custody");
+  } finally { await rm(tmp,{recursive:true,force:true}); }
   console.log("SELF_TEST_PASS: signed independent exposure/finance input custody, ITT denominator, arm masking, prior consent, human approval, matured ledger, cents accounting, complete costs, no unauthorized outcome claim");
   console.log("SYNTHETIC DATA ONLY. NO ACTUAL SOFTWARE RANDOMIZATION OR FINANCIAL OUTCOME OBSERVED.");
 }
@@ -475,7 +503,7 @@ function arg(args,name){
 }
 async function main(){
   const args=process.argv.slice(2);
-  if(args.includes("--self-test"))return selfTest();
+  if(args.includes("--self-test"))return await selfTest();
   const options=["config","manifest","exposures","finances","attestation",
     "trusted-pubkey"];
   const paths=Object.fromEntries(options.map(x=>[x,arg(args,"--"+x)]));
