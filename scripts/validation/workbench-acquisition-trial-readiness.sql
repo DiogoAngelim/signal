@@ -53,7 +53,10 @@ SELECT
  (SELECT COUNT(DISTINCT (owner_id, opportunity_id))
    FROM public.cash_receipts) AS opportunities_with_cash_records,
  (SELECT COUNT(*) FROM public.commercial_activities) AS commercial_activity_rows,
- (SELECT COUNT(*) FROM public.acquisition_opportunity_scores)
-   AS qualification_score_snapshots,
- (SELECT COUNT(*) FROM public.signal_integration_events)
-   AS recorded_signal_integration_events;
+ -- These optional tables can be absent on a pre-migration Workbench database.
+ -- PostgreSQL resolves missing relations at parse time even inside CASE, so
+ -- report honest table-presence flags rather than fabricate zero rows.
+ (to_regclass('public.acquisition_opportunity_scores') IS NOT NULL)
+   AS qualification_score_table_present,
+ (to_regclass('public.signal_integration_events') IS NOT NULL)
+   AS signal_integration_event_table_present;
