@@ -1,0 +1,33 @@
+name: Independent firm-profit RCT source gate (synthetic only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/independent-rct-profit-source-gate.mjs"
+      - "docs/validation/independent-togo-firm-profit-rct.md"
+      - ".github/workflows/independent-firm-profit-rct-source-gate.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-independent-firm-profit-rct-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  source-integrity-synthetic:
+    name: Synthetic RCT provenance, missingness and no-attribution assertions
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify 1,500-firm Togo three-arm data intake
+        run: node scripts/validation/independent-rct-profit-source-gate.mjs --self-test
+      - name: Scientific attribution boundary
+        run: |
+          echo "Synthetic input only. No firm-level World Bank microdata, real net profit, cost-adjudicated policy value, or randomized Signal software exposure has been analyzed."
