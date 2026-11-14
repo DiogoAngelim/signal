@@ -69,6 +69,11 @@ The separate read-only Workbench production cohort check in PR #75 refers to the
 
 GitHub API showed on baseline SHA `7352ff3...`: Signal core **success** (run `43610997964`) and Signal quality **success** (run `43610997937`). A third workflow run `43610997002` was **in progress at inspection**, not recorded as success. GitHub branch-protection API returned 403 to the connected app, so enforcement of required reviews/status checks is **not verified**. No release certification should assume protected-branch policy is active from this review.
 
+
+### 2.4 Follow-up preview build result (not production evidence)
+
+After the first scanner-only branch commit `4b35635c5398e3786c44f7dede45d49ad5d6a031`, Vercel's **automatically created Git preview** for `signal-reference-lab` reported **READY**: [deployment `dpl_Er1tY75r2EgB7cnq4dRNS68zCtZW`](https://vercel.com/diogos-projects-c462ac73/signal-reference-lab/Er1tY75r2EgB7cnq4dRNS68zCtZW). It has no production target. This is positive evidence that the preinstall blocker was overcome **for that one earlier source commit**; it does not prove route smoke, authorization, runtime operation, another project's root-directory fix, or the final PR head. Preview creation was performed automatically by the existing Vercel Git integration after a branch push; this review did not manually request a production deployment.
+
 ## 3. Outstanding release gates: concrete test and evidence contract
 
 | Priority | Gate | Current state | Required acceptance evidence |
