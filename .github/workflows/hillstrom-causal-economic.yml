@@ -1,0 +1,50 @@
+name: Signal historical randomized economic treatment audit
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/hillstrom-causal-economic.mjs"
+      - "docs/case-studies/hillstrom-causal-economic-prereg-2026-11-14.md"
+      - ".github/workflows/hillstrom-causal-economic.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-hillstrom-causal-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  economic-rct:
+    name: Signal quantitative choice on genuine randomized monetary outcomes
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install frozen workspace
+        run: pnpm install --frozen-lockfile
+      - name: Build the actual Signal decision package
+        run: pnpm --filter @signal/decision build
+      - name: Execute preregistration self tests
+        run: node scripts/validation/hillstrom-causal-economic.mjs --self-test
+      - name: Verify pinned existing RCT and estimate held-out real gross spend effect
+        run: node scripts/validation/hillstrom-causal-economic.mjs
+      - name: Publish aggregate scientific evidence only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-hillstrom-rct-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/hillstrom-causal-economic-report.json
+          if-no-files-found: warn
+          retention-days: 30
