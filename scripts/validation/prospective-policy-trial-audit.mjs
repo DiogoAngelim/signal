@@ -42,7 +42,7 @@ function erfc(x) {
   return x>=0?u:2-u;
 }
 function asFinite(v,label,minimum=-Infinity,maximum=Infinity) {
-  assert(v!==null&&v!==""&&v!==undefined, "missing "+label);
+  assert(v!==null&&v!==undefined&&String(v).trim()!=="", "missing "+label);
   const n=Number(v);
   assert(Number.isFinite(n)&&n>=minimum&&n<=maximum,"invalid "+label);
   return n;
