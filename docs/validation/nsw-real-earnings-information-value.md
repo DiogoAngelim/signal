@@ -51,4 +51,38 @@ node scripts/validation/nsw-earnings-evidence-policy.mjs \
 
 Actual aggregate-only output path: `artifacts/validation/nsw-real-earnings-evidence-value.json`. CI removes the original and derived individual-level data, and no GitHub dataset mirrors are created in the Signal repo. The relevant machine-generated run and final measured scores must be verified before making empirical claims.
 
+
+## Executed authentic-data result (frozen first held-out run)
+
+GitHub Actions [run #43610725990](https://github.com/DiogoAngelim/signal/actions/runs/43610725990) downloaded the original public sample at the specified immutable source commit, recovered its exact bytes SHA-256 **`72efd333a4b94a2bee55149d3542021d0adde03201d010ebe971e3e863360cd6`** (now hard-pinned), and verified the 445 total real NSW records, 185 treatment/260 controls. Train-only regression and uncertainty fitting used **303** individuals (122 treatment, 181 controls), leaving **142 held-out** individuals (63 treatment, 79 controls) for policy-value evaluation. An additional run after source-hash pinning must remain numerically stable before merge.
+
+The experiment's dollar outcome is **reported 1978 earnings**, not bank-confirmed settled receipts. No original training-program expense or Signal compute/staff expense was observed, and no software adoption was randomized. The source does not support a claim of actual net business profits.
+
+### Frozen human-training decision and strongly competitive baselines
+
+Policy training-action counts over 142 held-out real cases: experimental Signal uncertainty guard **78**, *equally informed conventional uncertainty guard* **78**, conventional fully informed Ridge expected-earnings optimizer **121**, conventional fully informed random forest **112**, reduced-history Ridge **134**, always training **142**, never training **0**.
+
+The Signal guard differs from the rich-Ridge expected-mean action on **30.28%** of cases. A different action can have legitimate risk implications, but this alone is not improvement.
+
+| Comparison of annual historical earnings policy values | Paired doubly robust difference (Signal minus comparator) | Unadjusted 95% bootstrap interval |
+| --- | ---: | ---: |
+| **Equal-information conventional uncertainty guard** | **$0 per person** | **[$0, $0]** |
+| Conventional rich-Ridge expected-earnings optimizer | +$133.92 | [−$902.65, +$1,147.40] |
+| Conventional rich random forest | +$479.35 | [−$692.40, +$1,828.45] |
+| Conventional reduced-history Ridge (less input) | +$608.72 | [−$692.06, +$1,986.11] |
+| Always training | +$603.99 | [−$712.42, +$2,002.67] |
+| Never training | +$1,422.85 | [−$359.12, +$3,330.43] |
+
+**All** nonzero doubly robust confidence intervals include zero; no statistically established incremental earnings advantage is demonstrated against the stronger alternatives. The exact zero versus the equally informed uncertainty optimizer is because the rules make **identical choices**, not because an equivalence test established that all possible Signal software workflows cost the same.
+
+The paired **inverse-propensity** policy differences were consistent in sign but are more uncertain than DR in most contrasts; for example, Signal minus rich Ridge: +$111.09, 95% bootstrap [−$1,458.52, +$1,586.19]. An exploratory never-training IPS comparison has a positive lower bound, but the paired doubly robust interval crosses zero. This is a small published historical subsample with multiple comparisons; never cherry-pick a favorable unadjusted interval or treat it as proprietary software profit.
+
+### Final experimental takeaway
+
+- Additional historical earnings information and predecision uncertainty influence actual Signal **research** proposals, but **do not establish statistically superior held-out real-dollar outcomes** versus strong conventional models.
+- An equally informed risk/uncertainty optimizer reproduces all Signal choices. Signal's solver is **not uniquely responsible** for any modeled or observed gains.
+- **Causal realized NET BUSINESS PROFIT attributable to Signal software: NOT PROVEN.** Software participation, cost-complete accounting, native evidence permission and real interventions were all absent. No price, margin, employment cost, or software charge was invented.
+- The sample's source and underlying intervention predate this analysis; this is exploratory retrospective policy research, not prospective preregistration.
+- The independent educational coupon data source identified while searching openly says it was simulated; it was correctly rejected instead of supplying invented "real" profit evidence.
+
 **Current causal Signal net-profit claim flag: FALSE.**
