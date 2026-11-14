@@ -21,6 +21,7 @@ on:
       - "api/ports/**"
       - "docs/production-simulation.md"
       - "benchmarks/rabbitmq-broker.mjs"
+      - "scripts/validation/actual-policy-ope.mjs"
       - ".github/workflows/production-simulation.yml"
   push:
     branches:
@@ -33,6 +34,7 @@ on:
       - "api/ports/**"
       - "docs/production-simulation.md"
       - "benchmarks/rabbitmq-broker.mjs"
+      - "scripts/validation/actual-policy-ope.mjs"
       - ".github/workflows/production-simulation.yml"
 
 permissions:
