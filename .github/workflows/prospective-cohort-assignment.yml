@@ -1,0 +1,35 @@
+name: Signal prospective company-level cohort manifest safety (synthetic only)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/prospective-cohort-assignment.mjs"
+      - "docs/validation/prospective-cohort-assignment.md"
+      - ".github/workflows/prospective-cohort-assignment.yml"
+      - "scripts/validation/prospective-policy-trial-audit.mjs"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-prospective-manifest-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  manifest-synthetic-gate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Test canonical-company HMAC arm assignment and mandatory native gate
+        run: node scripts/validation/prospective-cohort-assignment.mjs --self-test
+      - name: Test separately frozen assignment/outcome reconciliation
+        run: node scripts/validation/prospective-policy-trial-audit.mjs --self-test
+      - name: Scientific claim boundary
+        run: |
+          echo "SYNTHETIC TEST ONLY. No live company cohort, original financial outcomes, deployment, enrollment or causal profit result."
