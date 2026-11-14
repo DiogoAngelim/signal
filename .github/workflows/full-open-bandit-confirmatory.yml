@@ -1,0 +1,50 @@
+name: Signal preregistered full Open Bandit women confirmation
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/full-open-bandit-confirmatory.mjs"
+      - "docs/case-studies/confirmatory-full-open-bandit-prereg-2026-11-14.md"
+      - ".github/workflows/full-open-bandit-confirmatory.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-confirmatory-full-randomized-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  confirmatory-shadow-policy:
+    name: Pinned full-data native Signal policy shadow test (no production)
+    runs-on: ubuntu-latest
+    timeout-minutes: 50
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile
+      - name: Build native released-code decision package
+        run: pnpm --filter @signal/decision build
+      - name: Run offline invariant and time-block bootstrap self tests
+        run: node scripts/validation/full-open-bandit-confirmatory.mjs --self-test
+      - name: Evaluate FULL pinned public women randomized holdout
+        run: node --max-old-space-size=6144 scripts/validation/full-open-bandit-confirmatory.mjs
+      - name: Upload only aggregate evidence (not raw impressions or user features)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-full-women-confirmation-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/full-open-bandit-confirmatory-report.json
+          if-no-files-found: warn
+          retention-days: 30
