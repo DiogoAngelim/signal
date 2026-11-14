@@ -18,7 +18,7 @@ const EXPECTED_GIT_BLOB_SHA1 = "c26124a0716b5d7b44c2c357087c7136752a0aa7";
 const EXPECTED_BYTES = 658746;
 const SOURCE_URL = "https://raw.githubusercontent.com/nppackages-replication/CJM_2024_JOE/" +
   REVISION + "/jtpa.csv";
-const EXPECTED_ROWS=9223;
+const EXPECTED_ROWS=9872;
 const BOOT_SEED=20261114, BOOT_REPS=2000, TRAIN_SHARE=0.4;
 const PRIOR_N=300, Z=1.96, PENALTY=0.5;
 const STUDY = "jtpa-academic-pinned-risk-policy-20261114-v1";
