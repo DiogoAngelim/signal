@@ -41,8 +41,12 @@ jobs:
           PY
           fi
           archive="$work/egypt-rct-official.zip"
-          status=$(curl -L -sS --retry 1 --connect-timeout 10 --max-time 90 -w '%{http_code}' -o "$archive" "$base/api/access/dataset/:persistentId/?persistentId=doi%3A10.7910%2FDVN%2FQOGMVI&format=original" || true)
-          echo "HARVARD_DATAVERSE_ARCHIVE_HTTP=$status"
+          status=$(curl -L -sS --retry 1 --connect-timeout 10 --max-time 90 -w '%{http_code}' -o "$archive" "$base/api/access/datafile/3348775" || true)
+          echo "HARVARD_DATAVERSE_DIRECT_FILE_HTTP=$status"
+          if [[ "$status" == "200" ]]; then
+            echo "DIRECT_FILE_MD5=$(md5sum "$archive" | cut -d ' ' -f1)"
+            [[ "$(md5sum "$archive" | cut -d ' ' -f1)" == "d34d30d45bbabcb5bd21eec31c89a613" ]] || { echo "Checksum mismatch: refuse data"; exit 1; }
+          fi
           if [[ "$status" == "200" ]] && [[ "$(head -c 2 "$archive")" == "PK" ]] && unzip -tqq "$archive"; then
             echo "OFFICIAL_REAL_PROFIT_ARCHIVE_AVAILABLE=true"
             echo "ARCHIVE_SHA256=$(sha256sum "$archive" | cut -d ' ' -f1)"
