@@ -1,0 +1,64 @@
+name: Independent Lenta real-data calibration benchmark (research)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/lenta-calibration-real-outcomes.yml"
+      - "packages/decision/src/binary-calibration.ts"
+      - "packages/decision/src/binary-calibration.test.ts"
+      - "packages/decision/src/index.ts"
+      - "packages/decision/src/core.ts"
+      - "scripts/validation/lenta-calibration-real-outcomes.mjs"
+      - "docs/validation/independent-lenta-calibration.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-lenta-calibration-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  published-lenta-source-probe:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Retrieve official scikit-uplift public source privately, verify published MD5
+        shell: bash
+        run: |
+          set -euo pipefail
+          source_dir="$(mktemp -d)"
+          trap 'rm -rf "$source_dir"' EXIT
+          file="$source_dir/lenta.csv.gz"
+          url="https://sklift.s3.eu-west-2.amazonaws.com/lenta_dataset.csv.gz"
+          curl -fLSs --retry 2 --connect-timeout 20 --max-time 400 -o "$file" "$url"
+          md5="$(md5sum "$file" | cut -d ' ' -f 1)"
+          echo "LENTA_SOURCE_MD5=$md5"
+          if [[ "$md5" != "6ab28ff0989ed8b8647f530e2e86452f" ]]; then
+            echo "MD5 differs from sklift's published hash; do not process data"
+            exit 1
+          fi
+          echo "LENTA_SOURCE_SHA256=$(sha256sum "$file" | cut -d ' ' -f 1)"
+          echo "LENTA_SOURCE_SIZE_BYTES=$(stat -c%s "$file")"
+          python3 - "$file" <<'PY'
+          import csv,gzip,sys,collections
+          path=sys.argv[1]
+          with gzip.open(path,mode='rt',encoding='utf-8-sig',newline='',errors='strict') as src:
+              rows=csv.DictReader(src)
+              print('LENTA_SOURCE_COLUMN_COUNT',len(rows.fieldnames or []))
+              print('LENTA_SOURCE_COLUMNS',','.join(rows.fieldnames or []))
+              groups=collections.Counter()
+              responses=collections.Counter()
+              n=0
+              for r in rows:
+                  n+=1
+                  groups[r.get('group','<MISSING>')]+=1
+                  responses[r.get('response_att','<MISSING>')]+=1
+              print('LENTA_REAL_ROWS',n)
+              print('LENTA_REAL_ARMS',dict(groups))
+              print('LENTA_REAL_RESPONSE',dict(responses))
+          PY
+          echo "Authenticated source archive from public scikit-uplift metadata; only aggregates logged, no individual records stored in repository." >> "$GITHUB_STEP_SUMMARY"
