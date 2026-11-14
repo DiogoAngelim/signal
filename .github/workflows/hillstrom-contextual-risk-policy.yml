@@ -1,0 +1,50 @@
+name: Signal historical randomized contextual risk policy comparison
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - "scripts/validation/hillstrom-contextual-risk-policy.mjs"
+      - "docs/case-studies/hillstrom-contextual-signal-incremental-prereg-2026-11-14.md"
+      - ".github/workflows/hillstrom-contextual-risk-policy.yml"
+      - "packages/decision/**"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: signal-hillstrom-contextual-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  contextual-policy:
+    name: Randomized economic outcomes - Signal risk gate vs contextual comparator
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+          run_install: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - name: Install frozen workspace
+        run: pnpm install --frozen-lockfile
+      - name: Build actual quantitative Signal decision code
+        run: pnpm --filter @signal/decision build
+      - name: Verify policy invariants and estimator on toy fixtures
+        run: node scripts/validation/hillstrom-contextual-risk-policy.mjs --self-test
+      - name: Evaluate on the previously inspected public randomized dataset
+        run: node scripts/validation/hillstrom-contextual-risk-policy.mjs
+      - name: Publish aggregates only
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: signal-contextual-risk-hillstrom-${{ github.run_id }}-${{ github.run_attempt }}
+          path: artifacts/validation/hillstrom-contextual-risk-policy-report.json
+          if-no-files-found: warn
+          retention-days: 30
