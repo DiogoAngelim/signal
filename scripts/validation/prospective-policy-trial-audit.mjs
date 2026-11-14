@@ -343,7 +343,7 @@ function selfTest() {
   assert.throws(()=>readRows(duplicate,conf),/duplicate randomized/);
   const same=csv.replaceAll("action-B","action-A");
   assert(!evaluate(conf,readRows(same,conf)).gates.meaningfulPolicyDisagreement);
-  const missCost=csv.replace(",1,.5,.25,.25",",1,,.25,.25");
+  const missCost=csv.replace(",1,0.5,0.25,0.25",",1,,0.25,0.25");
   assert.throws(()=>readRows(missCost,conf),/missing review_cost_usd/);
   assert.throws(()=>configGate({...conf,minimum_point_net_gain_usd:0}),
     /economically positive/);
