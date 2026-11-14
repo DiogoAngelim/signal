@@ -5,6 +5,8 @@ on:
     branches: [main]
     paths:
       - "scripts/validation/prospective-policy-trial-audit.mjs"
+      - "scripts/validation/shadow-policy-readiness.mjs"
+      - "docs/validation/shadow-policy-readiness.md"
       - "docs/validation/prospective-signal-policy-causal-proof.md"
       - ".github/workflows/prospective-policy-trial-gate.yml"
   workflow_dispatch:
@@ -28,6 +30,8 @@ jobs:
           node-version: 22
       - name: Test CSV integrity, randomized ITT and safety gates using synthetic fixture only
         run: node scripts/validation/prospective-policy-trial-audit.mjs --self-test
+      - name: Test pre-outcome shadow feasibility and conditional sample sizing (synthetic only)
+        run: node scripts/validation/shadow-policy-readiness.mjs --self-test
       - name: Declare limitations
         run: |
           echo "NO EMPIRICAL TRIAL CONDUCTED"
