@@ -229,7 +229,7 @@ function selfTest(){
   assert.deepEqual(out.comparison.signalVsEquallyInformedConventionalRisk.bootstrap95,[0,0]);
   assert.equal(out.claims.softwareCausalNetProfitEffectIdentified,false);
   assert.throws(()=>analyze(s.replace(",amount,",",revenue,"),false),/missing verified source field/);
-  assert.throws(()=>analyze(s.replace(",0,1,","..."),false));
+  assert.throws(()=>analyze(s.replace("\n0,10,", "\ncorrupt,10,"),false),/randomized treatment arm/);
   console.log("SELF_TEST_PASS: actual Signal API, train-only fixed split, independent equal-risk comparator, propensity-weighted dollar outcomes and paired bootstrap");
   console.log("SYNTHETIC ONLY. REAL TRIAL IS RUN VIA SEPARATE PINNED CSV PATH.");
 }
