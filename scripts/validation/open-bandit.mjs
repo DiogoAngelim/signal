@@ -11,7 +11,8 @@
 import assert from "node:assert/strict";
 import { createHash } from "node:crypto";
 import { mkdir, writeFile, appendFile } from "node:fs/promises";
-import { evaluateBinaryForecasts, evaluateQuantitativeDecision, stressTestProbabilityCases } from "../../packages/decision/dist/index.js";
+import signalDecision from "../../packages/decision/dist/index.js";
+const { evaluateBinaryForecasts, evaluateQuantitativeDecision, stressTestProbabilityCases } = signalDecision;
 
 const UPSTREAM = "8cbd5fa4558b7ad2ba4781546d6604e4cc3e07c4";
 const DATASET_VERSION = "zr-obp-10k-men/" + UPSTREAM;
