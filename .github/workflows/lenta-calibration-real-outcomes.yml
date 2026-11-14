@@ -65,7 +65,7 @@ jobs:
           echo "Authenticated source archive from public scikit-uplift metadata; only aggregates logged, no individual records stored in repository." >> "$GITHUB_STEP_SUMMARY"
 
   independent-lenta-heldout-calibration:
-    name: Real randomized responses: Signal calibration versus strong conventional estimators
+    name: "Real randomized responses: Signal calibration versus strong conventional estimators"
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
