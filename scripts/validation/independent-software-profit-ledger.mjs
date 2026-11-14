@@ -271,7 +271,13 @@ function assembleLedger(inputs,pubkeyPem){
     const amt={};
     for(const field of FINANCE.filter(k=>k.endsWith("_cents")||
       k.endsWith("_minutes"))){
-      amt[field]=nonnegativeInteger(f[field],field);
+      // Bounded integer-cents arithmetic: 200k units max * bounded unit
+      // components cannot overflow JS's 53-bit safe integer range.
+      // Larger/complex books require a separately reviewed BigInt/decimal
+      // ingestion rather than silently rounding money.
+      const cap=field.endsWith("_minutes")?100000:
+        field.includes("_hourly_loaded_cents")?1000000:1000000000;
+      amt[field]=nonnegativeInteger(f[field],field,cap);
     }
     assert(f.zero_receipts_verified===true || f.zero_receipts_verified===false,
       "explicit verified-zero receipt certification required");
@@ -450,6 +456,10 @@ async function selfTest(){
   assert.throws(()=>assembleLedger(x.copy,x.pub),/unreviewed currency/);
   x=resigned("finances",r=>({...r,refund_cents:null}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/noninteger refund_cents/);
+  x=resigned("finances",r=>({...r,receipt_cents:1e13}));
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/noninteger receipt_cents/);
+  x=resigned("finances",r=>({...r,sales_minutes:1e12}));
+  assert.throws(()=>assembleLedger(x.copy,x.pub),/noninteger sales_minutes/);
   x=resigned("finances",r=>({...r,period_complete:false}));
   assert.throws(()=>assembleLedger(x.copy,x.pub),/must be independently reconciled/);
   x=resigned("finances",r=>({...r,statement_at:"2024-01-10T00:00:00Z"}));
