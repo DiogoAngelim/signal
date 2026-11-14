@@ -1,0 +1,57 @@
+name: Egypt randomized firm-profit RCT - public-source availability (research)
+
+on:
+  pull_request:
+    branches: [main]
+    paths:
+      - ".github/workflows/egypt-public-profit-rct.yml"
+      - "scripts/validation/egypt-profit-rct/**"
+      - "docs/validation/egypt-profit-rct-*.md"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  source-availability:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+      - name: Fetch official open CC0 Harvard Dataverse firm-profit replication archive
+        shell: bash
+        run: |
+          set -euo pipefail
+          work=$(mktemp -d)
+          trap 'rm -rf "$work"' EXIT
+          echo "Data citation: Atkin, Khandelwal, Osman 2019, Harvard Dataverse doi:10.7910/DVN/QOGMVI"
+          base='https://dataverse.harvard.edu'
+          metadata="$work/dataset-metadata.json"
+          metadata_status=$(curl -L -sS --retry 1 --connect-timeout 10 --max-time 50 -w '%{http_code}' -o "$metadata" "$base/api/datasets/:persistentId/?persistentId=doi%3A10.7910%2FDVN%2FQOGMVI" || true)
+          echo "HARVARD_DATAVERSE_METADATA_HTTP=$metadata_status"
+          if [[ "$metadata_status" == "200" ]]; then
+            python3 - "$metadata" <<'PY'
+          import json,sys
+          j=json.load(open(sys.argv[1]))
+          files=j.get("data",{}).get("latestVersion",{}).get("files",[])
+          print("OFFICIAL_FILE_COUNT",len(files))
+          for record in files:
+              f=record.get("dataFile",{})
+              print("OFFICIAL_FILE",f.get("filename"),"id",f.get("id"),"bytes",f.get("filesize"),"md5",f.get("md5"))
+          PY
+          fi
+          archive="$work/egypt-rct-official.zip"
+          status=$(curl -L -sS --retry 1 --connect-timeout 10 --max-time 90 -w '%{http_code}' -o "$archive" "$base/api/access/dataset/:persistentId/?persistentId=doi%3A10.7910%2FDVN%2FQOGMVI&format=original" || true)
+          echo "HARVARD_DATAVERSE_ARCHIVE_HTTP=$status"
+          if [[ "$status" == "200" ]] && [[ "$(head -c 2 "$archive")" == "PK" ]] && unzip -tqq "$archive"; then
+            echo "OFFICIAL_REAL_PROFIT_ARCHIVE_AVAILABLE=true"
+            echo "ARCHIVE_SHA256=$(sha256sum "$archive" | cut -d ' ' -f1)"
+            echo "ARCHIVE_SIZE_BYTES=$(stat -c%s "$archive")"
+            echo "ARCHIVE_CONTENTS:"
+            unzip -Z -1 "$archive" | head -n 100
+            echo "OFFICIAL_REAL_PROFIT_ARCHIVE_AVAILABLE=true" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "OFFICIAL_REAL_PROFIT_ARCHIVE_AVAILABLE=false"
+            echo "Official Harvard Dataverse ZIP unavailable from runner; no outcome analysis was attempted." >> "$GITHUB_STEP_SUMMARY"
+          fi
+          echo "A published profit RCT does NOT randomize Signal software; this is only a source probe."
