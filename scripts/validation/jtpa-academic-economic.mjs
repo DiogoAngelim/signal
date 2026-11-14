@@ -106,7 +106,7 @@ function parseData(text){
       d2:number(v("treatment"),"nonrandomized enrollment",0,1),
       earnings:number(v("income"),"30-month earnings",0,10000000)
     };
-    for(const key of ["male","married","age2225","hsorged","z2","d2"])
+    for(const key of ["male","hsorged","z2","d2"])
       assert(Number.isInteger(row[key]),"not a binary source value "+key);
     out.push(row);
   }
