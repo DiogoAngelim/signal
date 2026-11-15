@@ -1,0 +1,41 @@
+{
+  "status": "empirical_research_completed",
+  "observedAt": "2026-11-15T22:20:58.613Z",
+  "sourceCommit": "9fc87e19a45d486714bc6a77f79a814049de8553",
+  "workflowRun": 43768780477,
+  "workflowJob": 132979763856,
+  "provider": "binance-public",
+  "symbol": "BTCUSDT",
+  "interval": "1d",
+  "bars": 2500,
+  "calls": 3,
+  "dataHash": "cb03fcbd8e525b6d039283b11bed6631d7d7dc4669200fe6151b7e27281d528a",
+  "strategyHash": "757aa240b09919c222b7c039430f14416deaeaf34a86bc37d7fda9385eee5b9f",
+  "selectedConfig": { "id": "ml-mixed-f16-l1", "fast": 16, "slow": 50, "featureSet": "mixed", "lambda": 1, "horizon": 1, "probabilityThreshold": 0.55 },
+  "candidatesTested": 12,
+  "partitions": {
+    "train": {"count":1034,"start":1596067199999,"end":1685404799999},
+    "selection": {"count":458,"start":1685577599999,"end":1725148799999},
+    "calibration": {"count":458,"start":1725321599999,"end":1764892799999},
+    "test": {"count":343,"start":1765065599999,"end":1794700799999}
+  },
+  "validation": {
+    "passed": false,
+    "gates": {
+      "adequate_sample": false, "effective_sample": true, "positive_net_return": false,
+      "beats_exposure_matched_benchmark": false, "drawdown_within_limit": true,
+      "calibrated_forecast": false, "doubled_cost_stress": false, "walk_forward_stability": false
+    },
+    "interval": {"mean":0.00020345404939917303,"lower":-0.00029552234488573135,"upper":0.000709956805271864,"blockLength":5,"independentBlockEstimate":68,"draws":1000,"confidence":0.95},
+    "blockers": ["adequate_sample","positive_net_return","beats_exposure_matched_benchmark","calibrated_forecast","doubled_cost_stress","walk_forward_stability"]
+  },
+  "finalTest": {
+    "observations":343,"tradeCount":0,"durationDays":343,"totalReturn":0,
+    "benchmarkReturn":-0.07124940946876424,"excessReturn":0.07124940946876424,
+    "maxDrawdown":0,"annualizedSharpe":null,"profitFactor":null,"winRate":null,
+    "brier":0.22989785654757441,"constantBrier":0.22889535451577825
+  },
+  "prospectivePassed": false,
+  "liveTradingApproved": false,
+  "scope": "Read-only public-data research probe, not a deployed cross-service or live-execution certification."
+}
