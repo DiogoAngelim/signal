@@ -1,0 +1,18 @@
+{
+  "schemaVersion": "verified-dependencies.v1",
+  "signal": {
+    "repository": "DiogoAngelim/signal",
+    "commit": "7352ff381f4809b3bb21e103f127b399782a1526",
+    "runtimeTree": "9acdd1479d9c024b12b5d53a7dde29641725f0ba",
+    "protocolTree": "ebc615d4759eb46a42a2039febae3de95a1d342a",
+    "portsTree": "876ef54b82b1858d742c511d711ee3c5dd81a756",
+    "decisionTree": "05ae9e6a09edf7ad10f0f247e3918ec92c4fe032"
+  },
+  "marketData": {
+    "repository": "DiogoAngelim/tradingview-data",
+    "commit": "391a22050247926613412ba48beef1f67354699d",
+    "contract": "market-data.v1",
+    "integration": "authenticated HTTPS service; private repository source is not vendored"
+  },
+  "updatePolicy": "Review and test exact source snapshots. Never resolve floating latest dependencies at runtime."
+}

@@ -1,0 +1,30 @@
+name: Verified investing backend
+on:
+  pull_request:
+    paths: ['examples/stocks-optimizer/**', '.github/workflows/verified-investing.yml']
+  push:
+    branches: [hardening/verified-investing-20261115]
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  research-risk-runtime:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      VERIFIED_ROOT: examples/stocks-optimizer/src/artifacts/verified-investing
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+      - name: Inspect source before executing repository modules
+        run: node "$VERIFIED_ROOT/scripts/security-scan.mjs"
+      - name: Install isolated pinned build tools without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund --prefix "$RUNNER_TEMP/verified-tools" esbuild@0.25.12 zod@4.1.12
+      - name: Build real pinned Signal runtime and decision calibration
+        run: VERIFIED_TOOLING_DIR="$RUNNER_TEMP/verified-tools" node "$VERIFIED_ROOT/scripts/build.mjs"
+      - name: Run executable research, allocation, evidence and runtime integration tests
+        run: node --test --experimental-test-coverage "$VERIFIED_ROOT"/test/*.test.mjs
