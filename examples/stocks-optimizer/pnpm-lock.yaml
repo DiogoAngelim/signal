@@ -766,6 +766,8 @@ importers:
         specifier: ^5.0.0
         version: 5.9.3
 
+  src/artifacts/verified-investing: {}
+
 packages:
 
   '@babel/code-frame@7.29.0':
