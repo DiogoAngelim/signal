@@ -4,7 +4,8 @@ import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
 import { check, id } from './contracts.mjs';
 import { OperationalLedger } from './operational-ledger.mjs';
-import { BoundDataClient, createOperationalService, managedAutonomy } from './lifecycle.mjs';
+import { BoundDataClient, managedAutonomy } from './lifecycle.mjs';
+import { createSafeService } from './runtime-safety.mjs';
 import { createInvestingHandler, isolatedResearch } from './http.mjs';
 import { VerifiedBinancePorts } from './binance.mjs';
 import { PaperPortfolio } from './paper.mjs';
@@ -58,13 +59,14 @@ export async function startInvestingServer({ configPath = process.env.VERIFIED_I
         filters: config.paper.filters, quotePort: dataClient });
       accountPort = filterPort = brokerPort = paper;
     } else if (mode !== 'paper') {
-      check(config.permissions?.enabled === true, 'explicit_operator_permission_required');
+      // Read-only/shadow startup is allowed with disabled trading permission. Execution still checks every gate.
+      check(config.permissions && typeof config.permissions.enabled === 'boolean', 'explicit_operator_permission_state_required');
       const broker = new VerifiedBinancePorts({ mode, apiKey: environment.BINANCE_API_KEY,
         apiSecret: environment.BINANCE_API_SECRET, owner: config.owner, permissions: () => current().permissions,
         profileLookup: tenant => store.currentProfile(tenant), quotePort: dataClient });
       accountPort = filterPort = permissionPort = brokerPort = broker;
     }
-    service = createOperationalService({ store, dataClient, signal, runtime: signal.createInvestingRuntime(),
+    service = createSafeService({ store, dataClient, signal, runtime: signal.createInvestingRuntime(),
       mode, accountPort, filterPort, permissionPort, brokerPort, researchPort });
     handler = createInvestingHandler({ service, keyRegistry: () => current().apiKeys });
     server = createServer(handler);
@@ -79,7 +81,6 @@ export async function startInvestingServer({ configPath = process.env.VERIFIED_I
     async function close() {
       if (closing) return closing;
       closing = (async () => {
-        // Stop scheduling first, then drain active work; storage stays open until it completes.
         const stopped = worker?.stop();
         const httpDone = handler.close();
         const workDone = service.drain();
