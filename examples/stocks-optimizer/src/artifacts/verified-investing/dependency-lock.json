@@ -10,9 +10,16 @@
   },
   "marketData": {
     "repository": "DiogoAngelim/tradingview-data",
-    "commit": "391a22050247926613412ba48beef1f67354699d",
+    "commit": "0b721f7182ce0f29c04db75b5b4f107cb88fc35d",
     "contract": "market-data.v1",
-    "integration": "authenticated HTTPS service; private repository source is not vendored"
+    "integration": "authenticated HTTPS service; private repository source is not vendored",
+    "verifiedChecks": {
+      "providerContractRun": 43773334155,
+      "crossServiceRun": 43773334217,
+      "publicLiveFeedRun": 43773334211,
+      "crossServiceConsumerCommit": "6faed923c630b56ed5404709707cb03bba2556b7",
+      "productionDeploymentVerified": false
+    }
   },
   "updatePolicy": "Review and test exact source snapshots. Never resolve floating latest dependencies at runtime."
 }

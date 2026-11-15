@@ -3,12 +3,10 @@ import path from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createServer } from 'node:http';
 import { check, id } from './contracts.mjs';
-import { OperationalLedger } from './operational-ledger.mjs';
+import { FencedOperationalLedger, FencedBinancePorts, ObservedPaperPortfolio } from './execution-fencing.mjs';
 import { BoundDataClient, managedAutonomy } from './lifecycle.mjs';
 import { createSafeService } from './runtime-safety.mjs';
 import { createInvestingHandler, isolatedResearch } from './http.mjs';
-import { VerifiedBinancePorts } from './binance.mjs';
-import { PaperPortfolio } from './paper.mjs';
 
 export function readPrivateConfig(filename) {
   check(filename && path.isAbsolute(filename), 'absolute_private_config_path_required');
@@ -35,6 +33,7 @@ export async function startInvestingServer({ configPath = process.env.VERIFIED_I
   process.umask(0o077);
   const configuration = () => readPrivateConfig(configPath), config = configuration(), mode = config.mode || 'paper';
   const current = () => {
+    store.assertLease();
     const next = configuration();
     check((next.mode || 'paper') === mode && next.owner === config.owner && next.ledgerFile === config.ledgerFile,
       'configuration_identity_changed');
@@ -45,7 +44,7 @@ export async function startInvestingServer({ configPath = process.env.VERIFIED_I
   fs.mkdirSync(directory, { recursive: true, mode: 0o700 });
   const stat = fs.lstatSync(directory);
   check(stat.isDirectory() && !stat.isSymbolicLink() && (stat.mode & 0o077) === 0, 'private_ledger_directory_required');
-  const store = new OperationalLedger(config.ledgerFile, { owner: config.owner, mode });
+  const store = new FencedOperationalLedger(config.ledgerFile, { owner: config.owner, mode });
   let heartbeat, server, handler, worker, service, dataClient, closing;
   try {
     store.acquireLease();
@@ -55,15 +54,15 @@ export async function startInvestingServer({ configPath = process.env.VERIFIED_I
       token: environment.MARKET_DATA_READ_TOKEN, streaming: config.data.streaming === true });
     let accountPort, filterPort, permissionPort, brokerPort;
     if (mode === 'paper' && config.paper) {
-      const paper = new PaperPortfolio({ store, tenant: config.owner, seed: config.paper.account,
+      const paper = new ObservedPaperPortfolio({ store, tenant: config.owner, seed: config.paper.account,
         filters: config.paper.filters, quotePort: dataClient });
       accountPort = filterPort = brokerPort = paper;
     } else if (mode !== 'paper') {
-      // Read-only/shadow startup is allowed with disabled trading permission. Execution still checks every gate.
+      // Read-only/shadow startup accepts disabled trading; execution still checks every gate.
       check(config.permissions && typeof config.permissions.enabled === 'boolean', 'explicit_operator_permission_state_required');
-      const broker = new VerifiedBinancePorts({ mode, apiKey: environment.BINANCE_API_KEY,
+      const broker = new FencedBinancePorts({ mode, apiKey: environment.BINANCE_API_KEY,
         apiSecret: environment.BINANCE_API_SECRET, owner: config.owner, permissions: () => current().permissions,
-        profileLookup: tenant => store.currentProfile(tenant), quotePort: dataClient });
+        profileLookup: tenant => store.currentProfile(tenant), quotePort: dataClient, leaseGuard: () => store.assertLease() });
       accountPort = filterPort = permissionPort = brokerPort = broker;
     }
     service = createSafeService({ store, dataClient, signal, runtime: signal.createInvestingRuntime(),

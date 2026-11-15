@@ -1,26 +1,20 @@
 # Verified investing backend
 
-An opt-in, fail-closed backend for Stocks Optimizer. It is not a profit guarantee, an independent financial audit, or a claim that any strategy has passed prospective/live testing.
+An opt-in, evidence-gated Stocks Optimizer backend. Software checks, a real data feed, a profitable historical model, prospective evidence, and a qualified personal portfolio are different claims. This package does not equate them or guarantee investment returns.
 
-## What is wired
+## Architecture and exact dependencies
 
-`authenticated data service -> causal indicators -> ridge/logistic training -> chronological selection -> Signal isotonic calibration -> untouched final test -> frozen strategy -> prospective shadow ledger -> personal portfolio constraints -> convex MPT -> decimal lot sizing -> explicit execution permissions -> Spot adapter`
+`authenticated provider -> causal features -> ridge/logistic estimation -> chronological selection -> actual Signal isotonic calibration -> untouched final test -> frozen model -> prospective ledger -> personal risk/cash-flow constraints -> MPT -> executable lot audit -> permissions -> Spot adapter`
 
-The example API exposes this service through `/api/investing/*` when `VERIFIED_INVESTING_INTERNAL_URL` is configured. Both the standalone and serverless API use the same gateway. The persistent worker owns research isolation, SQLite evidence and streaming. Serverless functions do not pretend to own long-running research or continuous exchange sockets.
+The existing application exposes the persistent service through `/api/investing/*` when `VERIFIED_INVESTING_INTERNAL_URL` is configured. Both standalone and serverless API paths use this gateway. Long-running research, SQLite persistence, streaming and worker leases belong to the persistent service, not an ephemeral serverless invocation.
 
-Legacy `/strategy` output is marked research-only with zero executable exposure. Obsolete strategy write actions return HTTP 410 with the new endpoint. The legacy Binance client refuses new orders; its account reads and cancellations remain available. No production deployment or account setting is changed merely by this source branch.
+**`dependency-lock.json` is authoritative for exact release pins.** The actual Signal runtime/protocol/ports/decision sources are snapshotted from the recorded main commit, not reimplemented. The private tradingview-data repository is consumed through its authenticated versioned HTTPS contract, not copied into this public repository. A mismatched data release fails closed. Current reviewed data implementation includes stalled-stream recovery, authenticated health checks and request draining.
 
-## Dependencies and provenance
-
-`dependency-lock.json` identifies exact Signal runtime, protocol, ports and decision source trees from main commit `7352ff381f4809b3bb21e103f127b399782a1526`. These public source trees are snapshotted under `vendor/` and bundled by the adapter. They are not handwritten approximations of Signal. Upgrades require a reviewed snapshot update and the integration tests.
-
-The private tradingview-data repository is NOT copied here. The HTTPS data contract is pinned to its reviewed commit `391a22050247926613412ba48beef1f67354699d`; release mismatch blocks reads. Deploy that exact revision or deliberately update and test the lock. The verified free source currently covers Binance Spot only. It does not grant automated non-display rights to global equities or the TradingView guest feed.
+Legacy research remains non-executable. Legacy Binance order creation is disabled; reads and cancellations are retained. No deployment, credentials or trading permissions are changed by checking out this source branch.
 
 ## Build and test
 
-Node 22.16 or later is required (`node:sqlite` is experimental in Node 22; review runtime changes before upgrading).
-
-From this directory:
+Node 22.16 or later is required; `node:sqlite` is experimental in Node 22. Review and test runtime upgrades.
 
 ```sh
 TOOLING_DIR="$(mktemp -d)"
@@ -29,77 +23,56 @@ VERIFIED_TOOLING_DIR="$TOOLING_DIR" node scripts/build.mjs
 node --test test/*.test.mjs
 ```
 
-This does not run repository bootstrap or dependency lifecycle scripts. The GitHub workflow also scans known unsafe source signatures before importing code. The scanner is not a general malware certification.
+No repository bootstrap or dependency lifecycle scripts are executed by this isolated build. The source-signature scanner is a targeted check, not a general malware certification. Generated market fixtures and simulated clocks test software, never strategy performance. A separate read-only actual-market probe is `node scripts/live-research-probe.mjs`; failed gates remain failed.
 
-For a bounded read-only public-market experiment:
+## Start safely
 
-```sh
-node scripts/live-research-probe.mjs
-```
-
-The probe writes `live-research-evidence.json`. A provider block or failed strategy remains explicitly failed/unavailable. It is not counted as a passing unit test. Generated test fixtures validate mathematical plumbing, not investment performance.
-
-## Start in paper mode
-
-Copy `config.paper.example.json` outside the repository, set an absolute persistent ledger path and your deployed data endpoint, create a high-entropy API token in your secret manager, and store only its SHA-256 digest in `apiKeys`. Set each grant's subject, scopes and expiry. Keep the private configuration file owner-readable only (`chmod 600`). Empty keys in the example authorize nobody. No credentials belong in committed JSON or frontend bundles.
+Use `config.paper.example.json` as a schema example, not as your personal financial profile. Store the real configuration outside the repository, owner-readable only (`chmod 600`), with an absolute ledger path in a private directory. Create a high-entropy bearer token through your secret manager and store only its SHA-256 digest, subject, scopes and expiry in `apiKeys`. Inject the provider read token through the environment. Do not commit credentials or expose them to the frontend.
 
 ```sh
 export VERIFIED_INVESTING_CONFIG=/absolute/private/investing.json
-# MARKET_DATA_READ_TOKEN comes from the operator's secret manager.
 node src/server.mjs
 ```
 
-The worker listens on loopback port 4030 by default. Place an authenticated TLS reverse proxy in front of it. Set the existing app's `VERIFIED_INVESTING_INTERNAL_URL` to the worker's HTTPS origin or loopback origin. Original user authorization is forwarded; the gateway never substitutes an admin token. Back up the ledger and verify restore before enabling non-paper operation.
+The default listener is loopback port 4030. An operator-configured authenticated TLS reverse proxy and a persistent volume are required for remote operation. Configure the original application's `VERIFIED_INVESTING_INTERNAL_URL` to that service; the gateway forwards the original user's authorization rather than substituting an administrator token.
 
-## API
+The ledger binds an account owner and paper/testnet/live mode. One renewable writer lease is enforced at transaction and final order-send boundaries. A second worker sharing that ledger cannot take over while the first lease is valid. The process stops scheduling, drains in-flight requests and then closes storage on shutdown. This is not a distributed multi-region account lock; never use the same real account across independent ledgers.
 
-All endpoints require a bearer token with the matching scope. The server derives tenant identity from the token, never a body field.
+## Authenticated API
 
-| Method | Path | Scope | Purpose |
+| Method | Path under `/api/investing` | Scope | Purpose |
 |---|---|---|---|
-| GET | `/api/investing/capabilities` | investing:read | Real configured capabilities and limitations |
-| POST | `/api/investing/profile` | investing:write | Risk tolerance, horizon, reserve, goals, contributions/withdrawals |
-| POST | `/api/investing/research` | investing:write | `{symbol:"BTCUSDT",timeframes:["1d"],bars:2500}` |
-| GET | `/api/investing/report?id=<reportHash>` | investing:read | Exact research report and gate failures |
-| GET | `/api/investing/signals?strategies=<hashes>` | investing:read | Current evidence-gated Buy/Hold/Sell analysis |
-| GET | `/api/investing/stream?strategies=<hashes>` | investing:read | Authenticated SSE, up to 20 concurrent clients |
-| POST | `/api/investing/plan` | investing:write | `{strategies:["frozen-strategy-hash"]}`; exact proposed quantities |
-| POST | `/api/investing/execute` | investing:execute | `{planHash:"server-created-plan-hash"}`; paper or permission-gated broker |
+| GET | `/capabilities` | investing:read | Actual configured features, data/runtime identities and limitations |
+| GET | `/operations` | investing:read | Worker state and unresolved execution reservations |
+| POST | `/profile` | investing:write | Risk tolerance, horizon, reserves, goals and cash flows |
+| POST | `/research` | investing:write | `{symbol:"BTCUSDT",timeframes:["1d"],bars:2500}` |
+| GET | `/report?id=<hash>` | investing:read | Exact research evidence and failures |
+| GET | `/signals?strategies=<hashes>` | investing:read | Model analysis and blockers, not orders |
+| GET | `/stream?strategies=<hashes>` | investing:read | Authenticated SSE with token revocation checks |
+| POST | `/plan` | investing:write | `{strategies:["frozen-model-hash"]}`; account-specific exact lot proposal |
+| POST | `/execute` | investing:execute | `{planHash:"server-created-hash"}`; paper or separately gated broker |
+| POST | `/reconcile` | investing:reconcile | Read-only exchange reconciliation of an uncertain plan |
 
-Use authenticated fetch streaming; do not put bearer tokens in EventSource query strings. Signal streams contain analysis and blockers; the plan endpoint applies the account-specific sizing and returns quantities, limit prices, fees, target weights, cash reserve, expiry, model references and optimization certificate. Do not execute raw signal directions as orders.
+Use authenticated fetch streaming, not tokens in EventSource URLs. Tenant identity comes from the token, never request data. Profiles and accounts are rechecked before submission. Repeated execution requests return the durable prior result, including after plan expiry. Ambiguous or partial fills stop the worker; a restart does not silently retry them. Reconciliation verifies exchange identity, original/executed quantity and terminal status, refreshes account state, and requires a NEW plan. It never submits or cancels an order.
 
-## Research and statistical controls
+## Research and prospective evidence
 
-Eleven causal features cover moving averages, momentum, RSI, MACD, Bollinger position, ATR, volatility, relative volume and breakout. Twelve preregistered configurations per timeframe combine three feature families, two fast lookbacks and two regularization strengths. The search is bounded, not a universal strategy discovery claim.
+Eleven causal features cover trend, momentum, RSI, MACD, Bollinger position, ATR, volatility, relative volume and breakout. Twelve predefined configurations per timeframe form a bounded search, not a universal best-strategy claim. Timeframe partitions share calendar boundaries. Expanding walk-forward selection, purging, embargo and separate calibration precede an untouched final test. The final-test loser is not swapped for a runner-up until a flattering result appears.
 
-Training, selection, calibration and final-test partitions are chronological, purged and embargoed. Timeframes use common calendar boundaries; insufficient overlapping history is rejected. Three expanding-window retraining folds are confined to the selection partition. The selected model is frozen before final-test evaluation; a failure never prompts testing runner-ups until one passes. Server reports prevent reusing an already inspected final-test window for promotion.
+Gates include sample/calendar duration, dependence-aware confidence intervals, positive net return, a cost-adjusted exposure-matched benchmark, drawdown, calibration quality, doubled-cost stress and walk-forward stability. At most 5000 bars are retrieved; short intraday datasets can fail calendar-duration gates and need a longer archival system. Multi-timeframe search is not simultaneous ensemble confirmation.
 
-The final gates require sample size, calendar duration, dependence-adjusted evidence, positive net return, positive lower confidence bound against a cost-adjusted exposure-matched buy-and-hold sleeve, drawdown limit, calibration quality, doubled-cost stress and walk-forward stability. Bootstrap intervals are estimates, not mathematical guarantees under every market process. Costs are explicit assumptions, not measured future fills.
+Only fresh server-observed signals after model freezing count toward prospective evidence. Historical closed trades cannot substitute. Requirements include 30 elapsed days, 30 observations/day-clusters, positive net evidence, sufficient outcome coverage and recent observations. Artificially advancing a test clock cannot certify a production strategy. The ledger retains exact model and report hashes.
 
-The free retrieval cap is 5000 bars. Very short intervals cannot satisfy a 90-day final-test window within that cap; these fail rather than weakening statistical gates. Multi-timeframe search is not simultaneous multi-timeframe ensemble consensus. Longer intraday archival ingestion is a separate scaling requirement.
+## Investor constraints and executable quantities
 
-## Forward evidence is not historical evidence
+The planner uses settled cash and reconciled holdings, excludes unsettled contributions, reserves imminent withdrawals, observes horizon/exposure/concentration/drawdown constraints and aligns covariance on a common daily grid. Unrealistic goals never cause automatic relaxation of risk limits. Paper drawdown high-water marks persist even when no trades occur.
 
-Only server-observed fresh quotes emitted after strategy freezing count. Historical closed trades cannot satisfy the prospective gate. Samples mature at the declared horizon, missed outcome windows are rejected, repeated samples are deduplicated, and daily dependence clusters are used. At least 30 elapsed days, 30 observations and 30 day-clusters plus positive net evidence are required. Restarting the worker does not reset the evidence. Shadow quotes are not actual exchange fills.
+Shrinkage covariance and L1 turnover costs define the continuous long-only mean-variance problem. Its objective-gap certificate applies only to that estimated convex model. A separate post-rounding audit checks cash, fees, reserve coverage, concentration, exposure, volatility, exchange steps and quantity limits. Bounded one-lot repair can reduce buys, never inflate minimum orders or spend anticipated sales. Infeasible dust or exhausted repair budgets remain explicit blockers.
 
-A newly frozen model therefore cannot immediately receive non-paper trading permission. There is no API to fabricate past observations or set `passed=true`. A durable ledger is required. Until evidence qualifies, the public decision is HOLD with quantity zero and explicit reasons.
+`portfolioPolicyPerformanceVerified:false` is deliberate: single-asset signal validation and numerical allocation feasibility are not independent proof of a personalized rebalancing policy's future performance or global discrete optimality.
 
-## Portfolio and investor constraints
+## Optional autonomy and remaining qualification
 
-The planner consumes reconciled settled cash/positions and aligns all returns to a common daily covariance grid. It excludes unsettled deposits, avoids double-counting settled contributions, reserves near-term withdrawals, observes position/exposure caps, applies a forecast volatility target and a flow-adjusted historical drawdown constraint. Goals report required growth but never increase risk to force an unrealistic target.
+Paper is the default. Non-paper startup can remain read-only with `permissions.enabled:false`. Optional execution requires real credentials, owner-bound expiring permissions, symbol/notional limits, current reconciled account/cash-flow state, fee ceilings, security/host clearance, qualifying model/forward evidence and an inactive kill switch. Live mode adds a separate acknowledgement. Autonomy has its own enablement and expiry and reloads permission before execution. Never enable key withdrawal permissions.
 
-Shrinkage covariance and an L1 turnover penalty form a convex long-only mean-variance problem. An exact linear oracle bounds the objective gap for that stated model. This is not proof of optimal future returns. Expected-return uncertainty, future covariance changes, liquidity and lot rounding limit the interpretation.
-
-Quantities use eight-decimal BigInt arithmetic and round down to exchange lot sizes; orders below minimums become HOLD, never inflated purchases. Buys use currently settled cash, not anticipated sales. Re-plan after confirmed fills. Unvalued holdings, unsupported currencies, unresolved orders or stale data block the plan instead of silently ignoring risk. Increases are restricted to validated entry windows and directional Buy signals.
-
-## Optional autonomous mode
-
-Paper is the default. Testnet/live modes require server-side credentials, explicit expiring owner-bound permissions, reviewed source/host clearance, kill-switch clearance, a symbol allowlist, notional limits, fee ceiling, fresh account/flow reconciliation, matching profile/account/plan hashes and independently mature prospective evidence. Live adds a separate acknowledgement. Credentials are environment-injected by the operator and must not enable withdrawals.
-
-`config.autonomy.enabled` is separate from broker permissions. A sequential bounded worker re-evaluates and sizes plans; it stops on an error, expiry, partial/unknown fill or revoked permission. Permission state is re-read before the actual POST. Deterministic order IDs and a durable reservation prevent duplicate submission after restart. There is no blind retry after an ambiguous exchange response. Recovery requires reconciling actual exchange orders/fills; do not delete the ledger to bypass an unknown state.
-
-This is single-host persistent infrastructure, not a horizontally scalable HA execution cluster. Aggregate limits apply to this configured account owner and ledger; do not configure the same real account independently in multiple workers. Market depth impact, taxes, cross-currency conversion, shorting/leverage, equity corporate actions and complete multi-account accounting are not certified here. A separately reviewed licensed market-data provider is required for automated global-equity coverage.
-
-## Multidisciplinary review
-
-Economics: after-cost edge and a fair benchmark, no fabricated alpha. Statistics: causal features, separate calibration, untouched test and prospective evidence. Trading: exchange filters, stale-book rejection, bounded limits and ambiguous-fill safety. Investing: reserves, horizon, cash-flow constraints and explicit goals. Mathematics: convex feasibility and objective-gap certificate, not future-outcome optimality. Architecture: versioned data/ML/risk/execution ports and a single opt-in gateway. Engineering: deterministic tests, failure injection, durable idempotency, fixed-source budgets and CI. These are implementation controls, not independent expert scores.
+See [operational verification](docs/operational-verification.md) for a checksum-verified SQLite backup/restore drill and its limitations, and [verification record](VERIFICATION.md) for exact completed evidence. Tests do not verify the user's production host, actual credentials/profile, exchange fills, historical security exposure, or elapsed prospective returns. Free verified automated data currently covers Binance Spot, not unrestricted global equities. Long intraday archives, HA/multi-account accounting, cross-currency conversion, taxes, equity corporate actions and a full personal-policy performance study remain outside the completed verification scope.
