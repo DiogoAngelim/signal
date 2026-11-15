@@ -96,7 +96,7 @@ export function validateProfile(p, now = Date.now()) {
   return structuredClone(p);
 }
 
-/** Order sizing is a recommendation, not permission to place orders. Upcoming money is never spent. */
+/** Recommendations are not execution permissions. Upcoming money is never spent. */
 export function planPortfolio({ profile, account, assets, returnMatrix, now = Date.now(), expectedRelease }) {
   const p = validateProfile(profile, now);
   check(Array.isArray(assets) && assets.length >= 1 && assets.length <= 20, 'asset_count');
@@ -118,7 +118,6 @@ export function planPortfolio({ profile, account, assets, returnMatrix, now = Da
     return Number(decimal((held.get(a.symbol) || 0n) * units(a.quote.price) / SCALE));
   });
   const equity = Number(decimal(cash)) + sum(values); check(equity > 0, 'no_equity');
-  // Settled contributions are already in reconciled available cash; no double counting.
   const upcoming = p.cashFlows.filter(f => !f.settled && f.type === 'contribution');
   let reserve = units(p.cashReserve);
   for (const flow of p.cashFlows) if (!flow.settled && flow.type === 'withdrawal' && flow.dueAt <= now + Math.min(90, p.horizonDays) * 86400000)
@@ -133,7 +132,7 @@ export function planPortfolio({ profile, account, assets, returnMatrix, now = Da
   const expectedReturns = assets.map(a => Math.max(-0.5, a.expectedReturn - 1.96 * a.uncertainty));
   const currentWeights = values.map(v => v / equity);
   const costs = assets.map(a => a.feeBps / 10000 + (a.quote.ask - a.quote.bid) / (2 * a.quote.price) + 0.0005);
-  const caps = assets.map(a => Math.min(p.maxAssetWeight, a.liquidityCapWeight));
+  const caps = assets.map((a,i) => Math.min(p.maxAssetWeight, a.liquidityCapWeight, a.allowIncrease===false?currentWeights[i]:1));
   const periodsPerYear = assets[0].periodsPerYear;
   number(periodsPerYear, 'periods_per_year', 1, 525600);
   check(assets.every(a => a.periodsPerYear === periodsPerYear), 'unaligned_forecast_horizons');
@@ -150,7 +149,6 @@ export function planPortfolio({ profile, account, assets, returnMatrix, now = Da
   const orders = assets.map((a, i) => {
     const current = held.get(a.symbol) || 0n;
     const targetRaw = Math.max(0, solved.weights[i] * equity / a.quote.price);
-    // Mathematical optimization is floating point; executable amounts are rounded down, never up.
     const target = units(floorToStep((Math.floor(targetRaw * 1e8) / 1e8).toFixed(8), a.lotStep));
     const action = target > current ? 'BUY' : target < current ? 'SELL' : 'HOLD';
     const raw = target >= current ? target - current : current - target;
@@ -161,7 +159,6 @@ export function planPortfolio({ profile, account, assets, returnMatrix, now = Da
     return { symbol: a.symbol, action, quantity, price, targetQuantity: decimal(target), currentQuantity: decimal(current),
       targetWeight: solved.weights[i], a, reason: 'cost-aware constrained portfolio rebalance' };
   });
-  // Sells are presented first; buys may use existing settled cash ONLY. Re-plan after actual sell fills.
   orders.sort((a, b) => Number(b.action === 'SELL') - Number(a.action === 'SELL') || a.symbol.localeCompare(b.symbol));
   for (const order of orders) {
     const { a } = order;

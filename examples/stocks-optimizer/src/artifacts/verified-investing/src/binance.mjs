@@ -1,6 +1,7 @@
-import {createHmac} from 'node:crypto';
-import {check,number,units,decimal,SCALE,fingerprint} from './contracts.mjs';
-/** Spot only: no withdrawals, transfers, leverage, futures, arbitrary host or automatic POST retry. */
+import { createHmac } from 'node:crypto';
+import { check, number, units, decimal, SCALE, fingerprint } from './contracts.mjs';
+
+/** Spot only: no withdrawals, transfers, leverage, arbitrary hosts or automatic POST retry. */
 export class VerifiedBinancePorts {
  constructor({mode,apiKey,apiSecret,owner,permissions,profileLookup,quotePort,fetchImpl=globalThis.fetch,now=Date.now}){
   check(['testnet','live'].includes(mode),'broker_mode_required');check(typeof apiKey==='string'&&apiKey.length>0&&typeof apiSecret==='string'&&apiSecret.length>0,'broker_credentials_required');
@@ -53,6 +54,12 @@ export class VerifiedBinancePorts {
   return{quoteCurrency:profile.quoteCurrency,syncedAt:this.now(),reconciled:true,openOrders:0,holdings,availableCash,flowAdjustedPeakEquity:peak};
  }
  async permissions(tenant,plan){const profile=this.profileLookup(tenant);check(profile,'profile_required');const account=await this.snapshot(tenant,profile);return{...this.permissionConfig,tenant,mode:this.mode,profileHash:fingerprint(profile),accountHash:fingerprint({...account,syncedAt:0}),reconciledAccountAt:account.syncedAt,spentToday:0};}
+ assertPermission(symbol,expiresAt){
+  const p=this.permissionConfig;check(p.enabled===true&&p.expiresAt>this.now(),'execution_permission_expired');
+  check(p.killSwitch===false&&p.securityReviewCleared===true,'execution_clearance_required');
+  if(this.mode==='live')check(p.liveAcknowledged===true,'live_acknowledgement_required');
+  check(p.allowedSymbols.includes(symbol),'symbol_not_permitted');check(Number.isFinite(expiresAt)&&this.now()<expiresAt,'order_plan_expired');
+ }
  async submitLimit(order){
   check(this.permissionConfig.enabled===true&&this.permissionConfig.expiresAt>this.now(),'execution_permission_expired');check(this.permissionConfig.killSwitch===false&&this.permissionConfig.securityReviewCleared===true,'execution_clearance_required');
   if(this.mode==='live')check(this.permissionConfig.liveAcknowledged===true,'live_acknowledgement_required');check(this.permissionConfig.allowedSymbols.includes(order.symbol),'symbol_not_permitted');
@@ -61,6 +68,7 @@ export class VerifiedBinancePorts {
   check(quantity>0n&&price>0n&&quantity%units(filters.lotStep)===0n&&price%units(filters.priceTick)===0n,'order_step_mismatch');check(quantity>=units(filters.minQuantity)&&quantity<=units(filters.maxQuantity),'order_quantity_limit');
   const notional=quantity*price/SCALE;check(notional>=units(filters.minNotional),'order_below_minimum');const nf=info.filters.find(f=>f.filterType==='NOTIONAL');if(nf?.maxNotional)check(notional<=units(nf.maxNotional),'order_above_exchange_maximum');
   try{return await this.request('/api/v3/order',{symbol:order.symbol,origClientOrderId:order.clientOrderId});}catch(error){if(error.exchangeCode!==-2013)throw error;}
+  this.assertPermission(order.symbol,order.expiresAt);
   return this.request('/api/v3/order',{symbol:order.symbol,side:order.action,type:'LIMIT',timeInForce:'IOC',quantity:decimal(quantity),price:decimal(price),newClientOrderId:order.clientOrderId},'POST',true,1);
  }
  order(symbol,clientOrderId){return this.request('/api/v3/order',{symbol,origClientOrderId:clientOrderId});}

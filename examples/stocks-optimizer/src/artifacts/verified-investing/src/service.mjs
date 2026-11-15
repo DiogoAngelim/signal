@@ -88,19 +88,22 @@ export function createInvestingService({store,dataClient,signal,runtime,mode='pa
    const filters=await filterPort.filters(s.symbol,profile.quoteCurrency),strategy=store.get(tenant,'strategy',s.strategyHash),horizon=INTERVAL_MS[s.interval]*strategy.model.config.horizon;
    check(strategy.finalTest.metrics.maxDrawdown<=profile.maxDrawdown,'strategy_exceeds_personal_drawdown_limit');
    const multiplier=86400000/horizon;
-   assets.push({...filters,liquidityCapWeight:Math.min(filters.liquidityCapWeight,strategy.exposure),symbol:s.symbol,strategyHash:s.strategyHash,quote:s.quote,eligible:true,allowIncrease:s.entryWindowOpen,
+   assets.push({...filters,liquidityCapWeight:Math.min(filters.liquidityCapWeight,strategy.exposure),symbol:s.symbol,strategyHash:s.strategyHash,quote:s.quote,eligible:true,allowIncrease:s.entryWindowOpen&&s.rawAction==='BUY',
     expectedReturn:Math.max(-0.5,Math.min(0.5,Math.expm1(Math.log1p(s.forecast.expectedGrossReturn)*multiplier))),
     uncertainty:Math.min(1,s.forecast.predictionStd/Math.sqrt(strategy.model.nTrain)*multiplier),periodsPerYear:365});
    daily.push(await dataClient.history(s.symbol,'1d',253));
   }
   const maps=daily.map(d=>new Map(d.bars.slice(1).map((b,i)=>[b.timestamp,b.close/d.bars[i].close-1])));
   const timestamps=[...maps[0].keys()].filter(t=>maps.every(m=>m.has(t))).sort((a,b)=>a-b),matrix=timestamps.map(t=>maps.map(m=>m.get(t)));
+  for(const asset of assets)asset.quote=await dataClient.quote(asset.symbol);
   const result=await runtime.query('investing.plan.v1',{profile,account,assets,returnMatrix:matrix,now:now(),expectedRelease:dataClient.expectedRelease});
   check(result.ok,'runtime_plan_failed');const decision=result.result??result.data;
   store.transaction(()=>{if(!store.get(tenant,'plan',decision.planHash))store.put(tenant,'plan',decision.planHash,decision);store.append(tenant,'plan.created',{planHash:decision.planHash});});return decision;
  }
  async function execute(tenant,planHash){
-  const decision=store.get(tenant,'plan',planHash);check(decision,'unknown_plan');const permissions=permissionPort?await permissionPort.permissions(tenant,decision):null;
+  const decision=store.get(tenant,'plan',planHash);check(decision,'unknown_plan');
+  if(mode==='paper'&&accountPort){const profile=store.currentProfile(tenant);check(profile&&fingerprint(profile)===decision.riskProfileHash,'risk_profile_changed');const account=await accountPort.snapshot(tenant,profile);check(fingerprint({...account,syncedAt:0})===decision.accountHash,'account_changed');}
+  const permissions=permissionPort?await permissionPort.permissions(tenant,decision):null;
   return executeApprovedPlan({tenant,plan:decision,strategyHashes:decision.strategyHashes,store,permissions,broker:brokerPort,mode,now:now()});
  }
  return{research,saveProfile,signals,plan,execute,report:(tenant,key)=>store.get(tenant,'research',key),

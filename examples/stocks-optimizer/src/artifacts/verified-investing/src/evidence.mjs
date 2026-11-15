@@ -1,8 +1,8 @@
 import { DatabaseSync } from 'node:sqlite';
-import { check, id, fingerprint, validateQuote, afterCosts, integer, INTERVAL_MS, mean } from './contracts.mjs';
+import { units, check, id, fingerprint, validateQuote, afterCosts, integer, INTERVAL_MS, mean } from './contracts.mjs';
 import { blockMeanInterval } from './research.mjs';
 
-/** Single-host durable ledger. Use a persistent disk; not suitable for ephemeral/serverless replicas. */
+/** Single-host durable ledger. Requires persistent disk, not ephemeral/serverless replicas. */
 export class EvidenceStore {
   constructor(filename, { now = Date.now, allowMemory = false } = {}) {
     check(typeof filename === 'string' && filename.length > 0 && (filename !== ':memory:' || allowMemory), 'durable_ledger_required');
@@ -11,6 +11,7 @@ export class EvidenceStore {
     this.db.exec(`PRAGMA journal_mode=WAL; PRAGMA synchronous=FULL; PRAGMA busy_timeout=5000;
       CREATE TABLE IF NOT EXISTS records (tenant TEXT NOT NULL, kind TEXT NOT NULL, id TEXT NOT NULL, body TEXT NOT NULL,
         created_at INTEGER NOT NULL, PRIMARY KEY(tenant,kind,id));
+      CREATE INDEX IF NOT EXISTS records_chronological ON records(tenant,kind,created_at,id);
       CREATE TABLE IF NOT EXISTS audit (seq INTEGER PRIMARY KEY, tenant TEXT NOT NULL, event TEXT NOT NULL,
         body TEXT NOT NULL, at INTEGER NOT NULL, previous_hash TEXT NOT NULL, hash TEXT NOT NULL);
       CREATE TABLE IF NOT EXISTS executions (tenant TEXT NOT NULL, id TEXT NOT NULL, plan TEXT NOT NULL,
@@ -110,8 +111,8 @@ export class EvidenceStore {
       check(!active,'unresolved_execution_exists');
       const since = Math.floor(this.now()/86400000)*86400000;
       const daily = this.db.prepare("SELECT plan FROM executions WHERE tenant=? AND created_at>=? AND status NOT IN ('rejected','cancelled')").all(tenant,since);
-      const spent = daily.reduce((s,r)=>s+JSON.parse(r.plan).orders.reduce((n,o)=>n+Number(o.notional),0),0);
-      check(spent+plan.orders.reduce((n,o)=>n+Number(o.notional),0)<=maxDailyNotional,'notional_budget_exceeded');
+      const spent = daily.reduce((s,r)=>s+JSON.parse(r.plan).orders.reduce((n,o)=>n+units(o.notional),0n),0n);
+      if(Number.isFinite(maxDailyNotional))check(spent+plan.orders.reduce((n,o)=>n+units(o.notional),0n)<=units(maxDailyNotional),'notional_budget_exceeded');
       this.db.prepare('INSERT INTO executions VALUES(?,?,?,?,?,?)').run(tenant,key,JSON.stringify(plan),'reserved','{}',this.now());
       this.append(tenant,'execution.reserved',{key,planHash:plan.planHash});return {acquired:true,status:'reserved'};
     });
@@ -126,7 +127,7 @@ export class EvidenceStore {
   close() { this.db.close(); }
 }
 
-/** Only server-owned evidence and permissions may enter this boundary. No request-body approval flags. */
+/** Inputs here are server-owned; request-body approval flags never authorize execution. */
 export async function executeApprovedPlan({ tenant, plan, strategyHashes, store, permissions, broker, mode = 'paper', now = Date.now() }) {
   check(['paper','testnet','live'].includes(mode),'invalid_execution_mode');
   check(plan && plan.expiresAt > now && plan.generatedAt <= now && now-plan.generatedAt<=15000,'stale_plan');
@@ -139,26 +140,27 @@ export async function executeApprovedPlan({ tenant, plan, strategyHashes, store,
     check(permissions.reconciledAccountAt>=now-15000 && permissions.reconciledAccountAt<=now,'account_reconciliation_required');
     check(permissions.profileHash===plan.riskProfileHash,'risk_profile_changed');
     check(permissions.accountHash===plan.accountHash,'account_changed');
-    check(fingerprint([...strategyHashes].sort())===fingerprint([...plan.strategyHashes].sort()),'strategy_plan_mismatch');
     check(Array.isArray(strategyHashes)&&strategyHashes.length>0,'strategy_evidence_required');
+    check(fingerprint([...strategyHashes].sort())===fingerprint([...plan.strategyHashes].sort()),'strategy_plan_mismatch');
     for(const hash of strategyHashes) check(store.forward(tenant,hash).passed,'prospective_validation_required');
     for(const order of plan.orders) check(permissions.allowedSymbols.includes(order.symbol),'symbol_not_permitted');
-    const notional=plan.orders.reduce((s,o)=>s+Number(o.notional),0);
-    check(notional<=permissions.maxBatchNotional && notional+permissions.spentToday<=permissions.maxDailyNotional,'notional_budget_exceeded');
+    const notional=plan.orders.reduce((s,o)=>s+units(o.notional),0n);
+    check(notional<=units(permissions.maxBatchNotional) && notional+units(permissions.spentToday)<=units(permissions.maxDailyNotional),'notional_budget_exceeded');
     check(broker && typeof broker.submitLimit==='function','broker_required');
     if(mode==='live') check(permissions.liveAcknowledged===true,'live_acknowledgement_required');
   }
   const key=planHash;
   const lease=store.reserveExecution(tenant,key,plan,mode==='paper'?Infinity:permissions.maxDailyNotional);
   if(!lease.acquired)return {duplicate:true,...lease};
+  if(mode==='paper'&&broker?.settlePaper)return broker.settlePaper(tenant,key,plan);
   if(mode==='paper')return store.finishExecution(tenant,key,'filled',{mode,simulated:true,orders:plan.orders,liveOrdersPlaced:0});
   const results=[];
   try {
     for(let i=0;i<plan.orders.length;i++) {
       const order=plan.orders[i];if(order.action==='HOLD')continue;
-      check(Date.now()<plan.expiresAt,'plan_expired_during_execution');
+      check(store.now()<plan.expiresAt,'plan_expired_during_execution');
       store.finishExecution(tenant,key,'submitted',{results,pendingIndex:i});
-      const result=await broker.submitLimit({...order,clientOrderId:`vi${planHash.slice(0,25)}${i}`});
+      const result=await broker.submitLimit({...order,expiresAt:plan.expiresAt,clientOrderId:`vi${planHash.slice(0,25)}${i}`});
       results.push(result);
       if(result.status!=='FILLED') return store.finishExecution(tenant,key,'unknown',{results,reconciliationRequired:true});
     }

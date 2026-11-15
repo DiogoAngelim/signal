@@ -24,7 +24,15 @@ jobs:
         run: node "$VERIFIED_ROOT/scripts/security-scan.mjs"
       - name: Install isolated pinned build tools without lifecycle scripts
         run: npm install --ignore-scripts --no-audit --no-fund --prefix "$RUNNER_TEMP/verified-tools" esbuild@0.25.12 zod@4.1.12
-      - name: Build real pinned Signal runtime and decision calibration
+      - name: Build pinned Signal runtime and decision calibration
         run: VERIFIED_TOOLING_DIR="$RUNNER_TEMP/verified-tools" node "$VERIFIED_ROOT/scripts/build.mjs"
-      - name: Run executable research, allocation, evidence and runtime integration tests
-        run: node --test --experimental-test-coverage "$VERIFIED_ROOT"/test/*.test.mjs
+      - name: Run research, allocation, evidence and integration tests
+        run: node --test --experimental-test-coverage --test-coverage-exclude='**/dist/**' --test-coverage-exclude='**/test/**' "$VERIFIED_ROOT"/test/*.test.mjs
+      - name: Read-only real-data research probe (informational, not a passed validation test)
+        if: github.event_name == 'pull_request'
+        run: |
+          node "$VERIFIED_ROOT/scripts/live-research-probe.mjs"
+          echo '### Real-data verification outcome (not unit-test evidence)' >> "$GITHUB_STEP_SUMMARY"
+          echo '```json' >> "$GITHUB_STEP_SUMMARY"
+          cat live-research-evidence.json >> "$GITHUB_STEP_SUMMARY"
+          echo '```' >> "$GITHUB_STEP_SUMMARY"

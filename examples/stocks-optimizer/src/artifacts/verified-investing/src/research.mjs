@@ -2,7 +2,7 @@ import { check, number, integer, mean, variance, costModel, afterCosts, fingerpr
   validateDataset, INTERVAL_MS, SCHEMA, SOURCE_SIGNAL_COMMIT } from './contracts.mjs';
 import { indicators, samplesFor, chronologicalSplit, fitModel, predictModel, candidateConfigs } from './model.mjs';
 
-/** Moving-block resampling, seeded and deterministic. Dependence is not mistaken for extra independent trials. */
+/** Moving-block resampling, seeded and deterministic. Dependence is not extra independent evidence. */
 export function blockMeanInterval(values, { blockLength = 5, confidence = 0.95, draws = 1000 } = {}) {
   check(Array.isArray(values) && values.length >= 2 && values.every(Number.isFinite), 'invalid_returns');
   integer(draws, 'bootstrap_draws', 200, 10000); number(confidence, 'confidence', 0.9, 0.999);
@@ -25,11 +25,11 @@ export function blockMeanInterval(values, { blockLength = 5, confidence = 0.95, 
     independentBlockEstimate: Math.floor(values.length / blockLength), draws, confidence };
 }
 
-/** Long-only next-open entry and close-at-horizon exit. Costs affect cash/equity, not just trade labels. */
+/** Long-only next-open entry and close-at-horizon exit. Costs affect actual simulated equity. */
 export function backtest(samples, model, { costs = {}, exposure = 0.25, applyCalibrator } = {}) {
   const c = costModel(costs); number(exposure, 'exposure', 0, 1);
   const trades = [], curve = [], excess = [], predicted = []; let equity = 1, peak = 1, maxDrawdown = 0, occupiedUntil = -1;
-  let benchmark = 1, lastTime = -1;
+  let benchmark = 1, lastTime = -1; const benchmarkEntry = samples[0]?.entry;
   for (const s of samples) {
     check(s.time > lastTime && s.entryTime > s.time && s.exitTime >= s.entryTime, 'noncausal_backtest'); lastTime = s.time;
     if (s.entryTime <= occupiedUntil) continue;
@@ -37,9 +37,13 @@ export function backtest(samples, model, { costs = {}, exposure = 0.25, applyCal
     const net = afterCosts(s.entry, s.exit, c);
     const active = forecast.probability >= (model.config.probabilityThreshold ?? 0.55) && forecast.expectedGrossReturn > model.roundTripCost;
     const r = active ? exposure * net : 0;
-    equity *= 1 + r; benchmark *= 1 + exposure * net;
+    equity *= 1 + r;
+    // A buy-and-hold sleeve pays entry/exit costs once, not a fictitious round trip every bar.
+    const previousBenchmark = benchmark;
+    benchmark = 1 + exposure * afterCosts(benchmarkEntry, s.exit, c);
+    const benchmarkPeriodReturn = benchmark / previousBenchmark - 1;
     peak = Math.max(peak, equity); maxDrawdown = Math.max(maxDrawdown, 1 - equity / peak);
-    excess.push(r - exposure * net);
+    excess.push(r - benchmarkPeriodReturn);
     predicted.push({ time: s.time, probability: forecast.probability, outcome: Number(net > 0), return: r });
     if (active) trades.push({ signalAt: s.time, entryAt: s.entryTime, exitAt: s.exitTime,
       entryPrice: s.entry, exitPrice: s.exit, exposure, grossReturn: s.grossReturn, netReturn: net, equityReturn: r });
@@ -60,7 +64,6 @@ export function backtest(samples, model, { costs = {}, exposure = 0.25, applyCal
     winRate: trades.length ? wins.length / trades.length : null, brier, constantBrier } };
 }
 
-/** Gate rules are fixed before looking at final outcomes. A failed winner stays failed. */
 export function validationGates(result, stressed, { maxDrawdown = 0.15, minTrades = 30,
   minDays = 90, minBlocks = 20, blockLength = 5, maxBrier = 0.25 } = {}) {
   number(maxDrawdown, 'drawdown_limit', 0.001, 0.5); integer(minTrades, 'minimum_trades', 20, 10000);
@@ -80,7 +83,7 @@ export function validationGates(result, stressed, { maxDrawdown = 0.15, minTrade
     blockers: Object.entries(gates).filter(([, v]) => !v).map(([k]) => k) };
 }
 
-/** Expanding-window retraining confined to the selection partition. Final test remains untouched. */
+/** Expanding-window retraining confined to selection. Final test remains untouched. */
 export function walkForwardSelection(train, selection, config, options) {
   check(selection.length >= 99, 'walk_forward_sample');
   const folds = [];
@@ -95,7 +98,7 @@ export function walkForwardSelection(train, selection, config, options) {
   return folds;
 }
 
-/** Actual Signal calibrator is injected by the runtime adapter; no imitation or synthetic fallback. */
+/** Actual Signal calibrator is injected; no imitated implementation or synthetic market fallback. */
 export function discoverStrategy(datasets, { now = Date.now(), expectedRelease,
   costs = {}, exposure = 0.25, configs = candidateConfigs(), gatePolicy = {}, signal } = {}) {
   check(signal?.fitBinaryIsotonicCalibrator && signal?.applyBinaryIsotonicCalibrator, 'signal_calibration_required');
@@ -104,7 +107,6 @@ export function discoverStrategy(datasets, { now = Date.now(), expectedRelease,
   const data = datasets.map(d => validateDataset(d, { now, minBars: 1200, expectedRelease }));
   check(new Set(data.map(d => `${d.symbol}:${d.interval}`)).size === data.length, 'duplicate_dataset');
   const c = costModel(costs), roundTripCost = -afterCosts(1, 1, c);
-  // Compare timeframes on the same calendar bounds, not incomparable backtest lengths.
   const start = Math.max(...data.map(d => d.bars[200].closeTime));
   const end = Math.min(...data.map(d => d.bars.at(-1).closeTime));
   check(end > start, 'no_common_history');
@@ -130,7 +132,6 @@ export function discoverStrategy(datasets, { now = Date.now(), expectedRelease,
   const calibration = winner.splits.calibration.map(s => ({ id: `${winner.symbol}:${winner.interval}:${s.id}`,
     rawProbability: predictModel(winner.model, s.x).rawProbability,
     observedOutcome: Number(afterCosts(s.entry, s.exit, c) > 0) }));
-  // Freeze before final-test evaluation; never try runner-up models after test failure.
   winner.model.calibrator = signal.fitBinaryIsotonicCalibrator(calibration, {
     modelVersion: winner.model.modelHash, calibrationDatasetVersion: winner.dataHash, split: 'calibration_only' });
   const frozenHash = fingerprint(winner.model);
