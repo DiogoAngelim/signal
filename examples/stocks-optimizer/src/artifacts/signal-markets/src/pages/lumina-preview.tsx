@@ -23,79 +23,6 @@ function LuminaMark({ size = 28 }: { size?: number }) {
   );
 }
 
-function ScenarioCard({ state, onExposure }: { state: JourneyState; onExposure: (value: number) => void }) {
-  const [details, setDetails] = useState(false);
-  if (state.amount === null) return null;
-  const values = scenario(state.amount, state.exposedPercent);
-  return (
-    <>
-      <div className="l-kicker">A first picture, not an answer</div>
-      <h2 className="l-question">Let's see what flexibility could look like.</h2>
-      <p>{state.horizon ? HORIZON_EXPLANATIONS[state.horizon] : "We don't have a timeframe yet."} We can explore a simple split without treating it as a judgment about what you should do.</p>
-      <section className="l-visual" aria-label="Interactive hypothetical allocation">
-        <div className="l-visual-head">
-          <div>
-            <div className="l-label">Illustration · Not a recommendation</div>
-            <h3>Make room for possibility.<br />Keep room to breathe.</h3>
-          </div>
-          <span className="l-concept-tag">Practice</span>
-        </div>
-        <p className="l-visual-description">This is an adjustable example of how much money you could keep accessible versus expose to market price changes. It isn't a personalized recommendation.</p>
-        <div className="l-split" role="img" aria-label={"Illustrative allocation: " + values.accessiblePercent + "% accessible, " + values.exposedPercent + "% market-exposed"}>
-          <div className={"l-slice l-liquid" + (values.accessiblePercent <= 8 ? " l-minimal" : "")} style={{ flexGrow: Math.max(values.accessiblePercent, 0.1), display: values.accessiblePercent === 0 ? "none" : undefined }}>
-            <span>Accessible<strong>{values.accessiblePercent}%</strong></span>
-          </div>
-          <div className={"l-slice l-exposed" + (values.exposedPercent <= 8 ? " l-minimal" : "")} style={{ flexGrow: Math.max(values.exposedPercent, 0.1), display: values.exposedPercent === 0 ? "none" : undefined }}>
-            <span>Market-exposed<strong>{values.exposedPercent}%</strong></span>
-          </div>
-        </div>
-        <div className="l-slider-heading">
-          <label htmlFor="lumina-exposure"><strong>Move the balance</strong>Market-exposed portion</label>
-          <strong>{values.exposedPercent}%</strong>
-        </div>
-        <input
-          id="lumina-exposure"
-          className="l-slider"
-          aria-label="Percentage allocated to market-exposed investments in this example"
-          type="range" min={0} max={100} step={5} value={values.exposedPercent}
-          onChange={(event) => onExposure(Number(event.currentTarget.value))}
-        />
-        <div className="l-balances">
-          <div className="l-stat"><span>Accessible in this example</span><strong>{formatBRL(values.accessibleValue)}</strong></div>
-          <div className="l-stat l-stat-alt"><span>Exposed to market moves</span><strong>{formatBRL(values.exposedValue)}</strong></div>
-        </div>
-        <div className="l-stress">
-          <p><strong>What if the exposed portion fell 20%?</strong><br />This hypothetical market drop would reduce the example by:</p>
-          <strong>{values.hypotheticalLoss20 ? "−" : ""}{formatBRL(values.hypotheticalLoss20)}</strong>
-        </div>
-        <p className="l-disclaimer">A 20% fall is an illustrative stress event, not a probability or forecast. “Accessible” doesn't mean risk-free; this simplified model excludes taxes, fees, inflation, and asset liquidity constraints. No investments or live prices are used.</p>
-      </section>
-      <div className="l-actions">
-        <button type="button" className="l-primary" onClick={() => onSave(state)}>
-          <Bookmark size={16} aria-hidden="true" /> Save this practice choice
-        </button>
-        <button type="button" className="l-secondary" aria-expanded={details} aria-controls="lumina-assumptions" onClick={() => setDetails((open) => !open)}>
-          <Info size={16} aria-hidden="true" /> What am I seeing?
-        </button>
-      </div>
-      {details ? (
-        <div className="l-details" id="lumina-assumptions">
-          <p><strong>Known:</strong> only the hypothetical amount and timeframe you provided.</p>
-          <p><strong>Assumed:</strong> allocation categories and the 20% stress example.</p>
-          <p><strong>Unknown:</strong> real holdings, emergency needs, tax situation, prices, and suitable assets.</p>
-          <p>This prototype cannot make verified personalized recommendations or trade. Adjusting the slider or saving a practice choice changes this temporary exploration only.</p>
-        </div>
-      ) : null}
-    </>
-  );
-
-  function onSave(current: JourneyState) {
-    const at = new Date().toISOString();
-    const id = String(Date.now()) + "-" + current.nextId;
-    window.dispatchEvent(new CustomEvent("lumina-preview-save", { detail: { at, id } }));
-  }
-}
-
 function GuideMessage({
   message, state, isLatestPrompt, onHorizon, onAmount, onExposure, onSave, onStart,
 }: {
@@ -137,7 +64,7 @@ function GuideMessage({
           </>
         ) : null}
         {message.kind === "scenario" ? (
-          <ScenarioCardBridge state={state} onExposure={onExposure} onSave={onSave} />
+          <ScenarioWithSave state={state} onExposure={onExposure} onSave={onSave} />
         ) : null}
         {message.kind === "saved" ? (
           <>
@@ -163,10 +90,6 @@ function GuideMessage({
   );
 }
 
-// Keep the slider, explanation and save action attached to the same scenario.
-function ScenarioCardBridge({ state, onExposure, onSave }: { state: JourneyState; onExposure: (value: number) => void; onSave: () => void }) {
-  return <ScenarioWithSave state={state} onExposure={onExposure} onSave={onSave} />;
-}
 function ScenarioWithSave({ state, onExposure, onSave }: { state: JourneyState; onExposure: (value: number) => void; onSave: () => void }) {
   const [details, setDetails] = useState(false);
   if (state.amount === null) return null;
@@ -202,7 +125,7 @@ function ScenarioWithSave({ state, onExposure, onSave }: { state: JourneyState; 
 }
 
 export default function LuminaPreview() {
-  const [state, dispatch] = useReducer(journeyReducer, undefined, () => newJourney());
+  const [state, dispatch] = useReducer(journeyReducer, newJourney());
   const [text, setText] = useState("");
   const [panel, setPanel] = useState<"history" | "about" | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
