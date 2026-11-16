@@ -181,6 +181,7 @@ export default function LuminaPreview() {
   const closeRef = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const latestRef = useRef<HTMLDivElement>(null);
+  const returningNoticeRef = useRef<HTMLDivElement>(null);
   const messageCount = state.messages.length;
 
   // Saving in Practice is explicit; do not persist messages, drafts or free-form financial text.
@@ -198,6 +199,12 @@ export default function LuminaPreview() {
       block: "nearest",
     });
   }, [messageCount]);
+
+  useEffect(() => {
+    if (state.step === "returning" && state.notice) {
+      returningNoticeRef.current?.scrollIntoView?.({ block: "nearest" });
+    }
+  }, [state.step, state.notice]);
 
   useEffect(() => {
     if (!panel) return;
@@ -249,8 +256,9 @@ export default function LuminaPreview() {
         </div>
       </header>
       <main className="l-shell" aria-label="Lúmina conversation">
-        {state.notice ? <div role="status" className="l-status"><Info size={16} aria-hidden="true" /><span>{state.notice}</span></div> : null}
+        {state.step !== "returning" && state.notice ? <div role="status" className="l-status"><Info size={16} aria-hidden="true" /><span>{state.notice}</span></div> : null}
         {state.step === "returning" && state.choices[0] ? (
+          <>
           <ReturningExperience
             latest={state.choices[0]} otherCount={Math.max(0, state.choices.length - 1)}
             onResume={() => resumeChoice(state.choices[0].id)}
@@ -258,6 +266,12 @@ export default function LuminaPreview() {
             onNew={reset} onUpdate={describeChanges}
             onHistory={() => setPanel("history")}
           />
+          {state.notice ? (
+            <div role="status" className="l-status l-return-status" ref={returningNoticeRef}>
+              <Info size={16} aria-hidden="true" /><span>{state.notice}</span>
+            </div>
+          ) : null}
+          </>
         ) : state.step === "welcome" ? (
           <section className="l-welcome">
             <div className="l-orbit" aria-hidden="true"><span /></div>
