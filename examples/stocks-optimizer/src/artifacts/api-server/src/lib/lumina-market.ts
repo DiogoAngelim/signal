@@ -129,7 +129,7 @@ export type LuminaMarketQuote = {
   note: string;
 };
 
-function unavailableQuote(symbol: LuminaSymbol, now: number): LuminaMarketQuote {
+function unavailableQuote(symbol: LuminaSymbol, now: number, restricted = false): LuminaMarketQuote {
   const meta = LUMINA_MARKETS[symbol];
   return {
     symbol, label: meta.label, currency: meta.currency,
@@ -140,7 +140,7 @@ function unavailableQuote(symbol: LuminaSymbol, now: number): LuminaMarketQuote 
     receivedAt: new Date(now).toISOString(), syncedAt: null, quoteAt: null,
     realtimeVerified: false, eligibleForLiveCalculations: false,
     reliabilityScore: null,
-    note: "The tradingview-data module could not verify this price. No market value was substituted.",
+    note: restricted ? "The underlying provider restricted access from this deployment. No other host or substituted price was used." : "The tradingview-data module could not verify this price. No market value was substituted.",
   };
 }
 
@@ -163,7 +163,11 @@ export async function getLuminaMarketQuote(
         [String(symbol), String(meta.tradingViewSymbol)].includes(entry.providerSymbol.toUpperCase())),
     );
     if (!quote || quote.provider !== meta.providerId || quote.source !== meta.providerId) {
-      return unavailableQuote(symbol, now);
+      const restricted = data.errors?.some((error) =>
+        Boolean(error) && typeof error === "object" &&
+        /\b(401|403|418|451)\b/.test(String((error as { error?: unknown }).error ?? "")),
+      ) ?? false;
+      return unavailableQuote(symbol, now, restricted);
     }
     const observedAt = observationMs(quote.timestamp);
     const age = now - observedAt;
