@@ -100,10 +100,11 @@ function HistoryPlot({ history, currency }: {
 }
 
 export default function LuminaMarketPanel({
-  user, onWatchCreated,
-}: { user: LuminaUser | null; onWatchCreated?: () => void }) {
-  const [category, setCategory] = useState<"crypto" | "stocks">("crypto");
-  const [symbol, setSymbol] = useState<MarketSymbol>("BTCUSDT");
+  user, onWatchCreated, initialSymbol,
+}: { user: LuminaUser | null; onWatchCreated?: () => void; initialSymbol?: MarketSymbol }) {
+  const [category, setCategory] = useState<"crypto" | "stocks">(
+    initialSymbol && STOCK_MARKETS.some((m) => m.symbol === initialSymbol) ? "stocks" : "crypto");
+  const [symbol, setSymbol] = useState<MarketSymbol>(initialSymbol ?? "BTCUSDT");
   const [quote, setQuote] = useState<Quote | null>(null);
   const [history, setHistory] = useState<MarketHistory | null>(null);
   const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
@@ -115,6 +116,12 @@ export default function LuminaMarketPanel({
   const [creating, setCreating] = useState(false);
   const currency = quote?.currency ?? (category === "stocks" && ["PETR4", "VALE3"].includes(symbol) ? "BRL" : "USD");
   const isCrypto = category === "crypto";
+
+  useEffect(() => {
+    if (!initialSymbol) return;
+    setSymbol(initialSymbol);
+    setCategory(STOCK_MARKETS.some((m) => m.symbol === initialSymbol) ? "stocks" : "crypto");
+  }, [initialSymbol]);
 
   useEffect(() => {
     let active = true;
