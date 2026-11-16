@@ -43,7 +43,7 @@ const PracticeInput = z.object({
 const ConversationInput = z.object({
   title: z.string().trim().min(1).max(160).default("A thought"),
 }).strict();
-const ReplyInput = z.object({ message: z.string().trim().min(1).max(2000) }).strict();
+const ReplyInput = z.object({ message: z.string().trim().min(1).max(2000), useAi: z.boolean().optional().default(false) }).strict();
 const WatchInput = z.object({
   symbol: z.enum(["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]),
   direction: z.enum(["above", "below"]),
@@ -201,18 +201,18 @@ router.post("/lumina/conversations/:id/reply", run(async (req, res) => {
   const symbol = intent && /eth/i.test(intent[0]) ? "ETHUSDT"
     : intent && /sol/i.test(intent[0]) ? "SOLUSDT" : "BTCUSDT";
   const quote = await getLuminaMarketQuote(symbol);
-  const ai = await luminaAssistantReply({
+  const ai = data.useAi ? await luminaAssistantReply({
     userId, message: data.message, goalContext: goals.map((g) => ({
       title: g.title, targetAmount: g.targetAmount, targetDate: g.targetDate,
     })),
     marketContext: quote,
     history: past.slice(-8),
-  }).catch(() => null);
+  }).catch(() => null) : null;
 
   const assistantText = ai?.text ?? (
     "I can help you explore this without rushing into a decision. " +
     (goals.length ? "We can keep your goals in view as we compare choices. " : "What would you like your money to make possible? ") +
-    "The AI conversation isn't configured or available right now. You can still save goals, explore Practice, and inspect verified public prices."
+    "The AI conversation isn't configured, enabled, or available right now. You can still save goals, explore Practice, and inspect verified public prices."
   );
   const records = await appendMessages(userId, conversationId, [
     { role: "user", content: data.message, provenance: "user-provided" },
