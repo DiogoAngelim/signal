@@ -45,12 +45,21 @@ let files;
 let source;
 const cwd = process.cwd();
 if (existsSync(path.join(cwd, ".git"))) {
-  // If a Git checkout is present but git fails, fail closed instead of silently
-  // falling back to an incomplete or misleading scan.
-  files = execFileSync("git", ["ls-files", "-z"], {
-    cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
-  }).split("\0").filter(Boolean);
-  source = "git index";
+  try {
+    files = execFileSync("git", ["ls-files", "-z"], {
+      cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+    }).split("\0").filter(Boolean);
+    source = "git index";
+  } catch (error) {
+    // Vercel's .vercelignore removes the CONTENTS of .git, but can leave a
+    // vestigial .git directory. Git then reports "not a git repository".
+    // Fall back only for that exact missing-metadata case; all other errors
+    // must still stop the install.
+    const stderr = String(error?.stderr ?? "");
+    if (!/not a git repository|Stopping at filesystem boundary/i.test(stderr)) throw error;
+    files = uploadTreeFiles(cwd);
+    source = "gitless deployment tree";
+  }
 } else {
   files = uploadTreeFiles(cwd);
   source = "gitless deployment tree";
