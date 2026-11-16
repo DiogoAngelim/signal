@@ -157,3 +157,15 @@ test("history rejects synthetic provider substitutions, insufficient samples and
     makeFetcher({ provider: "binance-public", source: "binance-public", bars: [valid, valid] }), now);
   assert.equal(invalid.status, "unavailable");
 });
+
+test("a live upstream 451 restriction is surfaced without host hopping or fake data", async () => {
+  const result = await getLuminaMarketQuote("BTCUSDT", makeFetcher({
+    quotes: [],
+    errors: [{ symbol: "BTCUSDT", error: "Binance ticker failed: 451" }],
+    syncedAt: new Date(now).toISOString(),
+  }), now);
+  assert.equal(result.status, "unavailable");
+  assert.equal(result.price, null);
+  assert.equal(result.eligibleForLiveCalculations, false);
+  assert.match(result.note, /restricted access/);
+});
