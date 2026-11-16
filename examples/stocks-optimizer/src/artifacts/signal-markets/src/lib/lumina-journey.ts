@@ -72,7 +72,7 @@ export function formatBRL(value: number): string {
 }
 
 export function resolveMoney(text: string): number | null {
-  const numberPattern = "(\d{1,3}(?:[.,]\d{3})+|\d{3,8})";
+  const numberPattern = "(\\d{1,3}(?:[.,]\\d{3})+|\\d{3,8})";
   const patterns = [
     new RegExp("(?:R\\$\\s*|BRL\\s*)" + numberPattern + "\\b", "i"),
     new RegExp("\\b" + numberPattern + "\\s*(?:reais|BRL)\\b", "i"),
