@@ -1,0 +1,113 @@
+.lumina-app { --l-glow: rgba(72,131,99,.12); }
+.lumina-app .l-shell { max-width: 880px; }
+.lumina-app .l-top { position: sticky; top: 0; height: 77px; background: rgba(247,247,243,.95); backdrop-filter: blur(16px); }
+.lumina-app .l-user-menu { border: 1px solid #cfe0d4; background: #f4f9f4; color: #345e4b; padding: 10px 16px; min-height: 43px; border-radius: 999px; font-weight: 650; font-size: 12px; }
+.lumina-app .l-user-menu:hover { background: #e7f3eb; }
+.lumina-app .l-home { padding-top: clamp(44px, 8vh, 96px); }
+.lumina-app .l-home .l-orbit { margin-bottom: 19px; }
+.lumina-app .l-home-memory { max-width: 620px; width: 100%; border-radius: 21px; border: 1px solid #dfe9df; background: linear-gradient(135deg,#fff,#f4f8f3); padding: 19px 22px; margin: 0 0 28px; box-shadow: 0 10px 35px rgba(43,78,53,.04); text-align: left; }
+.lumina-app .l-home-memory .l-label { margin-bottom: 10px; }
+.lumina-app .l-home-memory-row { display: flex; align-items: center; justify-content: space-between; gap: 14px; }
+.lumina-app .l-home-memory-row strong { display: block; font-size: 24px; font-weight: 650; letter-spacing: -.6px; font-variant-numeric: tabular-nums; }
+.lumina-app .l-home-memory-row span { display: block; font-size: 12px; color: #557164; }
+.lumina-app .l-home-memory-row button { display: flex; align-items: center; gap: 4px; white-space: nowrap; min-height: 42px; border-radius: 12px; border: 1px solid #d6e5d9; background: #edf5ed; color: #285c49; padding: 8px 12px; font-weight: 600; }
+.lumina-app .l-home-memory p { margin: 9px 0 0; font-size: 11px; color: #577164; }
+.lumina-app .l-home-tools { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; margin-top: 25px; }
+.lumina-app .l-home-tools button { display: flex; align-items: center; gap: 7px; min-height: 44px; padding: 7px 12px; color: #456957; background: transparent; border: 1px solid transparent; border-radius: 11px; font-size: 12px; }
+.lumina-app .l-home-tools button:hover { border-color: #dae9dc; background: #f1f7f0; }
+.lumina-app .l-conversation { gap: 24px; }
+.lumina-app .l-context-bar { display: flex; gap: 9px; align-items: center; color: #708578; font-size: 11px; margin-bottom: 12px; }
+.lumina-app .l-link { color: #306752; border: 0; background: transparent; padding: 8px 1px; text-decoration: underline; text-underline-offset: 3px; }
+.lumina-app .l-app-conversation .l-reply-body { padding-top: 4px; }
+.lumina-app .l-response-source { color: #658075; font-size: 11px; }
+.lumina-app .l-busy { font-size: 12px; color: #5b7667; padding: 0 0 0 45px; }
+.lumina-app .l-live-visual { width: 100%; margin-top: 18px; }
+.lumina-app .l-live-visual .l-actions { margin-top: 17px; }
+.lumina-app .l-practice-inputs { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); gap: 12px; margin-bottom: 23px; }
+.lumina-app .l-practice-inputs label, .lumina-app .l-auth-form label, .lumina-app .l-goal-form label, .lumina-app .l-watch-controls label { display: grid; gap: 7px; color: #46685b; font-size: 12px; font-weight: 650; }
+.lumina-app .l-practice-inputs input, .lumina-app .l-practice-inputs select,
+.lumina-app .l-auth-form input, .lumina-app .l-goal-form input,
+.lumina-app .l-watch-controls input, .lumina-app .l-watch-controls select {
+  width: 100%; min-width: 0; min-height: 46px; border: 1px solid #dce7dd; border-radius: 11px; color: #254b3c;
+  background: #fff; font-size: 13px; padding: 9px 11px; box-shadow: 0 1px 3px rgba(29,71,45,.02);
+}
+.lumina-app .l-practice-inputs input:focus-visible,.lumina-app .l-practice-inputs select:focus-visible,
+.lumina-app .l-auth-form input:focus-visible,.lumina-app .l-goal-form input:focus-visible,
+.lumina-app .l-watch-controls input:focus-visible,.lumina-app .l-watch-controls select:focus-visible {
+  border-color: #5c9d7f; outline: 2px solid #6aac8b; outline-offset: 2px;
+}
+.lumina-app .l-drawer { max-width: 590px; }
+.lumina-app .l-drawer .l-panel-header { padding-bottom: 4px; }
+.lumina-app .l-drawer .l-record { padding: 16px 17px; }
+.lumina-app .l-drawer .l-record strong { overflow-wrap: anywhere; }
+.lumina-app .l-goal-form { border-top: 1px solid #e2eae2; margin-top: 22px; padding-top: 22px; display: grid; gap: 14px; }
+.lumina-app .l-goal-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.lumina-app .l-goal-form .l-primary { justify-self: start; }
+.lumina-app .l-auth-cta { margin-top: 20px; }
+.lumina-app .l-auth-panel { max-width: 490px; }
+.lumina-app .l-auth-form { margin-top: 22px; display: grid; gap: 17px; }
+.lumina-app .l-auth-form .l-primary { margin-top: 7px; min-height: 48px; }
+.lumina-app .l-auth-message { padding: 11px; border-radius: 11px; background: #f2f4ea; font-size: 12px; color: #4d6553; }
+.lumina-app .l-auth-switch { display: flex; gap: 7px; flex-wrap: wrap; align-items: center; margin-top: 22px; color: #61766b; font-size: 12px; }
+.lumina-app .l-auth-switch button { color: #26634c; font-weight: 700; background: transparent; border: 0; text-decoration: underline; min-height: 35px; }
+.lumina-app .l-auth-foot { font-size: 11px !important; margin-top: 18px !important; }
+.lumina-app .l-erase { margin-top: 22px; padding-top: 18px; border-top: 1px solid #e3eae2; }
+.lumina-app .l-erase button { display: inline-flex; align-items: center; gap: 7px; border: 1px solid #e1e5d9; background: #f8f9f3; color: #655a41; padding: 11px 14px; border-radius: 10px; min-height: 44px; margin-right: 7px; margin-top: 9px; }
+.lumina-app .l-erase button.l-destructive { background: #6d3a33; border-color: #6d3a33; color: white; }
+.lumina-app .l-watch-record { padding: 13px 0; border-bottom: 1px solid #e1e9df; display: flex; justify-content: space-between; gap: 14px; align-items: center; font-size: 12px; color: #486657; }
+.lumina-app .l-watch-record button { background: #f4f8f3; color: #345d4c; border: 1px solid #d9e7da; padding: 8px 11px; border-radius: 9px; min-height: 42px; }
+.lumina-app .l-status-close { margin-left: auto; background: transparent; border: 0; color: #416454; display: grid; place-items: center; min-width: 32px; min-height: 32px; }
+.lumina-app .l-market-panel { min-width: 0; width: 100%; }
+.lumina-app .l-market-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
+.lumina-app .l-market-panel > p { color: #587267; line-height: 1.65; font-size: 13px; }
+.lumina-app .l-market-symbols { display: flex; flex-wrap: wrap; gap: 8px; margin: 21px 0; }
+.lumina-app .l-market-symbols button { min-height: 43px; padding: 9px 14px; border: 1px solid #dbe7de; background: #fff; border-radius: 13px; font-size: 12px; color: #496557; }
+.lumina-app .l-market-symbols button.l-active-symbol { background: #245c49; color: white; border-color: #245c49; }
+.lumina-app .l-market-quote { padding: 22px; border: 1px solid #dae8dc; border-radius: 22px; background: linear-gradient(140deg,#fff,#f2f8f1); display: flex; justify-content: space-between; align-items: flex-start; gap: 14px; }
+.lumina-app .l-market-quote .l-label { margin-bottom: 8px; }
+.lumina-app .l-market-quote strong { display: block; font-size: 32px; line-height: 1.25; font-variant-numeric: tabular-nums; letter-spacing: -.5px; font-weight: 650; }
+.lumina-app .l-market-change { display: block; font-size: 12px; color: #536f61; margin-top: 7px; }
+.lumina-app .l-market-refresh { width: 43px; height: 43px; display: grid; place-items: center; border: 1px solid #dbe7dc; border-radius: 12px; background: #fff; flex: none; color: #416c56; }
+.lumina-app .l-market-panel .l-source-note { display: flex; align-items: flex-start; gap: 9px; margin: 14px 0 17px; color: #547263; font-size: 12px; }
+.lumina-app .l-source-note svg { flex: none; margin-top: 2px; }
+.lumina-app .l-market-panel .l-source-pause { color: #765d3d; }
+.lumina-app .l-chart-toggle { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; }
+.lumina-app .l-chart-toggle a { display: inline-flex; align-items: center; gap: 6px; color: #406a56; font-size: 12px; text-decoration: underline; text-underline-offset: 3px; padding: 9px; }
+.lumina-app .l-chart-shell { border-radius: 18px; border: 1px solid #e2eae2; padding: 10px; margin-top: 14px; background: #fff; overflow: hidden; }
+.lumina-app .l-chart-shell > p { font-size: 10px !important; margin: 8px 8px 2px !important; color: #607669; }
+.lumina-app .l-tv-widget { min-height: 410px; width: 100%; }
+.lumina-app .l-watch-form { border-top: 1px solid #e1ebe2; margin-top: 26px; padding-top: 23px; }
+.lumina-app .l-watch-form > p { font-size: 12px; color: #61776b; margin: 5px 0 15px; }
+.lumina-app .l-watch-controls { display: grid; grid-template-columns: 1fr 1fr auto; gap: 9px; align-items: end; }
+.lumina-app .l-watch-controls .l-secondary { min-height: 46px; }
+.lumina-app .l-inline-note { font-size: 12px; color: #456a56; margin-top: 13px; }
+.lumina-app .l-market-guest { display: flex; align-items: flex-start; gap: 10px; margin-top: 22px; color: #577267; font-size: 12px; }
+.lumina-app .l-market-guest svg { flex: none; }
+@media (max-width: 620px) {
+  .lumina-app .l-top { height: 69px; }
+  .lumina-app .l-topbtn { min-width: 38px; }
+  .lumina-app .l-user-menu { padding: 8px 10px; min-height: 40px; }
+  .lumina-app .l-shell { padding-left: 14px; padding-right: 14px; }
+  .lumina-app .l-home { padding-top: 40px; }
+  .lumina-app .l-home h1 { font-size: clamp(36px, 9vw, 47px); }
+  .lumina-app .l-home-memory { padding: 15px; margin-bottom: 22px; }
+  .lumina-app .l-home-memory-row strong { font-size: 21px; }
+  .lumina-app .l-home-memory-row button { font-size: 11px; }
+  .lumina-app .l-home-tools { margin-top: 17px; }
+  .lumina-app .l-context-bar { margin-bottom: 0; }
+  .lumina-app .l-practice-inputs,.lumina-app .l-goal-grid { grid-template-columns: 1fr; }
+  .lumina-app .l-drawer { padding: 20px; }
+  .lumina-app .l-market-quote { padding: 16px; }
+  .lumina-app .l-market-quote strong { font-size: 25px; }
+  .lumina-app .l-watch-controls { grid-template-columns: 1fr 1fr; }
+  .lumina-app .l-watch-controls button { grid-column: 1 / -1; justify-self: stretch; }
+}
+@media (max-width: 355px) {
+  .lumina-app .l-head-right { gap: 0; }
+  .lumina-app .l-mode { font-size: 10px; padding: 6px 7px; }
+  .lumina-app .l-user-menu { font-size: 11px; padding: 6px 8px; }
+  .lumina-app .l-topbtn { padding: 0 5px; }
+  .lumina-app .l-home-memory-row { flex-wrap: wrap; }
+  .lumina-app .l-market-quote strong { font-size: 23px; }
+}
+@media (prefers-reduced-motion: reduce) { .lumina-app * { scroll-behavior: auto; } }
