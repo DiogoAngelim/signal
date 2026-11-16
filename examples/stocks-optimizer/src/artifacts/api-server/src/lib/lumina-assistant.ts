@@ -23,7 +23,7 @@ const INSTRUCTIONS = [
 
 export async function luminaAssistantReply(input: {
   userId: string; message: string; goalContext: unknown; marketContext: unknown;
-  history?: History[];
+  history?: History;
 }): Promise<LuminaAssistantReply | null> {
   const key = process.env.OPENAI_API_KEY?.trim();
   if (!key) return null;
