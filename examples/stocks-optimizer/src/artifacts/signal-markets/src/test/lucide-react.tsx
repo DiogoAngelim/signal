@@ -88,3 +88,7 @@ export const WifiOff = createIcon("wifi-off");
 export const X = createIcon("x");
 export const XCircle = createIcon("x-circle");
 export const Zap = createIcon("zap");
+
+export const ArrowUp = createIcon("arrow-up");
+export const Bookmark = createIcon("bookmark");
+export const Info = createIcon("info");
