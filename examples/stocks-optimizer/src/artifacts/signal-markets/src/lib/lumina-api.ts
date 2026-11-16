@@ -20,13 +20,26 @@ export type Message = {
   content: string; provenance: "user-provided" | "illustrative" | "ai-generated";
   createdAt: string;
 };
-export type MarketSymbol = "BTCUSDT" | "ETHUSDT" | "SOLUSDT" | "BNBUSDT";
+export type MarketSymbol = "BTCUSDT" | "ETHUSDT" | "SOLUSDT" | "BNBUSDT" | "PETR4" | "VALE3" | "AAPL" | "MSFT";
 export type Quote = {
   symbol: MarketSymbol; label: string; tradingViewSymbol: string;
-  currency: string; price: number | null; change24hPercent: number | null;
-  status: "fresh" | "stale" | "unavailable"; provider: string;
-  receivedAt: string; quoteAt: string | null;
-  eligibleForLiveCalculations: boolean; note: string;
+  currency: "BRL" | "USD"; price: number | null; change24hPercent: number | null;
+  market: "crypto" | "stock"; exchange: string;
+  status: "fresh" | "delayed" | "stale" | "unavailable";
+  provider: "tradingview-data"; underlyingProvider: string | null; source: string | null;
+  receivedAt: string; syncedAt: string | null; quoteAt: string | null;
+  realtimeVerified: boolean; eligibleForLiveCalculations: boolean;
+  reliabilityScore: number | null; note: string;
+};
+export type MarketHistoryBar = {
+  timestamp: string; open: number; high: number; low: number;
+  close: number; volume: number | null;
+};
+export type MarketHistory = {
+  symbol: MarketSymbol; provider: "tradingview-data";
+  underlyingProvider: string | null; source: string | null;
+  status: "available" | "unavailable"; bars: MarketHistoryBar[];
+  lastBarAt: string | null; syncedAt: string | null; note: string;
 };
 export type Watch = {
   id: string; symbol: MarketSymbol; direction: "above" | "below";
@@ -93,6 +106,8 @@ export const luminaApi = {
   deleteConversation: (id: string) => luminaRequest<void>(
     "/api/lumina/conversations/" + encodeURIComponent(id), { method: "DELETE" }),
   quote: (symbol: MarketSymbol) => luminaRequest<Quote>("/api/lumina/market?symbol=" + symbol),
+  history: (symbol: MarketSymbol, bars = 90) => luminaRequest<MarketHistory>(
+    "/api/lumina/market/history?symbol=" + symbol + "&bars=" + bars),
   watches: () => luminaRequest<{ watches: Watch[] }>("/api/lumina/watches"),
   addWatch: (symbol: MarketSymbol, direction: "above" | "below", threshold: number) =>
     luminaRequest<{ watch: Watch }>("/api/lumina/watches",
