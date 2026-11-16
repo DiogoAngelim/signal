@@ -82,7 +82,7 @@ export function getLuminaAuth() {
       advanced: {
         useSecureCookies: production,
       },
-    });
+    }) as unknown as ReturnType<typeof betterAuth>;
   }
   return cachedAuth;
 }
