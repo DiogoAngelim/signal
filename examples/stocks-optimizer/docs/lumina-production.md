@@ -13,10 +13,10 @@
 - Practice choices are always labelled `provenance=illustrative`, `executed=false`; preserving an intention never creates or modifies an actual holding.
 - Clear deletion of a choice, a conversation, a goal, or all Lúmina **application** data. Authentication account and mandatory security records are separate.
 - A browser-tab session can remember guest Practice choices without requiring an account. This is distinct from authenticated cross-device PostgreSQL persistence.
-- Independent, time-stamped public Binance Spot quotes limited to a short allowlist and a 120-second freshness gate. Failed or stale quotes are not eligible for live financial calculations.
-- Optional TradingView-hosted Advanced Chart widget, only loaded when a visitor asks to open it. TradingView widget data are **not** consumed by investment calculation logic.
+- Time-stamped quotes from the existing tradingview-data service. Its Binance-backed crypto adapter may qualify for the 120-second realtime gate; guest TradingView equity quotes are indicative and never realtime-verified, regardless of sync timestamp.
+- Native historical-candle diagrams from tradingview-data for selected crypto, B3 and US shares. The separate TradingView-hosted Advanced Chart loads only on demand; widget data are **not** consumed by investment calculation logic.
 - Optional **explicitly opt-in** server-side OpenAI Responses API. The user must enable the checkbox before a message can be sent to OpenAI. The API uses `store=false`, but the user-provided message, recent conversation, and goal context are processed by the provider when enabled. Assistant content is retained in the user's own Lúmina conversation DB unless they delete it.
-- A quiet inbox and user-created price watches. **Watches are evaluated only when an authenticated user presses Check levels.** No background push or continuous monitoring exists.
+- A quiet inbox and crypto price watches. **Watches are evaluated only on authenticated Check levels against fresh, realtime-verified crypto quotes through tradingview-data.** No background push or continuous monitoring exists.
 - No brokerage access, no trading executor, no external fill reconciliation, and no ability for AI to place an order.
 
 ## Development setup
@@ -47,6 +47,7 @@ Set the following on the actual **server-side** hosting project:
 | `LUMINA_AUTH_TRUSTED_ORIGINS` | Explicit canonical app origins; no wildcard origin in production |
 | `LUMINA_SMTP_HOST`, `LUMINA_SMTP_PORT`, `LUMINA_SMTP_USER`, `LUMINA_SMTP_PASSWORD`, `LUMINA_SMTP_FROM` | Required for production account activation; email verification is mandatory in production |
 | `OPENAI_API_KEY` | Optional. Store server-side only; never in `VITE_*` or an uploaded document/chat message |
+| `LUMINA_MARKET_DATA_URL` | Optional root origin of tradingview-data, default https://tradingview-data.vercel.app; HTTPS required in production |
 | `LUMINA_OPENAI_MODEL` | Optional, default `gpt-6-luna`. Verify available model access before enabling |
 | `LUMINA_REQUIRE_EMAIL_VERIFICATION` | Optional for local development; always enabled in production regardless of this variable |
 
@@ -68,7 +69,7 @@ The existing Lúmina first-journey and Signal API CI must remain green. React vi
 
 - Guest mode and Practice mode cannot authenticate as a different user or update verified holdings.
 - Backend queries include `owner_id`, with user ID taken from a verified session—not from request JSON, URL query, or a client-auth header.
-- Market data from Binance has a source, observation time, request time and freshness state. A stale state blocks new live actionable recommendations.
+- Market data via tradingview-data has a provider, observation time, request time and freshness status. Stale quotes and guest TradingView equities cannot qualify as live evidence. Recent syncedAt never overrides source trust.
 - The AI prompt is informational and has no trade, webhook or billing tools. AI calls require both a configured server key and explicit user opt-in for the message. The request uses a hashed user ID and `store=false`; this is not equivalent to local-only processing.
 - TradingView is a third-party widget. Users should see it only after selecting to load it; the widget's own privacy terms apply.
 - User data removal via the app affects goals, choices, messages and inbox. It does not remove authentication account or security/audit records and does not automatically delete provider-side telemetry.
@@ -82,3 +83,21 @@ The existing Lúmina first-journey and Signal API CI must remain green. React vi
 5. Native chart datafeed contracts or TradingView Advanced Charts library licensing beyond the official hosted widget.
 
 The correct release label until these are finished is **Lúmina account-backed Practice and financial exploration**, not a real-money trading platform.
+
+## tradingview-data service integration
+
+All Lúmina quote and candle requests go to the user's dedicated tradingview-data service on the server:
+
+- GET /api/stocks/quotes?symbol=BTCUSDT&market=crypto&exchange=BINANCE&provider=binance-public
+- GET /api/stocks/quotes?symbol=PETR4&market=stock&exchange=BMFBOVESPA&provider=tradingview-remote
+- GET /api/stocks/history?symbol=PETR4&market=stock&exchange=BMFBOVESPA&provider=tradingview-remote&interval=D&bars=90
+
+The adapter validates provider ID, original symbol, timestamps and numeric values, and rejects static-fallback substitutions or malformed responses. It never treats an HTTP 200 or recent syncedAt timestamp as a guarantee of realtime entitlement.
+
+- Crypto is eligible for a fresh quote only when the module's Binance public adapter reports realtime true and delayed false and the observation is within 120 seconds.
+- B3 and US equity prices via the TradingView guest websocket are indicative, cannot qualify for actionable realtime calculations and do not trigger market watches.
+- History has actual OHLCV observations and sample counts, not synthetic histories or return forecasts; incomplete daily bars may change.
+- The TradingView hosted interactive widget remains optional and independent of module-backed candles.
+- If the external module service is unavailable, Lúmina displays unavailability instead of substituting prices.
+
+Configured module root: LUMINA_MARKET_DATA_URL=https://tradingview-data.vercel.app. This must be a root origin, not an /api/chart-data URL. The module deployment must be confirmed separately; passing local CI does not verify remote availability.
