@@ -113,3 +113,104 @@
 @media (prefers-reduced-motion: reduce) { .lumina-app * { scroll-behavior: auto; } }
 .lumina-app .l-ai-consent { display: flex; align-items: flex-start; gap: 8px; color: #567265; font-size: 11px; line-height: 1.5; margin: 8px 6px 0; cursor: pointer; }
 .lumina-app .l-ai-consent input { flex: none; margin-top: 2px; width: 15px; height: 15px; accent-color: #326a55; }
+
+/* Historical price evidence comes from tradingview-data, not a rendered mock. */
+.lumina-app .l-market-categories {
+  display: flex;
+  width: fit-content;
+  flex-wrap: wrap;
+  gap: 3px;
+  margin-top: 18px;
+  border: 1px solid #dbe6dc;
+  border-radius: 14px;
+  padding: 4px;
+  background: #f0f5ef;
+}
+.lumina-app .l-market-categories button {
+  border: 0;
+  background: transparent;
+  min-height: 42px;
+  padding: 9px 16px;
+  border-radius: 10px;
+  color: #516b5d;
+  font-size: 12px;
+  font-weight: 650;
+}
+.lumina-app .l-market-categories button.l-category-active {
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(33,72,50,.08);
+  color: #245e49;
+}
+.lumina-app .l-history-figure {
+  width: 100%;
+  margin: 20px 0 24px;
+  padding: 17px 18px 13px;
+  border: 1px solid #dce9df;
+  border-radius: 20px;
+  background: #fff;
+  overflow: hidden;
+}
+.lumina-app .l-history-title {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+  align-items: start;
+  margin-bottom: 12px;
+}
+.lumina-app .l-history-title strong {
+  display: block;
+  color: #294c3c;
+  font-size: 14px;
+  font-weight: 650;
+  line-height: 1.45;
+}
+.lumina-app .l-history-title .l-record-badge {
+  flex: none;
+}
+.lumina-app .l-history-plot {
+  display: block;
+  width: 100%;
+  height: auto;
+  max-height: 240px;
+  overflow: visible;
+}
+.lumina-app .l-history-axis,
+.lumina-app .l-history-facts {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  color: #657d6d;
+  font-size: 11px;
+}
+.lumina-app .l-history-axis {
+  margin: -4px 6px 13px;
+  font-variant-numeric: tabular-nums;
+}
+.lumina-app .l-history-facts {
+  margin-bottom: 13px;
+  flex-wrap: wrap;
+}
+.lumina-app .l-history-facts strong {
+  font-weight: 650;
+  color: #355b49;
+  font-variant-numeric: tabular-nums;
+}
+.lumina-app .l-history-figure figcaption {
+  padding-top: 10px;
+  border-top: 1px solid #eef2ec;
+  font-size: 11px;
+  color: #607568;
+  line-height: 1.6;
+}
+.lumina-app .l-history-empty {
+  padding: 26px 10px;
+  color: #6c7c6f;
+  font-size: 12px;
+  text-align: center;
+}
+@media (max-width: 360px) {
+  .lumina-app .l-history-figure { padding: 13px 11px; }
+  .lumina-app .l-history-title { flex-wrap: wrap; }
+  .lumina-app .l-history-facts { font-size: 10px; }
+}
