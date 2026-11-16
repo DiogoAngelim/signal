@@ -229,3 +229,19 @@
   .lumina-preview .l-return-amount { font-size: 25px; }
   .lumina-preview .l-return-actions button { flex: 1 1 175px; }
 }
+
+
+/* A returning visit should not become a second onboarding ceremony. */
+.lumina-preview .l-return-status { margin: 16px auto 0; scroll-margin-bottom: 185px; }
+@media (max-width: 620px) {
+  .lumina-preview .l-returning { padding-top: 14px; }
+  .lumina-preview .l-returning .l-orbit { height: 75px; transform: scale(.59); transform-origin: center top; margin-bottom: 3px; }
+  .lumina-preview .l-returning .l-eyebrow { margin-bottom: 8px; }
+  .lumina-preview .l-returning h1 { font-size: clamp(30px, 9vw, 39px); letter-spacing: -1px; }
+  .lumina-preview .l-returning > p { font-size: 13px; line-height: 1.5; margin: 8px 0 15px; }
+  .lumina-preview .l-return-card h2 { margin: 12px 0 3px; }
+  .lumina-preview .l-return-bar { margin-top: 13px; }
+  .lumina-preview .l-return-footnote { margin: 14px 0 12px !important; }
+  .lumina-preview .l-return-links { margin-top: 7px; }
+  .lumina-preview .l-returning .l-trustline { display: none; }
+}
