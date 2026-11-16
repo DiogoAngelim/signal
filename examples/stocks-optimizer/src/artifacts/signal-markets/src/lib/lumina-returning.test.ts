@@ -46,7 +46,7 @@ describe("Lúmina returning Practice journey", () => {
     expect(asked.notice).toContain("doesn't monitor prices");
     const resumed = journeyReducer(returned, { type: "RESUME_CHOICE", id: "idea-1" });
     const askedAgain = journeyReducer(resumed, { type: "SUBMIT", text: "Any updates?" });
-    expect(askedAgain.messages.at(-1)?.text).toContain("don't");
+    expect(askedAgain.messages.at(-1)?.text).toContain("doesn't monitor prices");
     expect(askedAgain.choices).toEqual(returned.choices);
   });
 
