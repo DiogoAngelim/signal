@@ -19,7 +19,9 @@ describe("Lúmina integrated experience", () => {
   it("does not claim market price or connected holdings before verification", () => {
     const html = renderToStaticMarkup(<LuminaMarketPanel user={null} />);
     expect(html).toContain("Checking");
-    expect(html).toContain("Binance Spot public quote");
+    expect(html).toContain("tradingview-data quote");
+    expect(html).toContain("Digital assets");
+    expect(html).toContain("Shares");
     expect(html).toContain("TradingView chart");
     expect(html).not.toContain('data-trade-executed="true"');
     expect(html).not.toContain("Verified holding");
