@@ -63,8 +63,8 @@ test("market exploration preserves separation between TradingView and exchange e
   await page.getByRole("button", { name: "Shares" }).click();
   await expect(page.getByRole("button", { name: "Petrobras" })).toBeVisible();
   await expect(page.getByText("tradingview-data quote · PETR4")).toBeVisible();
-  await expect(page.getByRole("button", { name: "Explore TradingView chart" })).toBeVisible();
-  await expect(page.getByText("Neither is evidence that a trade was executed.")).toBeVisible();
+  await expect(page.getByRole("button", { name: "Open interactive TradingView chart" })).toBeVisible();
+  await expect(page.getByText("Prices and history come through your", { exact: false })).toBeVisible();
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: innerWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.view + 2);
 });
