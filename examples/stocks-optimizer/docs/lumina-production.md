@@ -15,7 +15,7 @@
 - A browser-tab session can remember guest Practice choices without requiring an account. This is distinct from authenticated cross-device PostgreSQL persistence.
 - Independent, time-stamped public Binance Spot quotes limited to a short allowlist and a 120-second freshness gate. Failed or stale quotes are not eligible for live financial calculations.
 - Optional TradingView-hosted Advanced Chart widget, only loaded when a visitor asks to open it. TradingView widget data are **not** consumed by investment calculation logic.
-- Optional server-side OpenAI Responses API, storing no provider response in OpenAI by using `store=false`; assistant content is retained in the user's own Lúmina conversation DB unless they delete it.
+- Optional **explicitly opt-in** server-side OpenAI Responses API. The user must enable the checkbox before a message can be sent to OpenAI. The API uses `store=false`, but the user-provided message, recent conversation, and goal context are processed by the provider when enabled. Assistant content is retained in the user's own Lúmina conversation DB unless they delete it.
 - A quiet inbox and user-created price watches. **Watches are evaluated only when an authenticated user presses Check levels.** No background push or continuous monitoring exists.
 - No brokerage access, no trading executor, no external fill reconciliation, and no ability for AI to place an order.
 
@@ -69,7 +69,7 @@ The existing Lúmina first-journey and Signal API CI must remain green. React vi
 - Guest mode and Practice mode cannot authenticate as a different user or update verified holdings.
 - Backend queries include `owner_id`, with user ID taken from a verified session—not from request JSON, URL query, or a client-auth header.
 - Market data from Binance has a source, observation time, request time and freshness state. A stale state blocks new live actionable recommendations.
-- The AI prompt is informational and has no trade, webhook or billing tools. The request uses a hashed user ID and `store=false`; this is not equivalent to local-only processing.
+- The AI prompt is informational and has no trade, webhook or billing tools. AI calls require both a configured server key and explicit user opt-in for the message. The request uses a hashed user ID and `store=false`; this is not equivalent to local-only processing.
 - TradingView is a third-party widget. Users should see it only after selecting to load it; the widget's own privacy terms apply.
 - User data removal via the app affects goals, choices, messages and inbox. It does not remove authentication account or security/audit records and does not automatically delete provider-side telemetry.
 
