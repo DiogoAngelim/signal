@@ -111,3 +111,5 @@
   .lumina-app .l-market-quote strong { font-size: 23px; }
 }
 @media (prefers-reduced-motion: reduce) { .lumina-app * { scroll-behavior: auto; } }
+.lumina-app .l-ai-consent { display: flex; align-items: flex-start; gap: 8px; color: #567265; font-size: 11px; line-height: 1.5; margin: 8px 6px 0; cursor: pointer; }
+.lumina-app .l-ai-consent input { flex: none; margin-top: 2px; width: 15px; height: 15px; accent-color: #326a55; }
