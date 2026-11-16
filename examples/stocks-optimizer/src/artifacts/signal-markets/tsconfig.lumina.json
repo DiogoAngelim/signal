@@ -5,7 +5,8 @@
     "src/lib/lumina-journey.ts",
     "src/lib/lumina-journey.test.ts",
     "src/pages/lumina-preview.tsx",
-    "src/pages/lumina-preview.test.tsx"
+    "src/pages/lumina-preview.test.tsx",
+    "src/pages/lumina-preview.interaction.test.tsx"
   ],
   "exclude": []
 }
