@@ -160,7 +160,7 @@ export async function getLuminaMarketQuote(
     const quote = data.quotes.find((entry) =>
       entry.symbol.toUpperCase() === symbol &&
       (entry.providerSymbol === undefined ||
-        [symbol, meta.tradingViewSymbol].includes(entry.providerSymbol.toUpperCase())),
+        [String(symbol), String(meta.tradingViewSymbol)].includes(entry.providerSymbol.toUpperCase())),
     );
     if (!quote || quote.provider !== meta.providerId || quote.source !== meta.providerId) {
       return unavailableQuote(symbol, now);
@@ -255,7 +255,7 @@ export async function getLuminaMarketHistory(
         raw.close < raw.low || raw.close > raw.high) continue;
       if (raw.symbol && raw.symbol.toUpperCase() !== symbol) continue;
       if (raw.providerSymbol &&
-        ![symbol, meta.tradingViewSymbol].includes(raw.providerSymbol.toUpperCase())) continue;
+        ![String(symbol), String(meta.tradingViewSymbol)].includes(raw.providerSymbol.toUpperCase())) continue;
       const timestamp = new Date(at).toISOString();
       byDate.set(timestamp, {
         timestamp, open: raw.open, high: raw.high, low: raw.low,
