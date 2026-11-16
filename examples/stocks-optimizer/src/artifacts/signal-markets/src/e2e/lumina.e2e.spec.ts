@@ -39,7 +39,7 @@ test("real account sessions keep goals and keep two users isolated", async ({ pa
   await page.getByLabel("Email", { exact: true }).fill(email);
   await page.getByLabel("Password", { exact: true }).fill("browsers-only-password#2026");
   await page.getByRole("button", { name: "Create account", exact: true }).click();
-  await expect(page.getByRole("button", { name: "Account" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Account", exact: true })).toBeVisible();
   await expect(page.locator(".l-auth-panel")).toHaveCount(0);
   await page.getByRole("button", { name: "Your goals" }).click();
   await page.getByPlaceholder("A home, breathing room, a trip…").fill("A home of my own");
@@ -48,7 +48,7 @@ test("real account sessions keep goals and keep two users isolated", async ({ pa
   await page.getByRole("button", { name: "Close panel" }).click();
 
   await page.reload();
-  await expect(page.getByRole("button", { name: "Account" })).toBeVisible();
+  await expect(page.getByRole("button", { name: "Account", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Your goals" }).click();
   await expect(page.getByText("A home of my own")).toBeVisible();
   await page.getByRole("button", { name: "Close panel" }).click();
