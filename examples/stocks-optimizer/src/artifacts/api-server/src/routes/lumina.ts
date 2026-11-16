@@ -85,7 +85,7 @@ function protectMutation(req: Request, res: Response, next: NextFunction) {
       const ownHost = String(req.headers["x-forwarded-host"] ?? req.headers.host ?? "").split(",")[0].trim();
       const others = (process.env.LUMINA_AUTH_TRUSTED_ORIGINS ?? "").split(",").map((item) => item.trim());
       allowed = parsed.host === ownHost || others.includes(parsed.origin);
-      if (process.env.NODE_ENV !== "production" && parsed.hostname === "localhost") allowed = true;
+      if (process.env.NODE_ENV !== "production" && (parsed.hostname === "localhost" || parsed.hostname === "127.0.0.1")) allowed = true;
     } catch { allowed = false; }
     if (!allowed) {
       res.status(403).json({ error: { code: "forbidden_origin" } });
