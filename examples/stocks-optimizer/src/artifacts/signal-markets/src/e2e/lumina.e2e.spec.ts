@@ -59,7 +59,10 @@ test("market exploration preserves separation between TradingView and exchange e
   await page.goto("/");
   await page.getByRole("button", { name: "Market context" }).click();
   await expect(page.getByRole("heading", { name: "Look closer at the market." })).toBeVisible();
-  await expect(page.getByText("Binance Spot public quote")).toBeVisible();
+  await expect(page.getByText("tradingview-data quote · BTCUSDT")).toBeVisible();
+  await page.getByRole("button", { name: "Shares" }).click();
+  await expect(page.getByRole("button", { name: "Petrobras" })).toBeVisible();
+  await expect(page.getByText("tradingview-data quote · PETR4")).toBeVisible();
   await expect(page.getByRole("button", { name: "Explore TradingView chart" })).toBeVisible();
   await expect(page.getByText("Neither is evidence that a trade was executed.")).toBeVisible();
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: innerWidth }));
