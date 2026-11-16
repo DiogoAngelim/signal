@@ -23,11 +23,15 @@ function button(text: string): HTMLButtonElement {
   return found;
 }
 
-afterEach(() => {
+function unmountJourney() {
   if (root) act(() => root?.unmount());
   host?.remove();
   host = null;
   root = null;
+}
+afterEach(() => {
+  unmountJourney();
+  window.sessionStorage.clear();
 });
 
 describe("Lúmina interactive first visit", () => {
@@ -67,5 +71,51 @@ describe("Lúmina interactive first visit", () => {
     expect(slider?.min).toBe("0");
     expect(slider?.max).toBe("100");
     expect(slider?.step).toBe("5");
+  });
+});
+
+
+describe("Lúmina returning to a saved Practice idea", () => {
+  it("survives a tab reload without inventing market outcomes or synced memory", () => {
+    const initial = renderJourney();
+    act(() => { button("I'm just curious").click(); });
+    act(() => { button("Save this practice choice").click(); });
+    expect(initial.textContent).toContain("Saved as a practice choice.");
+    expect(window.sessionStorage.getItem("lumina-preview-practice-v1")).toContain('"executed":false');
+
+    // Remount models refreshing this same tab. Conversation text is not kept.
+    unmountJourney();
+    const returned = renderJourney();
+    expect(returned.textContent).toContain("Good to have you back.");
+    expect(returned.textContent).toContain("Practice · Not a holding");
+    expect(returned.textContent).toContain("We haven't monitored prices");
+    expect(returned.textContent).not.toContain("Just explore a simple example");
+
+    act(() => { button("What changed?").click(); });
+    expect(returned.textContent).toContain("can't verify what changed");
+    expect(returned.textContent).toContain("doesn't monitor prices");
+
+    act(() => { button("Continue exploring").click(); });
+    expect(returned.textContent).toContain("not a verified position");
+    expect(returned.querySelector<HTMLInputElement>("#lumina-exposure")?.value).toBe("20");
+    expect(returned.textContent).toContain("Save this practice choice");
+  });
+
+  it("forgets the specific idea and never restores it on a subsequent visit", () => {
+    renderJourney();
+    act(() => { button("I'm just curious").click(); });
+    act(() => { button("Save this practice choice").click(); });
+    unmountJourney();
+
+    const returned = renderJourney();
+    act(() => { button("Forget this choice").click(); });
+    expect(returned.textContent).toContain("forgotten from this browser tab");
+    expect(returned.textContent).toContain("What would you like your money to make possible?");
+    expect(window.sessionStorage.getItem("lumina-preview-practice-v1")).toBeNull();
+
+    unmountJourney();
+    const clean = renderJourney();
+    expect(clean.textContent).not.toContain("Good to have you back.");
+    expect(clean.textContent).toContain("What would you like your money to make possible?");
   });
 });
