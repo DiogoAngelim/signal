@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from "react";
+import { createElement, useEffect, useState, type FormEvent } from "react";
 import { BarChart3, Clock, ExternalLink, RefreshCw, ShieldCheck } from "lucide-react";
 import { luminaApi, type MarketSymbol, type Quote, type LuminaUser } from "@/lib/lumina-api";
 
@@ -123,17 +123,13 @@ export default function LuminaMarketPanel({
             The official widget owns the visuals, market feed and licensing.
             It is deliberately NOT used to make server-side financial calculations.
           */}
-          {import.meta.env.SSR ? null :
-            <div className="l-tv-widget">
-              {globalThis.React === undefined ? null : null}
-              {(() => {
-                const props: Record<string, unknown> = {
-                  symbol: "BINANCE:" + symbol, interval: "1D", theme: "light",
-                  autosize: "true", locale: "en", style: { display: "block", width: "100%", height: 410 },
-                };
-                return (requireWidgetElement(props));
-              })()}
-            </div>}
+          <div className="l-tv-widget">
+            {createElement("tv-advanced-chart", {
+              key: symbol, symbol: "BINANCE:" + symbol, interval: "1D",
+              theme: "light", autosize: "true", locale: "en",
+              style: { display: "block", width: "100%", height: 410 },
+            })}
+          </div>
           <p>TradingView-hosted display · Its feed and timestamps may differ from the public quote above. This third-party widget is loaded only when opened.</p>
         </div>
       ) : null}
@@ -161,12 +157,3 @@ export default function LuminaMarketPanel({
   );
 }
 
-function requireWidgetElement(props: Record<string, unknown>) {
-  // React.createElement supports registered custom elements without custom typings.
-  return createTradingViewElement(props);
-}
-
-import { createElement } from "react";
-function createTradingViewElement(props: Record<string, unknown>) {
-  return createElement("tv-advanced-chart", props);
-}
