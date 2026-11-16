@@ -74,7 +74,7 @@ function ReturningExperience({
 }
 
 function GuideMessage({
-  message, state, isLatestPrompt, onHorizon, onAmount, onExposure, onSave, onStart,
+  message, state, isLatestPrompt, onHorizon, onAmount, onExposure, onSave, onStart, storageAvailable,
 }: {
   message: JourneyMessage;
   state: JourneyState;
@@ -84,6 +84,7 @@ function GuideMessage({
   onExposure: (value: number) => void;
   onSave: () => void;
   onStart: (text: string) => void;
+  storageAvailable: boolean;
 }) {
   return (
     <section className="l-message l-reply">
@@ -122,7 +123,7 @@ function GuideMessage({
               <Bookmark size={18} aria-hidden="true" />
               <div><strong>Saved as a practice choice.</strong><br />No asset was purchased, and no real balance changed.</div>
             </div>
-            <p className="l-hint">You can revisit this choice in History. It stays in this tab's browser session, including across reloads. It isn't synced to other devices.</p>
+            <p className="l-hint">You can revisit this choice in History. {storageAvailable ? "Saved in this browser tab across reloads, not synced." : "Browser storage is unavailable, so this choice lasts only while this page is open."}</p>
           </>
         ) : null}
         {message.kind === "unsupported" ? (
@@ -177,6 +178,7 @@ function ScenarioWithSave({ state, onExposure, onSave }: { state: JourneyState; 
 export default function LuminaPreview() {
   const [state, dispatch] = useReducer(journeyReducer, undefined, () => returningJourney(readPracticeChoices()));
   const [text, setText] = useState("");
+  const [storageAvailable, setStorageAvailable] = useState(true);
   const [panel, setPanel] = useState<"history" | "about" | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
@@ -185,7 +187,11 @@ export default function LuminaPreview() {
   const messageCount = state.messages.length;
 
   // Saving in Practice is explicit; do not persist messages, drafts or free-form financial text.
-  useEffect(() => { writePracticeChoices(state.choices); }, [state.choices]);
+  useEffect(() => {
+    const saved = writePracticeChoices(state.choices);
+    if (state.choices.length && !saved) setStorageAvailable(false);
+    else if (saved) setStorageAvailable(true);
+  }, [state.choices]);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -296,6 +302,7 @@ export default function LuminaPreview() {
                 onExposure={(value) => dispatch({ type: "EXPOSURE", value })}
                 onSave={save}
                 onStart={start}
+                storageAvailable={storageAvailable}
               />
             ))}
             <div ref={latestRef} aria-hidden="true" />
@@ -315,7 +322,7 @@ export default function LuminaPreview() {
             <button className="l-send" type="submit" aria-label="Send message" disabled={!text.trim()}><ArrowUp size={19} /></button>
           </div>
           <div className="l-composer-foot">
-            <span><ShieldCheck size={12} aria-hidden="true" />Practice saved in this tab · Not synced</span>
+            <span><ShieldCheck size={12} aria-hidden="true" />{storageAvailable ? "Practice only · Tab session, not synced" : "Practice only · This page, not synced"}</span>
             <button type="button" onClick={reset}>New thought</button>
           </div>
         </form>
@@ -347,7 +354,7 @@ export default function LuminaPreview() {
               <>
                 <p>This is a focused experience prototype, not a live investing product. It includes an initial conversation, a question about timing, an interactive allocation illustration, limited text commands, and a browser-tab Practice history that survives refresh.</p>
                 <div className="l-record"><div className="l-record-head"><span>What is real here?</span><span className="l-record-badge">Transparent by design</span></div><p>Only the interface and its arithmetic are functional. There are no market prices, executed orders, broker connections, notifications, AI-generated advice, or cross-device synchronization.</p></div>
-                <p>Only explicitly saved Practice choices are kept in this tab's browser session storage, including across reloads. Free-form conversation text isn't stored. Closing the tab generally clears its session. Nothing syncs across devices, and this preview sends no information to a server. Use “Forget choice” or “Clear practice history” to delete saved records.</p>
+                <p>Only explicitly saved Practice choices are kept in this tab's browser session storage, including across reloads. Free-form conversation text isn't stored. If browser session storage is blocked, choices last only while the page is open. Closing the tab generally clears its session. Nothing syncs across devices, and this preview sends no information to a server. Use “Forget choice” or “Clear practice history” to delete saved records.</p>
               </>
             )}
           </section>
