@@ -43,6 +43,7 @@ function uploadTreeFiles(root) {
 
 let files;
 let source;
+const gitlinks = new Set();
 const cwd = process.cwd();
 if (existsSync(path.join(cwd, ".git"))) {
   try {
@@ -50,6 +51,17 @@ if (existsSync(path.join(cwd, ".git"))) {
       cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
     }).split("\0").filter(Boolean);
     source = "git index";
+    // Gitlinks have mode 160000 and represent submodule commits, not readable
+    // files. An orphaned or unavailable submodule must not be mistaken for an
+    // unreadable ordinary source file. Scan all checked-out source files.
+    const entries = execFileSync("git", ["ls-files", "--stage", "-z"], {
+      cwd, encoding: "utf8", stdio: ["ignore", "pipe", "pipe"],
+    }).split("\0").filter(Boolean);
+    for (const entry of entries) {
+      const separator = entry.indexOf("\t");
+      if (separator < 0) throw new Error("Unexpected git index entry");
+      if (entry.startsWith("160000 ")) gitlinks.add(entry.slice(separator + 1));
+    }
   } catch (error) {
     // Vercel's .vercelignore removes the CONTENTS of .git, but can leave a
     // vestigial .git directory. Git then reports "not a git repository".
@@ -71,6 +83,7 @@ if (files.length === 0) {
 } else {
   const findings = [];
   for (const file of files) {
+    if (gitlinks.has(file)) continue;
     let content;
     try {
       content = readFileSync(path.join(cwd, file));
