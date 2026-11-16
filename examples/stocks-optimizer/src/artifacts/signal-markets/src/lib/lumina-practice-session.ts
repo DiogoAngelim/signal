@@ -36,6 +36,17 @@ function isChoice(value: unknown): value is PracticeChoice {
     && item.provenance === "illustrative" && item.executed === false;
 }
 
+/** Recreate the exact allowed shape; never persist extra or unrecognized fields. */
+function copyChoice(item: PracticeChoice): PracticeChoice {
+  return {
+    id: item.id, at: item.at, amount: item.amount,
+    exposedPercent: item.exposedPercent,
+    accessiblePercent: 100 - item.exposedPercent,
+    goal: item.goal, horizon: item.horizon,
+    provenance: "illustrative", executed: false,
+  };
+}
+
 export function previewSessionStorage(): PracticeSessionStorage | null {
   if (typeof window === "undefined") return null;
   try {
@@ -56,7 +67,7 @@ export function readPracticeChoices(
     if (typeof record !== "object" || record === null) return [];
     const envelope = record as Record<string, unknown>;
     if (envelope.version !== 1 || !Array.isArray(envelope.choices)) return [];
-    return envelope.choices.filter(isChoice).slice(0, MAX_PRACTICE_CHOICES);
+    return envelope.choices.filter(isChoice).slice(0, MAX_PRACTICE_CHOICES).map(copyChoice);
   } catch {
     // A blocked or corrupt browser session must never block the welcome screen.
     return [];
@@ -69,7 +80,7 @@ export function writePracticeChoices(
 ): boolean {
   if (!storage) return false;
   try {
-    const valid = choices.filter(isChoice).slice(0, MAX_PRACTICE_CHOICES);
+    const valid = choices.filter(isChoice).slice(0, MAX_PRACTICE_CHOICES).map(copyChoice);
     if (valid.length === 0) {
       storage.removeItem(LUMINA_PRACTICE_SESSION_KEY);
     } else {
