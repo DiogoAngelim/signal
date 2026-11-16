@@ -21,6 +21,7 @@ jobs:
       BETTER_AUTH_SECRET: ci-only-never-use-outside-ci-rotate-in-prod-2026
       LUMINA_REQUIRE_EMAIL_VERIFICATION: "false"
       OPENAI_API_KEY: ""
+      BETTER_AUTH_URL: http://127.0.0.1:5173
     services:
       postgres:
         image: postgres:16
@@ -59,3 +60,5 @@ jobs:
       - run: pnpm --filter @workspace/signal-markets test
       - run: pnpm --filter @workspace/api-server build
       - run: pnpm --filter @workspace/signal-markets build
+      - run: pnpm --filter @workspace/signal-markets exec playwright install --with-deps chromium
+      - run: pnpm --filter @workspace/signal-markets test:browser
