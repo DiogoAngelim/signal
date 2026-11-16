@@ -1,9 +1,10 @@
 import { useEffect, useReducer, useRef, useState } from "react";
 import { ArrowUp, Bookmark, History, Info, ShieldCheck, X } from "lucide-react";
 import {
-  formatBRL, HORIZON_EXPLANATIONS, HORIZON_LABELS, journeyReducer, newJourney,
-  scenario, type Horizon, type JourneyMessage, type JourneyState,
+  formatBRL, HORIZON_EXPLANATIONS, HORIZON_LABELS, journeyReducer, returningJourney,
+  scenario, type Horizon, type JourneyMessage, type JourneyState, type PracticeChoice,
 } from "@/lib/lumina-journey";
+import { readPracticeChoices, writePracticeChoices } from "@/lib/lumina-practice-session";
 import "./lumina-preview.css";
 
 const STARTERS = [
@@ -20,6 +21,55 @@ function LuminaMark({ size = 28 }: { size?: number }) {
       <path d="M5 18c0-7 5.4-12 12-12 5.6 0 10 4.2 10 9.4 0 5.6-4.8 9.6-10.2 9.6-3.6 0-6.8-2.7-6.8-6.4 0-3.1 2.5-5.3 5.4-5.3 2.3 0 4 1.6 4 3.8" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" />
       <circle cx="23.5" cy="5.2" r="2" fill="currentColor" />
     </svg>
+  );
+}
+
+/** Returning is a quiet doorway, not a dashboard or a simulated performance report. */
+function ReturningExperience({
+  latest, otherCount, onResume, onForget, onNew, onUpdate, onHistory,
+}: {
+  latest: PracticeChoice;
+  otherCount: number;
+  onResume: () => void;
+  onForget: () => void;
+  onNew: () => void;
+  onUpdate: () => void;
+  onHistory: () => void;
+}) {
+  return (
+    <section className="l-welcome l-returning" aria-labelledby="lumina-return-title">
+      <div className="l-orbit" aria-hidden="true"><span /></div>
+      <div className="l-eyebrow">A little room to think</div>
+      <h1 id="lumina-return-title">Good to have you back.</h1>
+      <p>Your ideas are here when you want them. There's nothing you need to do.</p>
+      <div className="l-return-card" data-provenance="illustrative">
+        <div className="l-return-head">
+          <div className="l-label">An idea you explored</div>
+          <span className="l-concept-tag">Practice · Not a holding</span>
+        </div>
+        <h2>For {latest.goal.replace(/^your /, "")}</h2>
+        <div className="l-return-amount">{formatBRL(latest.amount)}</div>
+        <div className="l-return-bar" role="img" aria-label={latest.accessiblePercent + "% accessible, " + latest.exposedPercent + "% market-exposed in this saved hypothetical allocation"}>
+          <span className="l-return-liquid" style={{ width: latest.accessiblePercent + "%" }} />
+          <span className="l-return-exposed" style={{ width: latest.exposedPercent + "%" }} />
+        </div>
+        <div className="l-return-labels">
+          <span>Accessible · {latest.accessiblePercent}%</span>
+          <span>Market-exposed · {latest.exposedPercent}%</span>
+        </div>
+        <p className="l-return-footnote">This is the illustration you saved, not an actual portfolio. We haven't monitored prices, events, or investment outcomes.</p>
+        <div className="l-return-actions">
+          <button type="button" className="l-primary" onClick={onResume}>Continue exploring</button>
+          <button type="button" className="l-secondary" onClick={onNew}>Start a new thought</button>
+        </div>
+        <div className="l-return-links">
+          <button type="button" onClick={onUpdate}>What changed?</button>
+          <button type="button" onClick={onForget}>Forget this choice</button>
+        </div>
+      </div>
+      {otherCount ? <button type="button" className="l-more-history" onClick={onHistory}>View {otherCount} other Practice {otherCount === 1 ? "choice" : "choices"}</button> : null}
+      <div className="l-trustline"><ShieldCheck size={13} aria-hidden="true" />Saved in this browser tab's session · Not synced</div>
+    </section>
   );
 }
 
@@ -72,7 +122,7 @@ function GuideMessage({
               <Bookmark size={18} aria-hidden="true" />
               <div><strong>Saved as a practice choice.</strong><br />No asset was purchased, and no real balance changed.</div>
             </div>
-            <p className="l-hint">You can revisit this choice in History. It lasts only while this page stays open.</p>
+            <p className="l-hint">You can revisit this choice in History. It stays in this tab's browser session, including across reloads. It isn't synced to other devices.</p>
           </>
         ) : null}
         {message.kind === "unsupported" ? (
@@ -125,13 +175,16 @@ function ScenarioWithSave({ state, onExposure, onSave }: { state: JourneyState; 
 }
 
 export default function LuminaPreview() {
-  const [state, dispatch] = useReducer(journeyReducer, newJourney());
+  const [state, dispatch] = useReducer(journeyReducer, undefined, () => returningJourney(readPracticeChoices()));
   const [text, setText] = useState("");
   const [panel, setPanel] = useState<"history" | "about" | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const previousFocus = useRef<HTMLElement | null>(null);
   const latestRef = useRef<HTMLDivElement>(null);
   const messageCount = state.messages.length;
+
+  // Saving in Practice is explicit; do not persist messages, drafts or free-form financial text.
+  useEffect(() => { writePracticeChoices(state.choices); }, [state.choices]);
 
   useEffect(() => {
     const previousTitle = document.title;
@@ -177,6 +230,9 @@ export default function LuminaPreview() {
   function reset() { dispatch({ type: "RESET" }); setText(""); window.scrollTo({ top: 0, behavior: "instant" }); }
   function start(value: string) { dispatch({ type: "START", text: value }); setText(""); }
   function save() { dispatch({ type: "SAVE", at: new Date().toISOString(), id: String(Date.now()) + "-" + state.nextId }); }
+  function resumeChoice(id: string) { dispatch({ type: "RESUME_CHOICE", id }); setPanel(null); }
+  function forgetChoice(id: string) { dispatch({ type: "FORGET_CHOICE", id }); setPanel(null); }
+  function describeChanges() { dispatch({ type: "SUBMIT", text: "What changed?" }); }
   const latestPromptId = [...state.messages].reverse().find((message) => message.kind === "horizon" || message.kind === "amount")?.id;
 
   return (
@@ -193,7 +249,16 @@ export default function LuminaPreview() {
         </div>
       </header>
       <main className="l-shell" aria-label="Lúmina conversation">
-        {state.step === "welcome" ? (
+        {state.notice ? <div role="status" className="l-status"><Info size={16} aria-hidden="true" /><span>{state.notice}</span></div> : null}
+        {state.step === "returning" && state.choices[0] ? (
+          <ReturningExperience
+            latest={state.choices[0]} otherCount={Math.max(0, state.choices.length - 1)}
+            onResume={() => resumeChoice(state.choices[0].id)}
+            onForget={() => forgetChoice(state.choices[0].id)}
+            onNew={reset} onUpdate={describeChanges}
+            onHistory={() => setPanel("history")}
+          />
+        ) : state.step === "welcome" ? (
           <section className="l-welcome">
             <div className="l-orbit" aria-hidden="true"><span /></div>
             <div className="l-eyebrow">A little clarity, every day</div>
@@ -236,7 +301,7 @@ export default function LuminaPreview() {
             <button className="l-send" type="submit" aria-label="Send message" disabled={!text.trim()}><ArrowUp size={19} /></button>
           </div>
           <div className="l-composer-foot">
-            <span><ShieldCheck size={12} aria-hidden="true" />Private to this browser tab · Demo only</span>
+            <span><ShieldCheck size={12} aria-hidden="true" />Practice saved in this tab · Not synced</span>
             <button type="button" onClick={reset}>New thought</button>
           </div>
         </form>
@@ -256,15 +321,19 @@ export default function LuminaPreview() {
                     <div className="l-record-head"><span>{new Date(choice.at).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })} · Example allocation</span><span className="l-record-badge">Practice only</span></div>
                     <strong>{formatBRL(choice.amount)}</strong>
                     <small>{choice.accessiblePercent}% accessible · {choice.exposedPercent}% market-exposed<br />Explored for {choice.goal}. No real purchase or asset position.</small>
+                    <div className="l-record-actions">
+                      <button type="button" onClick={() => resumeChoice(choice.id)} aria-label={"Revisit Practice choice from " + choice.at}>Revisit idea</button>
+                      <button type="button" onClick={() => forgetChoice(choice.id)} aria-label={"Forget Practice choice from " + choice.at}>Forget choice</button>
+                    </div>
                   </article>
                 )) : <p>Nothing saved yet. You can explore an example and save a practice choice without placing an order.</p>}
                 {state.choices.length > 0 ? <button type="button" className="l-clear" onClick={() => dispatch({ type: "CLEAR_HISTORY" })}>Clear practice history</button> : null}
               </>
             ) : (
               <>
-                <p>This is a focused experience prototype, not a live investing product. It includes an initial conversation, a question about timing, an interactive allocation illustration, limited text commands, and a session-only practice history.</p>
+                <p>This is a focused experience prototype, not a live investing product. It includes an initial conversation, a question about timing, an interactive allocation illustration, limited text commands, and a browser-tab Practice history that survives refresh.</p>
                 <div className="l-record"><div className="l-record-head"><span>What is real here?</span><span className="l-record-badge">Transparent by design</span></div><p>Only the interface and its arithmetic are functional. There are no market prices, executed orders, broker connections, notifications, AI-generated advice, or cross-device synchronization.</p></div>
-                <p>Your inputs remain in this page's memory. The prototype sends nothing to a server.</p>
+                <p>Only explicitly saved Practice choices are kept in this tab's browser session storage, including across reloads. Free-form conversation text isn't stored. Closing the tab generally clears its session. Nothing syncs across devices, and this preview sends no information to a server. Use “Forget choice” or “Clear practice history” to delete saved records.</p>
               </>
             )}
           </section>
