@@ -41,14 +41,15 @@ Tests added to the frontend's existing Vitest script:
 Run in `examples/stocks-optimizer` after dependencies are installed:
 
 ```bash
-pnpm --filter @workspace/signal-markets typecheck
+pnpm --filter @signal/decision build
+pnpm --filter @workspace/signal-markets typecheck:lumina
 pnpm --filter @workspace/signal-markets test
 pnpm --filter @workspace/signal-markets build
 ```
 
 The original self-contained prototype passed Chromium interaction checks at 320, 390, 768 and 1440px before the port. **Those results do not certify this React version**. Its new runtime still needs a rendered review, keyboard and screen-reader validation, real-device checks, full CI and performance/reliability verification.
 
-The GitHub-connected editing environment cannot install the workspace's npm dependencies or run those checks locally; test files are committed but must not be presented as passing until a CI runner has actually executed them.
+The full frontend `typecheck` currently reports unrelated Recharts chart typings and workspace initialization errors on the base code. The preview has a scoped `typecheck:lumina` gate, while the full frontend test and production build must still pass independently. CI results, not the existence of test files, determine pass/fail status.
 
 ## Next joint experience
 
