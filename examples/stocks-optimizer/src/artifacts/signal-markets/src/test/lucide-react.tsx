@@ -92,3 +92,11 @@ export const Zap = createIcon("zap");
 export const ArrowUp = createIcon("arrow-up");
 export const Bookmark = createIcon("bookmark");
 export const Info = createIcon("info");
+
+export const ExternalLink = createIcon("external-link");
+export const LogOut = createIcon("log-out");
+export const Plus = createIcon("plus");
+export const Trash2 = createIcon("trash-2");
+export const ChartNoAxesCombined = createIcon("chart-no-axes-combined");
+export const LockKeyhole = createIcon("lock-keyhole");
+export const ChartLine = createIcon("chart-line");
