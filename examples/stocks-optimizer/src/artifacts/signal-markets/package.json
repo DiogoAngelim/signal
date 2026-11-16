@@ -11,7 +11,8 @@
     "test:coverage": "vitest run src/lib/dashboard-ia.test.ts src/lib/metaAllocation.test.ts src/lib/sizing.test.ts src/lib/semantic-metrics.test.ts src/lib/market-perception.e2e.test.tsx src/lib/signal-reliability.test.ts src/lib/market-reliability.test.ts src/components/ReliabilityAuditPanel.test.tsx --coverage --coverage.provider=v8 --coverage.allowExternal --coverage.include=\"$PWD/src/lib/metaAllocation.ts\" --coverage.include=\"$PWD/src/lib/market-reliability.ts\" --coverage.include=\"$PWD/src/components/ReliabilityAuditPanel.tsx\" --coverage.include=\"$PWD/../signal-framework/reliability/engine.ts\" --coverage.thresholds.lines=100 --coverage.thresholds.functions=100 --coverage.thresholds.statements=100 --coverage.thresholds.branches=100",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "typecheck:lumina": "tsc -p tsconfig.lumina.json --noEmit",
-    "preview": "vite --config vite.config.ts preview --host 0.0.0.0"
+    "preview": "vite --config vite.config.ts preview --host 0.0.0.0",
+    "test:browser": "playwright test"
   },
   "devDependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -80,7 +81,8 @@
     "vite": "catalog:",
     "vitest": "^4.1.7",
     "wouter": "^3.3.5",
-    "zod": "catalog:"
+    "zod": "catalog:",
+    "@playwright/test": "^1.56.1"
   },
   "dependencies": {
     "@signal/decision": "workspace:*",
