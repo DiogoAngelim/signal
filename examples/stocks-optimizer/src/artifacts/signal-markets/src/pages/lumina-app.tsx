@@ -8,7 +8,7 @@ import { formatBRL, resolveGoal, resolveHorizon, resolveMoney, scenario, HORIZON
 import { readPracticeChoices, writePracticeChoices } from "@/lib/lumina-practice-session";
 import {
   luminaApi, type Capabilities, type Conversation, type Goal, type InboxEvent,
-  type LuminaUser, type Message, type PracticeRecord, type Watch,
+  type LuminaUser, type MarketSymbol, type Message, type PracticeRecord, type Watch,
 } from "@/lib/lumina-api";
 import LuminaAccountPanel from "./lumina-account";
 import LuminaMarketPanel from "./lumina-market";
@@ -126,6 +126,7 @@ export default function LuminaApp() {
   const [accountOpen, setAccountOpen] = useState(false);
   const [drawer, setDrawer] = useState<Drawer>(null);
   const [mode, setMode] = useState<Mode>("conversation");
+  const [selectedMarketSymbol, setSelectedMarketSymbol] = useState<MarketSymbol>("BTCUSDT");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [aiOptIn, setAiOptIn] = useState(false);
@@ -212,7 +213,10 @@ export default function LuminaApp() {
     setAwaitingHorizon(false);
     setMode("practice"); setDrawer(null); setNotice("");
   }
-  function showMarket() { setMode("market"); setDrawer(null); setNotice(""); }
+  function showMarket(symbol?: MarketSymbol) {
+    if (symbol) setSelectedMarketSymbol(symbol);
+    setMode("market"); setDrawer(null); setNotice("");
+  }
   function pickHorizon(value: Horizon) {
     setHorizon(value); setAwaitingHorizon(false); setMode("practice");
     setThread((prev) => [...prev,
@@ -255,10 +259,21 @@ export default function LuminaApp() {
     if (mode === "practice" && /\b(more risk|more exposure)\b/i.test(text)) {
       updateExposure(exposure + 10); setNotice("Raised hypothetical exposure by ten percentage points."); return;
     }
-    if (/\b(bitcoin|ethereum|solana|crypto|chart|market price)\b/i.test(text)) {
+    const asset = text.match(/\b(bitcoin|btc|btcusdt|ethereum|eth|ethusdt|solana|sol|solusdt|bnb|bnbusdt|petr4|petrobras|vale3|aapl|apple|msft|microsoft)\b/i);
+    const assetSymbols: Record<string, MarketSymbol> = {
+      bitcoin: "BTCUSDT", btc: "BTCUSDT", btcusdt: "BTCUSDT",
+      ethereum: "ETHUSDT", eth: "ETHUSDT", ethusdt: "ETHUSDT",
+      solana: "SOLUSDT", sol: "SOLUSDT", solusdt: "SOLUSDT",
+      bnb: "BNBUSDT", bnbusdt: "BNBUSDT",
+      petr4: "PETR4", petrobras: "PETR4", vale3: "VALE3",
+      aapl: "AAPL", apple: "AAPL", msft: "MSFT", microsoft: "MSFT",
+    };
+    if (asset || /\b(crypto|chart|market price|stocks|shares)\b/i.test(text)) {
       setThread((prev) => [...prev, createdMessage("user", text, "user-provided"),
-        createdMessage("assistant", "We can look at the market without turning a price move into a recommendation. The chart and public price observation have separate sources.", "illustrative")]);
-      showMarket();
+        createdMessage("assistant",
+          "We can explore the market through tradingview-data, keeping historical observations separate from verified realtime quotes. No price move alone makes an investment recommendation.",
+          "illustrative")]);
+      showMarket(asset ? assetSymbols[asset[0].toLowerCase()] : undefined);
       return;
     }
     if (/\b(have|invest|explore|allocate|practice)\b/i.test(text) && (resolveMoney(text) !== null || /\bpractice\b/i.test(text))) {
@@ -447,7 +462,7 @@ export default function LuminaApp() {
             </div>
             <div className="l-home-tools">
               <button type="button" onClick={() => setDrawer("goals")}><Target size={15}/>Your goals</button>
-              <button type="button" onClick={showMarket}><ChartNoAxesCombined size={15}/>Market context</button>
+              <button type="button" onClick={() => showMarket()}><ChartNoAxesCombined size={15}/>Market context</button>
               <button type="button" onClick={() => setDrawer("thoughts")}><History size={15}/>Past thoughts</button>
             </div>
             <div className="l-trustline"><ShieldCheck size={13}/>No brokerage credentials. No automatic trading.</div>
@@ -500,7 +515,7 @@ export default function LuminaApp() {
             {mode === "market" ? <div className="l-message l-reply">
               <span className="l-reply-mark"><ChartNoAxesCombined size={18}/></span>
               <div className="l-reply-body">
-                <LuminaMarketPanel user={user} onWatchCreated={() => void reloadAccount()}/>
+                <LuminaMarketPanel user={user} initialSymbol={selectedMarketSymbol} onWatchCreated={() => void reloadAccount()}/>
               </div>
             </div> : null}
             {busy ? <p className="l-busy" role="status">Thinking through that…</p> : null}
