@@ -207,22 +207,31 @@ router.post("/lumina/conversations/:id/reply", run(async (req, res) => {
     throw new ApiProblem(429, "conversation_rate_limited", "You've reached the conversation limit. Try again later.");
 
   const goals = await listGoals(userId);
-  const intent = data.message.match(/\b(bitcoin|btc|ethereum|eth|solana|sol)\b/i);
-  const symbol = intent && /eth/i.test(intent[0]) ? "ETHUSDT"
-    : intent && /sol/i.test(intent[0]) ? "SOLUSDT" : "BTCUSDT";
-  const quote = await getLuminaMarketQuote(symbol);
+  // Do not call or send market data unless the user actually mentioned an asset.
+  // This avoids amplifying requests to the quota-constrained tradingview-data service.
+  const assetTokens: Record<string, keyof typeof LUMINA_MARKETS> = {
+    bitcoin: "BTCUSDT", btc: "BTCUSDT", btcusdt: "BTCUSDT",
+    ethereum: "ETHUSDT", eth: "ETHUSDT", ethusdt: "ETHUSDT",
+    solana: "SOLUSDT", sol: "SOLUSDT", solusdt: "SOLUSDT",
+    bnb: "BNBUSDT", bnbusdt: "BNBUSDT",
+    petr4: "PETR4", petrobras: "PETR4", vale3: "VALE3",
+    aapl: "AAPL", apple: "AAPL", msft: "MSFT", microsoft: "MSFT",
+  };
+  const intent = data.message.match(/\b(bitcoin|btcusdt|btc|ethereum|ethusdt|eth|solana|solusdt|sol|bnbusdt|bnb|petr4|petrobras|vale3|aapl|apple|msft|microsoft)\b/i);
+  const symbol = intent ? assetTokens[intent[0].toLowerCase()] : undefined;
+  const quote = symbol ? await getLuminaMarketQuote(symbol) : null;
   const ai = data.useAi ? await luminaAssistantReply({
     userId, message: data.message, goalContext: goals.map((g) => ({
       title: g.title, targetAmount: g.targetAmount, targetDate: g.targetDate,
     })),
-    marketContext: quote,
+    marketContext: quote ?? { status: "not-requested", note: "No asset price was requested." },
     history: past.slice(-8),
   }).catch(() => null) : null;
 
   const assistantText = ai?.text ?? (
     "I can help you explore this without rushing into a decision. " +
     (goals.length ? "We can keep your goals in view as we compare choices. " : "What would you like your money to make possible? ") +
-    "The AI conversation isn't configured, enabled, or available right now. You can still save goals, explore Practice, and inspect verified public prices."
+    "The AI conversation isn't configured, enabled, or available right now. You can still save goals, explore Practice, and inspect available market observations with source and freshness labels."
   );
   const records = await appendMessages(userId, conversationId, [
     { role: "user", content: data.message, provenance: "user-provided" },
@@ -230,7 +239,7 @@ router.post("/lumina/conversations/:id/reply", run(async (req, res) => {
   ]);
   res.json({
     messages: records, ai: Boolean(ai),
-    priceEvidence: { symbol: quote.symbol, status: quote.status, quoteAt: quote.quoteAt, source: quote.provider },
+    priceEvidence: quote ? { symbol: quote.symbol, status: quote.status, quoteAt: quote.quoteAt, source: quote.provider } : { status: "not-requested", source: "tradingview-data" },
   });
 }));
 
