@@ -4,7 +4,7 @@ import { fromNodeHeaders } from "better-auth/node";
 import { z } from "zod";
 import { ApiProblem } from "../observability/signal-http.js";
 import { getLuminaAuth, luminaConfigured, luminaMailReady } from "../lib/lumina-auth.js";
-import { getLuminaMarketQuote, LUMINA_MARKETS, luminaSymbol } from "../lib/lumina-market.js";
+import { getLuminaMarketQuote, getLuminaMarketHistory, LUMINA_MARKETS, luminaSymbol } from "../lib/lumina-market.js";
 import { luminaAssistantReply } from "../lib/lumina-assistant.js";
 import {
   addGoal, addPractice, addConversation, appendMessages, clearPractice,
@@ -110,7 +110,10 @@ router.get("/lumina/capabilities", (_req, res) => {
     ai: Boolean(process.env.OPENAI_API_KEY),
     aiModel: process.env.OPENAI_API_KEY ? (process.env.LUMINA_OPENAI_MODEL || "gpt-6-luna") : null,
     tradingView: { type: "official-widget", source: "TradingView-hosted display", dataApi: false },
-    marketQuotes: "Binance Spot public",
+    marketQuotes: "tradingview-data (provider-verified Binance public for crypto; indicative TradingView for stocks)",
+    marketDataModule: "tradingview-data",
+    historicalCandles: true,
+    verifiedRealtimeEquities: false,
     quoteFreshnessLimitSeconds: 120,
     connectedBroker: false,
     realExecution: false,
@@ -124,6 +127,13 @@ router.get("/lumina/market", run(async (req, res) => {
   if (!symbol) throw new ApiProblem(400, "unsupported_market", "Choose a supported market.");
   res.setHeader("Cache-Control", "no-store");
   res.json(await getLuminaMarketQuote(symbol));
+}));
+router.get("/lumina/market/history", run(async (req, res) => {
+  const symbol = luminaSymbol(req.query.symbol ?? "BTCUSDT");
+  if (!symbol) throw new ApiProblem(400, "unsupported_market", "Choose a supported market.");
+  const bars = z.coerce.number().int().min(10).max(365).default(90).parse(req.query.bars);
+  res.setHeader("Cache-Control", "no-store");
+  res.json(await getLuminaMarketHistory(symbol, bars));
 }));
 router.get("/lumina/markets", (_req, res) => {
   res.json({ symbols: LUMINA_MARKETS });
