@@ -47,3 +47,18 @@ test("gitless scan rejects an empty source upload", () => {
     rmSync(directory, { recursive: true, force: true });
   }
 });
+
+test("Vercel's empty .git stub still triggers source-tree scanning", () => {
+  withGitlessTree((cwd) => {
+    mkdirSync(path.join(cwd, ".git"));
+    const clean = spawnSync(process.execPath, [script], { cwd, encoding: "utf8" });
+    assert.equal(clean.status, 0);
+    assert.match(clean.stdout, /gitless deployment tree/);
+
+    const marker = ["HjHs", "Hac$ObTDDGcJ"].join("");
+    writeFileSync(path.join(cwd, "nested", "obfuscated.js"), "const injected = " + JSON.stringify(marker));
+    const unsafe = spawnSync(process.execPath, [script], { cwd, encoding: "utf8" });
+    assert.equal(unsafe.status, 1);
+    assert.match(unsafe.stderr, /obfuscated\\.js/);
+  });
+});
