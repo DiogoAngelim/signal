@@ -92,7 +92,7 @@ export async function evaluateWatchesOnVisit(
             "Public price: " + String(quote.price) + " USD; your watch was " +
               watch.direction + " " + String(threshold) +
               " USD. This is informational only, not an investment recommendation.",
-            "Binance Spot public API", quote.quoteAt],
+            "tradingview-data / Binance public", quote.quoteAt],
         );
       }
       await client.query("COMMIT");
