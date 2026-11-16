@@ -134,8 +134,14 @@ export default function LuminaPreview() {
   const messageCount = state.messages.length;
 
   useEffect(() => {
-    if (messageCount) latestRef.current?.scrollIntoView({
-      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+    const previousTitle = document.title;
+    document.title = "Lúmina — a calmer way to think about money";
+    return () => { document.title = previousTitle; };
+  }, []);
+
+  useEffect(() => {
+    if (messageCount) latestRef.current?.scrollIntoView?.({
+      behavior: typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
       block: "nearest",
     });
   }, [messageCount]);
