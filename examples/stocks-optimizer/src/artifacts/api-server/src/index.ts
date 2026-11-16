@@ -1,6 +1,9 @@
 import { createServer } from "node:http";
 import cors from "cors";
 import express from "express";
+import { toNodeHandler } from "better-auth/node";
+import { getLuminaAuth } from "./lib/lumina-auth.js";
+import luminaRouter from "./routes/lumina.js";
 import { WebSocketServer } from "ws";
 import { createSignalApiRouter } from "./api/signal-routes.js";
 import { getOrCreateMarketBacktest } from "./lib/market-backtest.js";
@@ -27,6 +30,10 @@ app.disable("x-powered-by");
 app.use(requestIdMiddleware);
 app.use(secureHeadersMiddleware);
 app.use(cors(createSignalCorsOptions()));
+app.all("/api/auth/*splat", async (req, res, next) => {
+  try { await toNodeHandler(getLuminaAuth())(req, res); }
+  catch (error) { next(error); }
+});
 app.use(
   express.json({
     limit:
@@ -83,6 +90,7 @@ app.use("/api", createSignalApiRouter());
 app.use("/api", stocksRouter);
 app.use(binanceExecutionRouter);
 app.use("/api", binanceExecutionRouter);
+app.use("/api", luminaRouter);
 
 const server = createServer(app);
 const wss = new WebSocketServer({ server });
