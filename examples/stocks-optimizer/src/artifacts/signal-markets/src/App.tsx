@@ -9,16 +9,21 @@ import { Route, Switch, Router as WouterRouter } from "wouter";
 
 const queryClient = new QueryClient();
 const LuminaPreview = lazy(() => import("@/pages/lumina-preview"));
+const LuminaApp = lazy(() => import("@/pages/lumina-app"));
 const luminaPreviewEnabled = import.meta.env.DEV || import.meta.env.VITE_ENABLE_LUMINA_PREVIEW === "true";
 
 function LuminaPreviewRoute() {
   return <Suspense fallback={<div role="status">Opening Lúmina…</div>}><LuminaPreview /></Suspense>;
 }
+function LuminaAppRoute() {
+  return <Suspense fallback={<div role="status">Opening Lúmina…</div>}><LuminaApp /></Suspense>;
+}
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
+      <Route path="/" component={LuminaAppRoute} />
+      <Route path="/lumina" component={LuminaAppRoute} />
       <Route path="/dashboard" component={Dashboard} />
       {luminaPreviewEnabled ? <Route path="/lumina-preview" component={LuminaPreviewRoute} /> : null}
       <Route component={NotFound} />
