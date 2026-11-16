@@ -133,7 +133,7 @@ function start(state: JourneyState, text: string): JourneyState {
     step: explore || (horizon && amount !== null) ? "visual" : horizon ? "amount" : "horizon",
   };
   if (explore) return add(next, { kind: "user", text }, { kind: "text", text: "We can start with a made-up R$ 5,000. Nothing needs to be real to explore." }, { kind: "scenario" });
-  return add(next, { kind: "user", text }, { kind: next.step === "visual" ? "scenario" : next.step });
+  return add(next, { kind: "user", text }, { kind: next.step === "visual" ? "scenario" : next.step === "amount" ? "amount" : "horizon" });
 }
 
 export function journeyReducer(state: JourneyState, event: JourneyEvent): JourneyState {
