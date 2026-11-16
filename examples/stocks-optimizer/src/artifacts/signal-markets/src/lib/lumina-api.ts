@@ -86,10 +86,10 @@ export const luminaApi = {
     luminaRequest<{ conversation: Conversation }>("/api/lumina/conversations", { method: "POST", body: JSON.stringify({ title }) }),
   messages: (id: string) => luminaRequest<{ messages: Message[] }>(
     "/api/lumina/conversations/" + encodeURIComponent(id) + "/messages"),
-  reply: (id: string, message: string) =>
+  reply: (id: string, message: string, useAi = false) =>
     luminaRequest<{ messages: Message[]; ai: boolean; priceEvidence: unknown }>(
       "/api/lumina/conversations/" + encodeURIComponent(id) + "/reply",
-      { method: "POST", body: JSON.stringify({ message }) }),
+      { method: "POST", body: JSON.stringify({ message, useAi }) }),
   deleteConversation: (id: string) => luminaRequest<void>(
     "/api/lumina/conversations/" + encodeURIComponent(id), { method: "DELETE" }),
   quote: (symbol: MarketSymbol) => luminaRequest<Quote>("/api/lumina/market?symbol=" + symbol),
