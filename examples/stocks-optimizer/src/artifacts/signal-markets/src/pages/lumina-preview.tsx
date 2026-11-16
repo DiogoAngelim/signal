@@ -47,7 +47,7 @@ function ReturningExperience({
           <div className="l-label">An idea you explored</div>
           <span className="l-concept-tag">Practice · Not a holding</span>
         </div>
-        <h2>For {latest.goal.replace(/^your /, "")}</h2>
+        <h2>For {latest.goal}</h2>
         <div className="l-return-amount">{formatBRL(latest.amount)}</div>
         <div className="l-return-bar" role="img" aria-label={latest.accessiblePercent + "% accessible, " + latest.exposedPercent + "% market-exposed in this saved hypothetical allocation"}>
           <span className="l-return-liquid" style={{ width: latest.accessiblePercent + "%" }} />
