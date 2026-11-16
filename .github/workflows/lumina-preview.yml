@@ -1,0 +1,31 @@
+name: Lúmina first-journey preview
+
+on:
+  pull_request:
+    paths:
+      - "examples/stocks-optimizer/src/artifacts/signal-markets/**"
+      - "examples/stocks-optimizer/pnpm-lock.yaml"
+      - ".github/workflows/lumina-preview.yml"
+  workflow_dispatch:
+
+jobs:
+  frontend:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    defaults:
+      run:
+        working-directory: examples/stocks-optimizer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: examples/stocks-optimizer/pnpm-lock.yaml
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/signal-markets typecheck
+      - run: pnpm --filter @workspace/signal-markets test
+      - run: pnpm --filter @workspace/signal-markets build
