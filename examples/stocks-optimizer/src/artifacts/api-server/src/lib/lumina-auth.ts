@@ -58,7 +58,14 @@ export function getLuminaAuth() {
       },
       account: { modelName: "lumina_account" },
       verification: { modelName: "lumina_verification" },
-      rateLimit: { enabled: true, storage: "database", modelName: "lumina_auth_rate_limit" },
+      // CI runs concurrent signup journeys from the same 127.0.0.1 address.
+      // Better Auth intentionally limits signup/signin to 3 per 10 seconds
+      // per IP, so enable the production protection everywhere except the
+      // isolated NODE_ENV=test suite. Never disable it in a real deployment.
+      rateLimit: {
+        enabled: process.env.NODE_ENV !== "test",
+        storage: "database", modelName: "lumina_auth_rate_limit",
+      },
       emailAndPassword: {
         enabled: true,
         minPasswordLength: 12,
