@@ -1,0 +1,11 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/vite-env.d.ts",
+    "src/lib/lumina-journey.ts",
+    "src/lib/lumina-journey.test.ts",
+    "src/pages/lumina-preview.tsx",
+    "src/pages/lumina-preview.test.tsx"
+  ],
+  "exclude": []
+}
