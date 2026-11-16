@@ -37,11 +37,13 @@ Tests added to the frontend's existing Vitest script:
 
 - `src/lib/lumina-journey.test.ts`: contextual clarification, parsing, visual/text consistency, hypothetical arithmetic, no execution, session-only choices, bounds, and invalid input.
 - `src/pages/lumina-preview.test.tsx`: initial render and absence of deceptive financial controls.
+- `src/pages/lumina-preview.interaction.test.tsx`: first-visit button flow, visual, practice save and in-tab history.
 
 Run in `examples/stocks-optimizer` after dependencies are installed:
 
 ```bash
 pnpm --filter @signal/decision build
+pnpm --filter @workspace/signal-markets typecheck
 pnpm --filter @workspace/signal-markets typecheck:lumina
 pnpm --filter @workspace/signal-markets test
 pnpm --filter @workspace/signal-markets build
@@ -49,7 +51,7 @@ pnpm --filter @workspace/signal-markets build
 
 The original self-contained prototype passed Chromium interaction checks at 320, 390, 768 and 1440px before the port. **Those results do not certify this React version**. Its new runtime still needs a rendered review, keyboard and screen-reader validation, real-device checks, full CI and performance/reliability verification.
 
-The full frontend `typecheck` currently reports unrelated Recharts chart typings and workspace initialization errors on the base code. The preview has a scoped `typecheck:lumina` gate, while the full frontend test and production build must still pass independently. CI results, not the existence of test files, determine pass/fail status.
+The preview includes scoped `typecheck:lumina` and a restored full frontend typecheck gate. This branch also corrects existing Vite type declarations, Recharts injected-content typings, and the legacy DOM-test environment so those checks can run. CI enforces full typecheck, scoped typecheck, all frontend tests, and the Vite build. A successful build is **not** a production release or a substitute for rendered/browser accessibility QA.
 
 ## Next joint experience
 
