@@ -128,6 +128,7 @@ export default function LuminaApp() {
   const [mode, setMode] = useState<Mode>("conversation");
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
+  const [aiOptIn, setAiOptIn] = useState(false);
   const [notice, setNotice] = useState("");
   const [serverStatus, setServerStatus] = useState<"checking" | "ready" | "unavailable">("checking");
   const [goals, setGoals] = useState<Goal[]>([]);
@@ -289,7 +290,7 @@ export default function LuminaApp() {
         setConversations((prev) => [created.conversation, ...prev]);
       }
       setThread((prev) => [...prev, createdMessage("user", text, "user-provided")]);
-      const result = await luminaApi.reply(conversationId, text);
+      const result = await luminaApi.reply(conversationId, text, aiOptIn && capabilities?.ai === true);
       setThread((prev) => [...prev, ...result.messages.filter((m) => m.role === "assistant")]);
     } catch (error) {
       setNotice(error instanceof Error ? error.message : "This thought wasn't saved. You can try again.");
@@ -522,9 +523,15 @@ export default function LuminaApp() {
             </button>
           </div>
           <div className="l-composer-foot">
-            <span><ShieldCheck size={12}/>{user ? "Private signed-in space · Practice is not real execution" : "Explore without an account · Practice only"}</span>
+            <span><ShieldCheck size={12}/>{user ? "Saved to your account · No trading" : "Explore without an account · Practice only"}</span>
             <button type="button" onClick={startThought}>New thought</button>
           </div>
+          {user && capabilities?.ai ? (
+            <label className="l-ai-consent">
+              <input type="checkbox" checked={aiOptIn} onChange={(event) => setAiOptIn(event.target.checked)} />
+              Use OpenAI for chat (shares your message, recent conversation and goal context)
+            </label>
+          ) : null}
         </form>
       </div>
 
@@ -634,7 +641,7 @@ export default function LuminaApp() {
                   <p>Saved goals, Practice records, conversations, and inbox events are tied to your account. Trade execution and verified brokerage holdings are not available here.</p>
                   {user ? <>
                     <button className="l-secondary" onClick={() => void luminaApi.signOut().then(() => {
-                      setUser(null); setGoals([]); setChoices([]); setConversations([]); setThread([]);
+                      setUser(null); setAiOptIn(false); setGoals([]); setChoices([]); setConversations([]); setThread([]);
                       setEvents([]); setWatches([]); setActiveConversation(null); setDrawer(null); setMode("conversation");
                     }).catch(() => setNotice("Sign out failed. Please try again."))}><LogOut size={16}/>Sign out</button>
                     <div className="l-erase">
