@@ -27,6 +27,7 @@ jobs:
           cache-dependency-path: examples/stocks-optimizer/pnpm-lock.yaml
       - run: pnpm install --frozen-lockfile
       - run: pnpm --filter @signal/decision build
+      - run: pnpm --filter @workspace/signal-markets typecheck
       - run: pnpm --filter @workspace/signal-markets typecheck:lumina
       - run: pnpm --filter @workspace/signal-markets test
       - run: pnpm --filter @workspace/signal-markets build
