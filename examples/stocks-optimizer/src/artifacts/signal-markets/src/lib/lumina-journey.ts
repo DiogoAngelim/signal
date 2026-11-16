@@ -5,7 +5,7 @@
  * brokerage operations, verified positions, AI-generated advice, or market forecasts.
  */
 export type EvidenceSource = "user-provided" | "illustrative" | "verified-external" | "unavailable";
-export type JourneyStep = "welcome" | "horizon" | "amount" | "visual";
+export type JourneyStep = "welcome" | "returning" | "horizon" | "amount" | "visual";
 export type Horizon = "soon" | "middle" | "later" | "unsure";
 export type MessageKind = "user" | "text" | "horizon" | "amount" | "scenario" | "saved" | "unsupported";
 
@@ -34,6 +34,10 @@ export interface JourneyState {
   messages: JourneyMessage[];
   nextId: number;
   choices: PracticeChoice[];
+  /** The specific saved choice currently being explored. Never an actual holding. */
+  activeChoiceId: string | null;
+  /** Ephemeral, user-facing message that is not saved. */
+  notice: string | null;
 }
 export type JourneyEvent =
   | { type: "START"; text: string }
@@ -43,6 +47,8 @@ export type JourneyEvent =
   | { type: "EXPOSURE"; value: number }
   | { type: "SAVE"; at: string; id: string }
   | { type: "RESET" }
+  | { type: "RESUME_CHOICE"; id: string }
+  | { type: "FORGET_CHOICE"; id: string }
   | { type: "CLEAR_HISTORY" };
 
 export const HORIZON_LABELS: Record<Horizon, string> = {
@@ -62,7 +68,13 @@ export function newJourney(choices: PracticeChoice[] = []): JourneyState {
   return {
     step: "welcome", goal: "your money", amount: null, horizon: null,
     exposedPercent: 20, messages: [], nextId: 1, choices,
+    activeChoiceId: null, notice: null,
   };
+}
+
+/** Called only on an initial load, after validating tab-scoped Practice records. */
+export function returningJourney(choices: PracticeChoice[]): JourneyState {
+  return { ...newJourney(choices), step: choices.length ? "returning" : "welcome" };
 }
 
 export function formatBRL(value: number): string {
@@ -139,7 +151,35 @@ function start(state: JourneyState, text: string): JourneyState {
 export function journeyReducer(state: JourneyState, event: JourneyEvent): JourneyState {
   switch (event.type) {
     case "RESET": return newJourney(state.choices);
-    case "CLEAR_HISTORY": return { ...state, choices: [] };
+    case "CLEAR_HISTORY": return {
+      ...newJourney(), notice: "Your saved Practice history was cleared from this browser tab.",
+    };
+    case "RESUME_CHOICE": {
+      const choice = state.choices.find((item) => item.id === event.id);
+      if (!choice) return state;
+      const resumed: JourneyState = {
+        ...newJourney(state.choices), step: "visual", goal: choice.goal,
+        amount: choice.amount, horizon: choice.horizon,
+        exposedPercent: choice.exposedPercent, activeChoiceId: choice.id,
+      };
+      return add(resumed,
+        { kind: "text", text: "Here's the idea you explored. It's still a Practice choice, not a verified position. We haven't tracked any market changes or outcomes." },
+        { kind: "scenario" },
+      );
+    }
+    case "FORGET_CHOICE": {
+      if (!state.choices.some((item) => item.id === event.id)) return state;
+      const remaining = state.choices.filter((item) => item.id !== event.id);
+      const note = "That Practice choice has been forgotten from this browser tab.";
+      if (state.activeChoiceId === event.id) {
+        return { ...newJourney(remaining), notice: note };
+      }
+      return {
+        ...state, choices: remaining,
+        step: state.step === "returning" && !remaining.length ? "welcome" : state.step,
+        notice: note,
+      };
+    }
     case "START": return start(state, event.text);
     case "PICK_HORIZON": {
       if (state.step !== "horizon") return state;
@@ -154,7 +194,7 @@ export function journeyReducer(state: JourneyState, event: JourneyEvent): Journe
       if (state.step !== "visual" || !Number.isFinite(event.value)) return state;
       return { ...state, exposedPercent: Math.max(0, Math.min(100, Math.round(event.value / 5) * 5)) };
     case "SAVE": {
-      if (state.step !== "visual" || state.amount === null) return state;
+      if (state.step !== "visual" || state.amount === null || state.choices.some((item) => item.id === event.id)) return state;
       const choice: PracticeChoice = {
         id: event.id, at: event.at, amount: state.amount,
         exposedPercent: state.exposedPercent,
@@ -162,12 +202,33 @@ export function journeyReducer(state: JourneyState, event: JourneyEvent): Journe
         goal: state.goal, horizon: state.horizon,
         provenance: "illustrative", executed: false,
       };
-      return add({ ...state, choices: [choice, ...state.choices] }, { kind: "saved" });
+      return add({ ...state, choices: [choice, ...state.choices].slice(0, 25), activeChoiceId: choice.id }, { kind: "saved" });
     }
     case "SUBMIT": {
       const text = event.text.trim();
       if (!text) return state;
       if (/^(new thought|start over|restart|reset)$/i.test(text)) return newJourney(state.choices);
+      if (/^(forget everything|forget all practice choices|clear practice history)$/i.test(text)) {
+        return journeyReducer(state, { type: "CLEAR_HISTORY" });
+      }
+      if (/^(don't remember this|do not remember this|forget this|forget that|forget this choice|delete this choice)[.!]?$/i.test(text)) {
+        const id = state.activeChoiceId ?? (state.choices.length === 1 ? state.choices[0].id : null);
+        if (id) return journeyReducer(state, { type: "FORGET_CHOICE", id });
+        return { ...state, notice: state.choices.length > 1
+          ? "There are several Practice choices. Open History to choose which one to forget."
+          : "There's no saved Practice choice here to forget. Your unsaved conversation is not stored." };
+      }
+      if (/\b(what (?:has )?changed|anything new|what happened since|how did it do|any updates?|am i up|market performance|gains? or losses?)\b/i.test(text)) {
+        const note = "I can't verify what changed: this preview doesn't monitor prices, portfolio activity, or outcomes. Your Practice choices remain illustrations, not real holdings.";
+        if (state.step === "returning" || state.step === "welcome") return { ...state, notice: note };
+        return add(state, { kind: "user", text }, { kind: "text", text: note });
+      }
+      if (state.step === "returning") {
+        if (/^(resume|continue|pick up|revisit|last choice|my last idea)[.!]?$/i.test(text) && state.choices[0]) {
+          return journeyReducer(state, { type: "RESUME_CHOICE", id: state.choices[0].id });
+        }
+        return start(state, text);
+      }
       if (state.step === "welcome") return start(state, text);
       if (state.step === "horizon") {
         const horizon = resolveHorizon(text);
