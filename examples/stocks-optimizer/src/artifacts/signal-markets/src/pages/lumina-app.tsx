@@ -181,6 +181,12 @@ export default function LuminaApp() {
       setNotice("Some saved information could not be loaded. Your last visible snapshot may be incomplete.");
   }, [user?.id]);
   useEffect(() => { void reloadAccount(); }, [reloadAccount]);
+  // A session may be restored while the account dialog is still open.
+  // Reconcile the dialog with the authenticated state, so successful sign-up
+  // and cookie-based restoration never leave a sign-in overlay blocking the app.
+  useEffect(() => {
+    if (user) setAccountOpen(false);
+  }, [user?.id]);
   useEffect(() => {
     if (hasThread) bottomRef.current?.scrollIntoView?.({
       behavior: typeof window.matchMedia === "function" && window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
