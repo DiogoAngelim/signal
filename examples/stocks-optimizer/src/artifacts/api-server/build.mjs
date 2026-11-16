@@ -49,6 +49,13 @@ await build({
 await build({
   ...common,
   format: "esm",
+  entryPoints: ["src/app.ts"],
+  outfile: "dist/app.mjs",
+});
+
+await build({
+  ...common,
+  format: "esm",
   entryPoints: ["src/workers/signal-queue-worker.ts"],
   outfile: "dist/signal-queue-worker.mjs",
 });
