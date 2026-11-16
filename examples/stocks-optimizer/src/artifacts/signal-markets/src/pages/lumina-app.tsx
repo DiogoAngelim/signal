@@ -4,7 +4,7 @@ import {
   Info, LogOut, Plus, RefreshCw, ShieldCheck, SlidersHorizontal,
   Target, Trash2, X, ChartNoAxesCombined,
 } from "lucide-react";
-import { formatBRL, resolveGoal, resolveMoney, scenario } from "@/lib/lumina-journey";
+import { formatBRL, resolveGoal, resolveHorizon, resolveMoney, scenario, HORIZON_LABELS, type Horizon } from "@/lib/lumina-journey";
 import { readPracticeChoices, writePracticeChoices } from "@/lib/lumina-practice-session";
 import {
   luminaApi, type Capabilities, type Conversation, type Goal, type InboxEvent,
@@ -145,6 +145,8 @@ export default function LuminaApp() {
   const [practiceAmount, setPracticeAmount] = useState(5000);
   const [exposure, setExposure] = useState(20);
   const [practiceGoal, setPracticeGoal] = useState("your money");
+  const [horizon, setHorizon] = useState<Horizon | null>(null);
+  const [awaitingHorizon, setAwaitingHorizon] = useState(false);
   const [confirmErase, setConfirmErase] = useState(false);
   const [persistBusy, setPersistBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
@@ -195,6 +197,7 @@ export default function LuminaApp() {
   function startThought() {
     setMode("conversation"); setThread([]); setActiveConversation(null);
     setDraft(""); setNotice("");
+    setAwaitingHorizon(false); setHorizon(null);
     setDrawer(null);
   }
   function updateExposure(value: number) { setExposure(Math.min(100, Math.max(0, value))); }
@@ -203,10 +206,20 @@ export default function LuminaApp() {
       const money = resolveMoney(text);
       if (money !== null) setPracticeAmount(money);
       setPracticeGoal(resolveGoal(text));
+      setHorizon(resolveHorizon(text) ?? "unsure");
     }
+    setAwaitingHorizon(false);
     setMode("practice"); setDrawer(null); setNotice("");
   }
   function showMarket() { setMode("market"); setDrawer(null); setNotice(""); }
+  function pickHorizon(value: Horizon) {
+    setHorizon(value); setAwaitingHorizon(false); setMode("practice");
+    setThread((prev) => [...prev,
+      createdMessage("user", HORIZON_LABELS[value], "user-provided"),
+      createdMessage("assistant", "Thank you. We can explore how accessibility and market exposure relate to that timing. This is still only an illustration.", "illustrative"),
+    ]);
+    setDraft("");
+  }
 
   async function sendThought(event?: FormEvent) {
     event?.preventDefault();
@@ -214,6 +227,18 @@ export default function LuminaApp() {
     if (!text || busy) return;
     setDraft("");
     setNotice("");
+    if (awaitingHorizon) {
+      const answer = resolveHorizon(text);
+      if (answer) {
+        pickHorizon(answer);
+      } else {
+        setThread((prev) => [...prev,
+          createdMessage("user", text, "user-provided"),
+          createdMessage("assistant", "When might you need this money? A rough timeframe is enough; 'I'm not sure' is also fine.", "illustrative"),
+        ]);
+      }
+      return;
+    }
     const percent = text.match(/\b(\d{1,3})\s*%/);
     if (mode === "practice" && percent) {
       const value = Number(percent[1]);
@@ -236,9 +261,17 @@ export default function LuminaApp() {
       return;
     }
     if (/\b(have|invest|explore|allocate|practice)\b/i.test(text) && (resolveMoney(text) !== null || /\bpractice\b/i.test(text))) {
+      const amount = resolveMoney(text);
+      if (amount !== null) setPracticeAmount(amount);
+      setPracticeGoal(resolveGoal(text));
+      const when = resolveHorizon(text);
+      const casual = /\b(just curious|made-up|just explore|hypothetical)\b/i.test(text);
       setThread((prev) => [...prev, createdMessage("user", text, "user-provided"),
-        createdMessage("assistant", "Let's make that a reversible illustration. You can change every number or leave whenever you like.", "illustrative")]);
-      showPractice(text);
+        createdMessage("assistant", !when && !casual
+          ? "One thing will help: when do you think you might need this money? We can keep the answer approximate."
+          : "Let's make that a reversible illustration. You can change every number or leave whenever you like.", "illustrative")]);
+      if (!when && !casual) { setAwaitingHorizon(true); setMode("conversation"); }
+      else { setHorizon(when ?? "unsure"); setAwaitingHorizon(false); setMode("practice"); }
       return;
     }
     if (!user) {
@@ -271,7 +304,7 @@ export default function LuminaApp() {
       if (user) {
         const result = await luminaApi.savePractice({
           amount: practiceAmount, exposedPercent: exposure, goal: practiceGoal,
-          rationale: "Explored as a reversible illustration.",
+          horizon: horizon ?? "unsure", rationale: "Explored as a reversible illustration.",
         });
         setChoices((prev) => [result.choice, ...prev]);
         setNotice("Saved as a Practice choice across your signed-in devices. Nothing was purchased.");
@@ -280,7 +313,7 @@ export default function LuminaApp() {
           id: crypto.randomUUID(), at: new Date().toISOString(),
           amount: practiceAmount, exposedPercent: exposure,
           accessiblePercent: 100 - exposure, goal: practiceGoal,
-          goalId: null, horizon: "unsure", rationale: "",
+          goalId: null, horizon: horizon ?? "unsure", rationale: "",
           provenance: "illustrative", executed: false,
         };
         const next = [record, ...guestChoices].slice(0, MAX_GUEST_HISTORY);
@@ -297,7 +330,7 @@ export default function LuminaApp() {
 
   function revisitPractice(choice: PracticeRecord) {
     setPracticeAmount(choice.amount); setExposure(choice.exposedPercent);
-    setPracticeGoal(choice.goal); setMode("practice"); setDrawer(null);
+    setPracticeGoal(choice.goal); setHorizon(choice.horizon); setAwaitingHorizon(false); setMode("practice"); setDrawer(null);
     setNotice("Resuming an illustration—not a verified portfolio or an investment outcome.");
   }
   async function forgetPractice(choice: PracticeRecord) {
@@ -437,6 +470,21 @@ export default function LuminaApp() {
                   </div>
                 </section>
             ))}
+            {awaitingHorizon ? (
+              <section className="l-message l-reply" aria-label="Timing clarification">
+                <span className="l-reply-mark"><Target size={17}/></span>
+                <div className="l-reply-body">
+                  <div className="l-kicker">One useful question</div>
+                  <h2 className="l-question">When might you need this money?</h2>
+                  <p>Your timing matters more than choosing a specific investment right away.</p>
+                  <div className="l-choices" role="group" aria-label="When you may need this money">
+                    {(["soon", "middle", "later", "unsure"] as Horizon[]).map((value) => (
+                      <button type="button" className="l-choice" key={value} onClick={() => pickHorizon(value)}>{HORIZON_LABELS[value]}</button>
+                    ))}
+                  </div>
+                </div>
+              </section>
+            ) : null}
             {mode === "practice" ? <div className="l-message l-reply">
               <span className="l-reply-mark"><SlidersHorizontal size={18}/></span>
               <div className="l-reply-body">
