@@ -21,15 +21,36 @@ jobs:
     timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Verify canonical and standalone public policy
-        run: node scripts/check-human-support-mirror.mjs
-      - name: Run Signal policy regression suite
+      - name: Install pinned tools and initialize package configuration
         run: |
           corepack enable
           corepack prepare pnpm@10.12.4 --activate
           pnpm install --frozen-lockfile
+          node init
+          (cd packages/decision && node init)
+      - name: Capture reproducible source and formatter configuration
+        run: |
+          mkdir -p /tmp/human-support-evidence
+          git rev-parse HEAD > /tmp/human-support-evidence/source-sha.txt
+          git archive --format=tar.gz --output=/tmp/human-support-evidence/source.tar.gz HEAD
+          find . -path '*/node_modules/*' -prune -o -name 'biome.json*' -print | tar -czf /tmp/human-support-evidence/formatter-config.tar.gz -T -
+          find node_modules/.pnpm -path '*/@biomejs/cli-linux-x64/biome' -type f -exec cp '{}' /tmp/human-support-evidence/biome ';'
+          (cd packages/decision && pnpm exec biome --version) > /tmp/human-support-evidence/formatter-version.txt
+      - name: Retain offline reproduction inputs
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-support-reproduction-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 3
+          path: /tmp/human-support-evidence/
+      - name: Verify canonical and standalone public policy
+        run: node scripts/check-human-support-mirror.mjs
+      - name: Run Signal policy regression suite
+        run: |
           pnpm --filter @signal/decision typecheck
           pnpm --filter @signal/decision test
+          (cd packages/decision && pnpm exec biome check src/human-support.ts src/human-support.test.ts)
