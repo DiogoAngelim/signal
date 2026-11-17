@@ -48,12 +48,17 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha || github.sha }}
-          persist-credentials: false
       - name: Record exact source
         run: |
           mkdir -p evidence
           git rev-parse HEAD > evidence/source-sha.txt
           git archive --format=tar.gz --output=evidence/source.tar.gz HEAD
+      - name: Retain exact source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumina-source-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          path: examples/stocks-optimizer/evidence/
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -86,6 +91,6 @@ jobs:
           name: lumina-acceptance-${{ github.event.pull_request.head.sha || github.sha }}
           retention-days: 7
           path: |
-            examples/stocks-optimizer/evidence/
+            examples/stocks-optimizer/evidence/source-sha.txt
             examples/stocks-optimizer/src/artifacts/signal-markets/test-results/
             examples/stocks-optimizer/src/artifacts/signal-markets/playwright-report/
