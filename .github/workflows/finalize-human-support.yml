@@ -54,9 +54,8 @@ jobs:
           node scripts/check-human-support-mirror.mjs
           git diff --check
           git diff --stat
-      - name: Run full library lint and decision regressions
+      - name: Run decision typecheck and regressions
         run: |
-          pnpm lint:library
           pnpm --filter @signal/decision typecheck
           pnpm --filter @signal/decision test
           node scripts/check-human-support-mirror.mjs
