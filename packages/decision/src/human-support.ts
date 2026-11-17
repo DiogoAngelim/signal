@@ -240,10 +240,11 @@ export function buildHumanSupportPlan(
     observed === "immediate-safety";
   const cue =
     unconditional || preferences.adaptToExplicitCues ? observed : "none";
-  const pair = cue === "none" ? ["", ""] : COPY[preferences.locale][cue];
+  const pair: [string, string] =
+    cue === "none" ? ["", ""] : COPY[preferences.locale][cue];
   const acknowledgement =
-    preferences.mode === "direct" && !unconditional ? "" : pair[0]!;
-  const nextStep = pair[1]!;
+    preferences.mode === "direct" && !unconditional ? "" : pair[0];
+  const nextStep = pair[1];
   const response = [acknowledgement, nextStep].filter(Boolean).join(" ");
   const explanation =
     preferences.locale === "pt-BR"
@@ -381,7 +382,7 @@ export function parsePracticeAllocation(message: unknown): number | null {
     /^set (?:the )?(market|market-exposed|exposure|accessible|cash|reserve)(?: portion)? to (\d{1,3})\s*%$/,
   );
   const match = short ?? action;
-  const value = match ? Number(match[1]) : long ? Number(long[2]) : NaN;
+  const value = match ? Number(match[1]) : long ? Number(long[2]) : Number.NaN;
   const category = match ? match[2] : long?.[1];
   if (!Number.isFinite(value) || value < 0 || value > 100 || value % 5 !== 0)
     return null;

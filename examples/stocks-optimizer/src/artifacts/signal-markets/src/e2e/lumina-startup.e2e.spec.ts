@@ -4,7 +4,8 @@ for (const path of ["/", "/lumina"]) {
   test(`Lúmina starts without a runtime error at ${path}`, async ({ page }, testInfo) => {
     const errors: string[] = [];
     const failedModules: string[] = [];
-    page.on("pageerror", error => errors.push(error.stack ?? error.message));
+    // Browser syntax errors may have an empty stack; preserve the actual message.
+    page.on("pageerror", error => errors.push(error.stack || `${error.name}: ${error.message}`));
     page.on("console", message => {
       if (message.type() === "error") errors.push(message.text());
     });
@@ -18,6 +19,7 @@ for (const path of ["/", "/lumina"]) {
       await expect(page.getByTestId("lumina-app")).toBeVisible();
       await expect(page.getByRole("textbox", { name: "Your message", exact: true })).toBeVisible();
       expect(errors.filter(error => !error.includes("Failed to load resource"))).toEqual([]);
+      expect(failedModules).toEqual([]);
     } finally {
       const evidence = {
         path,
