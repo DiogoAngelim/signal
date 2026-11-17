@@ -19,12 +19,12 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
-      - name: Install and initialize exactly as library CI
+      - name: Install and initialize package configuration
         run: |
           corepack enable
           corepack prepare pnpm@10.12.4 --activate
           pnpm install --frozen-lockfile
-          pnpm typecheck:library
+          node init
       - name: Format using initialized decision package configuration
         working-directory: packages/decision
         run: |
@@ -40,6 +40,7 @@ jobs:
       - name: Run full library lint and decision regressions
         run: |
           pnpm lint:library
+          pnpm --filter @signal/decision typecheck
           pnpm --filter @signal/decision test
           node scripts/check-human-support-mirror.mjs
       - name: Remove temporary workflow and commit only isolated source fixes
