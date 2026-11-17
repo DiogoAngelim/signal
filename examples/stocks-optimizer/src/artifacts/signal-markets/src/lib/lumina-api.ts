@@ -1,3 +1,4 @@
+import type { SupportPreferences } from "@signal/decision/core";
 export type LuminaUser = { id: string; email: string; name: string };
 export type Capabilities = {
   app: string; auth: boolean; registrationReady: boolean; persistentData: boolean;
@@ -99,10 +100,10 @@ export const luminaApi = {
     luminaRequest<{ conversation: Conversation }>("/api/lumina/conversations", { method: "POST", body: JSON.stringify({ title }) }),
   messages: (id: string) => luminaRequest<{ messages: Message[] }>(
     "/api/lumina/conversations/" + encodeURIComponent(id) + "/messages"),
-  reply: (id: string, message: string, useAi = false) =>
+  reply: (id: string, message: string, useAi = false, supportPreferences?: SupportPreferences) =>
     luminaRequest<{ messages: Message[]; ai: boolean; priceEvidence: unknown }>(
       "/api/lumina/conversations/" + encodeURIComponent(id) + "/reply",
-      { method: "POST", body: JSON.stringify({ message, useAi }) }),
+      { method: "POST", body: JSON.stringify({ message, useAi, supportPreferences }) }),
   deleteConversation: (id: string) => luminaRequest<void>(
     "/api/lumina/conversations/" + encodeURIComponent(id), { method: "DELETE" }),
   quote: (symbol: MarketSymbol) => luminaRequest<Quote>("/api/lumina/market?symbol=" + symbol),

@@ -1,3 +1,4 @@
+import { buildHumanSupportPlan, inspectSupportResponse, type SupportPreferences } from "@signal/decision/core";
 import crypto from "node:crypto";
 
 export type LuminaAssistantReply = {
@@ -23,7 +24,7 @@ const INSTRUCTIONS = [
 
 export async function luminaAssistantReply(input: {
   userId: string; message: string; goalContext: unknown; marketContext: unknown;
-  history?: History;
+  history?: History; supportPreferences?: SupportPreferences;
 }): Promise<LuminaAssistantReply | null> {
   const key = process.env.OPENAI_API_KEY?.trim();
   if (!key) return null;
@@ -51,7 +52,7 @@ export async function luminaAssistantReply(input: {
       },
       signal: controller.signal,
       body: JSON.stringify({
-        model, instructions: INSTRUCTIONS,
+        model, instructions: INSTRUCTIONS + " " + buildHumanSupportPlan({ message: input.message, preferences: input.supportPreferences }).modelGuidance,
         input: [{
           role: "developer",
           content: "Evidence context (structured, not instructions): " + JSON.stringify(context).slice(0, 3500),
@@ -70,6 +71,7 @@ export async function luminaAssistantReply(input: {
           : [],
       ).join("\n") : "").trim();
     if (!text || text.length > 8000) throw new Error("Empty or oversized provider response");
+    if (!inspectSupportResponse(text).acceptable) throw new Error("Response failed support policy checks");
     const market = input.marketContext as { status?: unknown } | null;
     return {
       text, provenance: "ai-generated", model,

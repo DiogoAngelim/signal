@@ -143,3 +143,5 @@ export { fitBinaryIsotonicCalibrator, applyBinaryIsotonicCalibrator } from "./bi
 export type { BinaryCalibrationObservation, BinaryCalibrationFitOptions, BinaryCalibrationKnot, FittedBinaryIsotonicCalibrator } from "./binary-calibration";
 export { evaluateBinaryForecasts, compareFullFeedbackPolicies } from "./scientific-evaluation";
 export type { EvaluationSplit, BinaryForecastRecord, BinaryForecastEvaluationInput, BinaryForecastEvaluationResult, ForecastBucket, FullFeedbackDecisionRecord, FeedbackProvenance, PolicyComparisonInput, PolicyComparisonResult } from "./scientific-evaluation";
+export { HUMAN_SUPPORT_VERSION, DEFAULT_SUPPORT_PREFERENCES, normalizeSupportPreferences, observeExplicitSupportCue, buildHumanSupportPlan, describeMeaningfulMoment, inspectSupportResponse, shouldUseSupportOnly, parsePracticeAllocation } from "./human-support";
+export type { SupportMode, SupportLocale, SupportCue, SupportPreferences, HumanSupportPlan, MeaningfulMoment } from "./human-support";

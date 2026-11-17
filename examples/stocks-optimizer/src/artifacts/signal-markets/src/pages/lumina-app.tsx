@@ -14,6 +14,10 @@ import LuminaAccountPanel from "./lumina-account";
 import LuminaMarketPanel from "./lumina-market";
 import "./lumina-preview.css";
 import "./lumina-app.css";
+import "./lumina-support.css";
+import { toast } from "@/hooks/use-toast";
+import { buildHumanSupportPlan, DEFAULT_SUPPORT_PREFERENCES, describeMeaningfulMoment, shouldUseSupportOnly, parsePracticeAllocation, type HumanSupportPlan, type SupportPreferences } from "@signal/decision/core";
+import { LuminaSupportControls, LuminaSupportExplanation } from "./lumina-support";
 
 type Drawer = "ideas" | "goals" | "thoughts" | "inbox" | "privacy" | null;
 type Mode = "conversation" | "practice" | "market";
@@ -130,7 +134,12 @@ export default function LuminaApp() {
   const [draft, setDraft] = useState("");
   const [busy, setBusy] = useState(false);
   const [aiOptIn, setAiOptIn] = useState(false);
-  const [notice, setNotice] = useState("");
+  const noticeRef = useRef<ReturnType<typeof toast> | null>(null);
+  const setNotice = useCallback((message: string) => {
+    noticeRef.current?.dismiss();
+    noticeRef.current = message ? toast({ description: message, duration: 9000 }) : null;
+  }, []);
+  useEffect(() => () => { noticeRef.current?.dismiss(); }, []);
   const [serverStatus, setServerStatus] = useState<"checking" | "ready" | "unavailable">("checking");
   const [goals, setGoals] = useState<Goal[]>([]);
   const [choices, setChoices] = useState<PracticeRecord[]>([]);
@@ -152,6 +161,14 @@ export default function LuminaApp() {
   const [confirmErase, setConfirmErase] = useState(false);
   const [persistBusy, setPersistBusy] = useState(false);
   const bottomRef = useRef<HTMLDivElement>(null);
+  const [supportPreferences, setSupportPreferences] = useState<SupportPreferences>({ ...DEFAULT_SUPPORT_PREFERENCES });
+  const [support, setSupport] = useState<{ plan: HumanSupportPlan; standalone: boolean } | null>(null);
+  const thoughtRevision = useRef(0);
+  useEffect(() => {
+    thoughtRevision.current += 1;
+    setSupport(null);
+    setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
+  }, [user?.id]);
   const visibleChoices = user ? choices : guestChoices;
   const hasThread = thread.length > 0;
 
@@ -203,6 +220,9 @@ export default function LuminaApp() {
   }, [drawer, accountOpen]);
 
   function startThought() {
+    thoughtRevision.current += 1;
+    setBusy(false);
+    setSupport(null); setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
     setMode("conversation"); setThread([]); setActiveConversation(null);
     setDraft(""); setNotice("");
     setAwaitingHorizon(false); setHorizon(null);
@@ -238,6 +258,16 @@ export default function LuminaApp() {
     if (!text || busy) return;
     setDraft("");
     setNotice("");
+    const plan = buildHumanSupportPlan({ message: text, preferences: supportPreferences });
+    const standalone = shouldUseSupportOnly(plan, text);
+    setSupport(plan.handled ? { plan, standalone } : null);
+    if (plan.cue === "correction") setSupportPreferences(current => ({ ...current, mode: "direct", adaptToExplicitCues: false }));
+    if (standalone) {
+      // Deliberately local: no provider call, persistence claim or visual action.
+      setThread(previous => [...previous, createdMessage("user", text, "user-provided"),
+        createdMessage("assistant", plan.response, "illustrative")]);
+      return;
+    }
     if (awaitingHorizon) {
       const answer = resolveHorizon(text);
       if (answer) {
@@ -250,19 +280,16 @@ export default function LuminaApp() {
       }
       return;
     }
-    const percent = text.match(/\b(\d{1,3})\s*%/);
-    if (mode === "practice" && percent) {
-      const value = Number(percent[1]);
-      if (value <= 100) {
-        updateExposure(/\b(accessible|cash|reserve)\b/i.test(text) ? 100 - value : value);
-        setNotice("Adjusted the hypothetical allocation. No real holding changed.");
-      } else setNotice("Please choose an allocation between 0% and 100%.");
+    const allocation = parsePracticeAllocation(text);
+    if (mode === "practice" && allocation !== null) {
+      updateExposure(allocation);
+      setNotice("Adjusted the hypothetical allocation. No real holding changed.");
       return;
     }
-    if (mode === "practice" && /\b(less risk|less exposure|safer|more accessible)\b/i.test(text)) {
+    if (mode === "practice" && /^(less risk|less exposure|safer|more accessible)[.!]?$/i.test(text)) {
       updateExposure(exposure - 10); setNotice("Reduced hypothetical exposure by ten percentage points."); return;
     }
-    if (mode === "practice" && /\b(more risk|more exposure)\b/i.test(text)) {
+    if (mode === "practice" && /^(more risk|more exposure)[.!]?$/i.test(text)) {
       updateExposure(exposure + 10); setNotice("Raised hypothetical exposure by ten percentage points."); return;
     }
     const asset = text.match(/\b(bitcoin|btc|btcusdt|ethereum|eth|ethusdt|solana|sol|solusdt|bnb|bnbusdt|petr4|petrobras|vale3|aapl|apple|msft|microsoft)\b/i);
@@ -301,21 +328,26 @@ export default function LuminaApp() {
         createdMessage("assistant", "That sounds worth exploring. You can try a hypothetical allocation, look at public market context, or sign in to keep a conversation. I'm not connected to an AI model for anonymous questions here.", "illustrative")]);
       return;
     }
+    const revision = thoughtRevision.current;
     setBusy(true);
     try {
       let conversationId = activeConversation;
       if (!conversationId) {
         const created = await luminaApi.addConversation(text.slice(0, 75));
+        if (thoughtRevision.current !== revision) return;
         conversationId = created.conversation.id;
         setActiveConversation(conversationId);
         setConversations((prev) => [created.conversation, ...prev]);
       }
       setThread((prev) => [...prev, createdMessage("user", text, "user-provided")]);
-      const result = await luminaApi.reply(conversationId, text, aiOptIn && capabilities?.ai === true);
+      const result = await luminaApi.reply(conversationId, text, aiOptIn && capabilities?.ai === true, supportPreferences);
+      if (thoughtRevision.current !== revision) return;
       setThread((prev) => [...prev, ...result.messages.filter((m) => m.role === "assistant")]);
     } catch (error) {
-      setNotice(error instanceof Error ? error.message : "This thought wasn't saved. You can try again.");
-    } finally { setBusy(false); }
+      if (thoughtRevision.current !== revision) return;
+      setDraft(current => current || text);
+      setNotice(error instanceof Error ? error.message : "This thought wasn't saved. Your draft is available to retry.");
+    } finally { if (thoughtRevision.current === revision) setBusy(false); }
   }
 
   async function savePractice() {
@@ -329,7 +361,7 @@ export default function LuminaApp() {
           horizon: horizon ?? "unsure", rationale: "Explored as a reversible illustration.",
         });
         setChoices((prev) => [result.choice, ...prev]);
-        setNotice("Saved as a Practice choice across your signed-in devices. Nothing was purchased.");
+        setNotice(describeMeaningfulMoment("practice-saved", supportPreferences) + " Saved to your account.");
       } else {
         const record: GuestChoice = {
           id: crypto.randomUUID(), at: new Date().toISOString(),
@@ -342,7 +374,7 @@ export default function LuminaApp() {
         setGuestChoices(next);
         const ok = writePracticeChoices(next);
         setNotice(ok
-          ? "Saved as a Practice choice in this browser tab. No real investment occurred."
+          ? describeMeaningfulMoment("practice-saved", supportPreferences) + " Saved in this browser tab only."
           : "Saved for this page only. Browser storage is unavailable; reload will clear it.");
       }
     } catch (error) {
@@ -353,7 +385,8 @@ export default function LuminaApp() {
   function revisitPractice(choice: PracticeRecord) {
     setPracticeAmount(choice.amount); setExposure(choice.exposedPercent);
     setPracticeGoal(choice.goal); setHorizon(choice.horizon); setAwaitingHorizon(false); setMode("practice"); setDrawer(null);
-    setNotice("Resuming an illustration—not a verified portfolio or an investment outcome.");
+    setSupport(null);
+    setNotice(describeMeaningfulMoment("choice-revisited", supportPreferences));
   }
   async function forgetPractice(choice: PracticeRecord) {
     if (user) {
@@ -381,14 +414,18 @@ export default function LuminaApp() {
       });
       setGoals((prev) => [result.goal, ...prev]);
       setGoalTitle(""); setGoalAmount(""); setGoalDate("");
-      setNotice("Your goal is saved. Lúmina won't assume you can invest money reserved for it.");
+      setNotice(describeMeaningfulMoment("goal-saved", supportPreferences));
     } catch (error) { setNotice(error instanceof Error ? error.message : "Goal couldn't be saved."); }
     finally { setPersistBusy(false); }
   }
 
   async function openConversation(conversation: Conversation) {
+    thoughtRevision.current += 1;
+    const revision = thoughtRevision.current;
+    setSupport(null); setBusy(false);
     try {
       const result = await luminaApi.messages(conversation.id);
+      if (thoughtRevision.current !== revision) return;
       setThread(result.messages);
       setActiveConversation(conversation.id);
       setMode("conversation"); setDrawer(null); setNotice("");
@@ -434,9 +471,13 @@ export default function LuminaApp() {
             <span>The live service can't be reached. You can explore Practice, but sign-in and persistence aren't available right now.</span>
           </div>
         ) : null}
-        {notice ? <div className="l-status" role="status"><Info size={17}/><span>{notice}</span>
-          <button type="button" className="l-status-close" aria-label="Dismiss notice" onClick={() => setNotice("")}><X size={14}/></button>
-        </div> : null}
+        <LuminaSupportControls value={supportPreferences} onChange={next => { setSupportPreferences(next); setSupport(null); }} />
+        {support ? <LuminaSupportExplanation plan={support.plan} showAcknowledgement={!support.standalone}
+          onCorrect={() => {
+            setSupport(null);
+            setSupportPreferences(current => ({ ...current, mode: "direct", adaptToExplicitCues: false }));
+            document.getElementById("lumina-app-message")?.focus();
+          }} /> : null}
         {!hasThread && mode === "conversation" ? (
           <section className="l-welcome l-home">
             <div className="l-orbit" aria-hidden="true"><span/></div>
@@ -488,7 +529,7 @@ export default function LuminaApp() {
                   <div className="l-reply-body">
                     <p>{message.content}</p>
                     {message.provenance === "ai-generated" ? <span className="l-response-source">AI-generated · Verify financial facts</span> :
-                      <span className="l-response-source">Guided explanation · Not financial advice</span>}
+                      <span className="l-response-source">{message.conversationId === "guest" ? "Guided reply on this page" : "Saved guided reply"} · Not financial advice</span>}
                   </div>
                 </section>
             ))}
@@ -544,7 +585,7 @@ export default function LuminaApp() {
             </button>
           </div>
           <div className="l-composer-foot">
-            <span><ShieldCheck size={12}/>{user ? "Saved to your account · No trading" : "Explore without an account · Practice only"}</span>
+            <span><ShieldCheck size={12}/>{user ? "Signed in · Guided replies may stay on this page · No trading" : "Explore without an account · Practice only"}</span>
             <button type="button" onClick={startThought}>New thought</button>
           </div>
           {user && capabilities?.ai ? (
@@ -662,6 +703,8 @@ export default function LuminaApp() {
                   <p>Saved goals, Practice records, conversations, and inbox events are tied to your account. Trade execution and verified brokerage holdings are not available here.</p>
                   {user ? <>
                     <button className="l-secondary" onClick={() => void luminaApi.signOut().then(() => {
+                      thoughtRevision.current += 1; setBusy(false); setSupport(null); setDraft(""); setNotice("");
+                      setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
                       setUser(null); setAiOptIn(false); setGoals([]); setChoices([]); setConversations([]); setThread([]);
                       setEvents([]); setWatches([]); setActiveConversation(null); setDrawer(null); setMode("conversation");
                     }).catch(() => setNotice("Sign out failed. Please try again."))}><LogOut size={16}/>Sign out</button>
@@ -671,6 +714,8 @@ export default function LuminaApp() {
                       </button> : <div>
                         <p>This deletes saved goals, practice ideas, conversations, watches and inbox events. Your authentication account and required security records remain.</p>
                         <button type="button" className="l-destructive" onClick={() => void luminaApi.erasePersonalData().then(() => {
+                          thoughtRevision.current += 1; setBusy(false); setSupport(null); setDraft("");
+                          setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
                           setGoals([]); setChoices([]); setConversations([]); setThread([]); setEvents([]);
                           setWatches([]); setActiveConversation(null); setConfirmErase(false); setDrawer(null); setMode("conversation");
                           setNotice("Your saved Lúmina application data was deleted. Your sign-in account remains.");

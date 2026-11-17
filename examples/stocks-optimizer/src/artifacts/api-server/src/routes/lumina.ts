@@ -1,3 +1,4 @@
+import { buildHumanSupportPlan, shouldUseSupportOnly } from "@signal/decision/core";
 import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import { fromNodeHeaders } from "better-auth/node";
@@ -43,7 +44,11 @@ const PracticeInput = z.object({
 const ConversationInput = z.object({
   title: z.string().trim().min(1).max(160).default("A thought"),
 }).strict();
-const ReplyInput = z.object({ message: z.string().trim().min(1).max(2000), useAi: z.boolean().optional().default(false) }).strict();
+const ReplyInput = z.object({
+  message: z.string().trim().min(1).max(2000), useAi: z.boolean().optional().default(false),
+  supportPreferences: z.object({ mode: z.enum(["balanced", "direct", "step-by-step"]),
+    locale: z.enum(["en", "pt-BR"]), adaptToExplicitCues: z.boolean() }).strict().optional(),
+}).strict();
 const WatchInput = z.object({
   symbol: z.enum(["BTCUSDT", "ETHUSDT", "SOLUSDT", "BNBUSDT"]),
   direction: z.enum(["above", "below"]),
@@ -197,6 +202,10 @@ router.post("/lumina/conversations/:id/reply", run(async (req, res) => {
   const data = ReplyInput.parse(req.body);
   const userId = owner(req);
   const conversationId = String(req.params.id);
+  const owned = await luminaDb().query("SELECT id FROM lumina_conversations WHERE id=$1 AND owner_id=$2", [conversationId, userId]);
+  if (!owned.rowCount) throw new ApiProblem(404, "conversation_not_found", "Conversation not found.");
+  const support = buildHumanSupportPlan({ message: data.message, preferences: data.supportPreferences });
+  const supportOnly = shouldUseSupportOnly(support, data.message);
   const past = await listMessages(userId, conversationId);
   if (past.length >= 200) throw new ApiProblem(409, "conversation_full", "Start a new thought to continue.");
   const recentCount = await luminaDb().query(
@@ -219,16 +228,16 @@ router.post("/lumina/conversations/:id/reply", run(async (req, res) => {
   };
   const intent = data.message.match(/\b(bitcoin|btcusdt|btc|ethereum|ethusdt|eth|solana|solusdt|sol|bnbusdt|bnb|petr4|petrobras|vale3|aapl|apple|msft|microsoft)\b/i);
   const symbol = intent ? assetTokens[intent[0].toLowerCase()] : undefined;
-  const quote = symbol ? await getLuminaMarketQuote(symbol) : null;
-  const ai = data.useAi ? await luminaAssistantReply({
+  const quote = symbol && !supportOnly ? await getLuminaMarketQuote(symbol) : null;
+  const ai = data.useAi && !supportOnly ? await luminaAssistantReply({
     userId, message: data.message, goalContext: goals.map((g) => ({
       title: g.title, targetAmount: g.targetAmount, targetDate: g.targetDate,
     })),
     marketContext: quote ?? { status: "not-requested", note: "No asset price was requested." },
-    history: past.slice(-8),
+    history: past.slice(-8), supportPreferences: data.supportPreferences,
   }).catch(() => null) : null;
 
-  const assistantText = ai?.text ?? (
+  const assistantText = supportOnly ? support.response : ai?.text ?? (
     "I can help you explore this without rushing into a decision. " +
     (goals.length ? "We can keep your goals in view as we compare choices. " : "What would you like your money to make possible? ") +
     "The AI conversation isn't configured, enabled, or available right now. You can still save goals, explore Practice, and inspect available market observations with source and freshness labels."
