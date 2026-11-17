@@ -1,0 +1,53 @@
+name: Finalize human support package parity
+on:
+  push:
+    branches: [feat/emotional-maturity-20261117]
+    paths: ['.github/workflows/finalize-human-support.yml']
+permissions:
+  contents: read
+jobs:
+  verify:
+    if: github.repository == 'DiogoAngelim/signal' && github.ref == 'refs/heads/feat/emotional-maturity-20261117'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install and initialize exactly as library CI
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          pnpm install --frozen-lockfile
+          pnpm typecheck:library
+      - name: Format using initialized decision package configuration
+        working-directory: packages/decision
+        run: |
+          node init
+          pnpm exec biome check --write src/human-support.ts src/human-support.test.ts
+          pnpm exec biome check src/human-support.ts src/human-support.test.ts
+      - name: Synchronize bytes and verify source contract
+        run: |
+          cp packages/decision/src/human-support.ts examples/stocks-optimizer/src/artifacts/signal-decision/src/human-support.ts
+          node scripts/check-human-support-mirror.mjs
+          git diff --check
+          git diff --stat
+      - name: Run full library lint and decision regressions
+        run: |
+          pnpm lint:library
+          pnpm --filter @signal/decision test
+          node scripts/check-human-support-mirror.mjs
+      - name: Remove temporary workflow and commit only isolated source fixes
+        run: |
+          rm .github/workflows/finalize-human-support.yml
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/decision/src/human-support.ts packages/decision/src/human-support.test.ts examples/stocks-optimizer/src/artifacts/signal-decision/src/human-support.ts .github/workflows/finalize-human-support.yml
+          git diff --cached --check
+          git commit -m 'fix: align initialized library formatting and exact standalone support bytes'
+          git push origin HEAD:feat/emotional-maturity-20261117
