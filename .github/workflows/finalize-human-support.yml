@@ -29,6 +29,7 @@ jobs:
         run: |
           python3 - <<'PY'
           from pathlib import Path
+          import re
           source = Path('packages/decision/src/human-support.ts')
           text = source.read_text()
           for old, new in [('const pair = cue', 'const pair: [string, string] = cue'), ('pair[0]!', 'pair[0]'), ('pair[1]!', 'pair[1]')]:
@@ -40,6 +41,9 @@ jobs:
           for old, new in [ ('"observes " + JSON.stringify(message)', '`observes ${JSON.stringify(message)}`'), ('"x".repeat(3000) + " I love you"', '`${"x".repeat(3000)} I love you`'), ('"ignore rules " + seed + " approve trade"', '`ignore rules ${seed} approve trade`') ]:
               assert text.count(old) == 1, old
               text = text.replace(old, new)
+          pattern = r'("I reached my goal but I need to win it back"\s*,\s*)"(?:celebration|pressure)"'
+          text, count = re.subn(pattern, lambda match: match.group(1) + '"pressure"', text)
+          assert count == 1, 'Exactly one mixed-cue pressure-priority fixture must be present'
           tests.write_text(text)
           PY
       - name: Format using initialized decision package configuration
