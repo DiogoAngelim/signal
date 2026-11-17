@@ -18,7 +18,7 @@ permissions:
 jobs:
   contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
         with:
@@ -49,6 +49,8 @@ jobs:
           path: /tmp/human-support-evidence/
       - name: Verify canonical and standalone public policy
         run: node scripts/check-human-support-mirror.mjs
+      - name: Build workspace exports before package typechecking
+        run: pnpm run build:library
       - name: Run Signal policy regression suite
         run: |
           pnpm --filter @signal/decision typecheck
