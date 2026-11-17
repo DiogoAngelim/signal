@@ -13,7 +13,8 @@ test("a new visitor can explore, save, return and forget without a brokerage", a
   const slider = page.locator("#lumina-app-exposure");
   await slider.fill("40");
   await expect(page.getByText("40%", { exact: true }).first()).toBeVisible();
-  await page.screenshot({ path: testInfo.outputPath("lumina-practice.png"), fullPage: true });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: testInfo.outputPath("lumina-practice.png"), fullPage: true, animations: "disabled" });
   await page.getByRole("button", { name: "Save this Practice choice" }).click();
   await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("nothing was purchased.", { exact: false })).toBeVisible();
   await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("Saved in this browser tab only.", { exact: false })).toBeVisible();
@@ -40,7 +41,8 @@ test("a new visitor can explore, save, return and forget without a brokerage", a
   await expect(page.getByText("A Practice idea you saved")).toHaveCount(0);
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: innerWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.view + 2);
-  await page.screenshot({ path: testInfo.outputPath("lumina-welcome.png"), fullPage: true });
+  await page.evaluate(() => window.scrollTo(0, 0));
+  await page.screenshot({ path: testInfo.outputPath("lumina-welcome.png"), fullPage: true, animations: "disabled" });
 });
 
 test("account goals persist, isolate owners, support API updates and user-controlled deletion", async ({ page, request }, testInfo) => {
