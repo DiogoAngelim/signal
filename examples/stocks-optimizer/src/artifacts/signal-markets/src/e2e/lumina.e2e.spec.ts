@@ -13,6 +13,7 @@ test("a new visitor can explore, save, return and forget without a brokerage", a
   const slider = page.locator("#lumina-app-exposure");
   await slider.fill("40");
   await expect(page.getByText("40%", { exact: true }).first()).toBeVisible();
+  await page.screenshot({ path: testInfo.outputPath("lumina-practice.png"), fullPage: true });
   await page.getByRole("button", { name: "Save this Practice choice" }).click();
   await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("nothing was purchased.", { exact: false })).toBeVisible();
   await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("Saved in this browser tab only.", { exact: false })).toBeVisible();
@@ -29,6 +30,13 @@ test("a new visitor can explore, save, return and forget without a brokerage", a
   await expect(page.getByText("Nothing saved here yet.", { exact: false })).toBeVisible();
   await page.getByRole("button", { name: "Close panel" }).click();
   await page.reload();
+  // Absence during the lazy route's loading screen does not prove deletion.
+  // Bind both the final assertion and screenshots to the restored application.
+  await expect(page.getByTestId("lumina-app")).toBeVisible();
+  await expect(page.getByRole("heading", {
+    name: "What would you like your money to make possible?",
+  })).toBeVisible();
+  await expect(page.getByRole("textbox", { name: "Your message", exact: true })).toBeVisible();
   await expect(page.getByText("A Practice idea you saved")).toHaveCount(0);
   const width = await page.evaluate(() => ({ scroll: document.documentElement.scrollWidth, view: innerWidth }));
   expect(width.scroll).toBeLessThanOrEqual(width.view + 2);
