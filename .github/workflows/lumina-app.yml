@@ -45,6 +45,7 @@ jobs:
           --health-retries 10
     defaults:
       run:
+        shell: bash
         working-directory: examples/stocks-optimizer
     steps:
       - uses: actions/checkout@v4
@@ -78,7 +79,7 @@ jobs:
       - run: pnpm --filter @workspace/api-server db:auth:migrate
       - run: pnpm --filter @workspace/api-server typecheck
       - run: pnpm --filter @workspace/api-server exec tsx src/tests/lumina-http.integration.ts
-      - run: pnpm --filter @workspace/api-server exec tsx --test src/tests/lumina-support-provider.test.ts
+      - run: pnpm --filter @workspace/api-server exec tsx --test src/tests/lumina-support-provider.test.ts src/tests/lumina-human-support.test.ts
       - run: pnpm --filter @workspace/signal-markets typecheck
       - run: pnpm --filter @workspace/signal-markets test
       - run: pnpm --filter @workspace/api-server build
@@ -99,6 +100,7 @@ jobs:
         with:
           name: lumina-checked-${{ github.event.pull_request.head.sha || github.sha }}
           retention-days: 7
+          include-hidden-files: true
           path: ${{ runner.temp }}/lumina-checked/
           if-no-files-found: error
       - name: Retain exact-head browser evidence

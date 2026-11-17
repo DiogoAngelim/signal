@@ -19,11 +19,14 @@ export type LuminaGoal = {
   targetDate: string | null; description: string;
   createdAt: string; updatedAt: string;
 };
+// A goal deadline is a civil date, not an instant. Format it in PostgreSQL
+// before node-postgres can reinterpret DATE as a local-midnight JavaScript Date.
+const goalFields = "id,title,target_amount,to_char(target_date, 'YYYY-MM-DD') AS target_date,description,created_at,updated_at";
 function goalFromRow(row: any): LuminaGoal {
   return {
     id: row.id, title: row.title,
     targetAmount: row.target_amount == null ? null : Number(row.target_amount),
-    targetDate: row.target_date == null ? null : String(row.target_date).slice(0, 10),
+    targetDate: row.target_date == null ? null : String(row.target_date),
     description: row.description,
     createdAt: new Date(row.created_at).toISOString(),
     updatedAt: new Date(row.updated_at).toISOString(),
@@ -31,7 +34,7 @@ function goalFromRow(row: any): LuminaGoal {
 }
 export async function listGoals(owner: string) {
   const { rows } = await luminaDb().query(
-    "SELECT * FROM lumina_goals WHERE owner_id=$1 ORDER BY updated_at DESC LIMIT 100", [owner],
+    "SELECT " + goalFields + " FROM lumina_goals WHERE owner_id=$1 ORDER BY updated_at DESC LIMIT 100", [owner],
   );
   return rows.map(goalFromRow);
 }
@@ -40,7 +43,7 @@ export async function addGoal(owner: string, data: {
 }) {
   const { rows } = await luminaDb().query(
     "INSERT INTO lumina_goals(id,owner_id,title,target_amount,target_date,description)" +
-    " VALUES($1,$2,$3,$4,$5,$6) RETURNING *",
+    " VALUES($1,$2,$3,$4,$5,$6) RETURNING " + goalFields,
     [luminaId(), owner, data.title, data.targetAmount ?? null, data.targetDate ?? null, data.description ?? ""],
   );
   return goalFromRow(rows[0]);
@@ -50,7 +53,7 @@ export async function updateGoal(owner: string, id: string, data: {
 }) {
   const { rows } = await luminaDb().query(
     "UPDATE lumina_goals SET title=$3,target_amount=$4,target_date=$5,description=$6,updated_at=now()" +
-    " WHERE owner_id=$1 AND id=$2 RETURNING *",
+    " WHERE owner_id=$1 AND id=$2 RETURNING " + goalFields,
     [owner, id, data.title, data.targetAmount ?? null, data.targetDate ?? null, data.description ?? ""],
   );
   return rows[0] ? goalFromRow(rows[0]) : null;

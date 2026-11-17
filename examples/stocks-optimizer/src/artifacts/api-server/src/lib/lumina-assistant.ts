@@ -1,4 +1,4 @@
-import { buildHumanSupportPlan, inspectSupportResponse, type SupportPreferences } from "@signal/decision/core";
+import { buildHumanSupportPlan, inspectSupportResponse, type SupportPreferences } from "./lumina-human-support.js";
 import crypto from "node:crypto";
 
 export type LuminaAssistantReply = {

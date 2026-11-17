@@ -16,7 +16,7 @@ import "./lumina-preview.css";
 import "./lumina-app.css";
 import "./lumina-support.css";
 import { toast } from "@/hooks/use-toast";
-import { buildHumanSupportPlan, DEFAULT_SUPPORT_PREFERENCES, describeMeaningfulMoment, shouldUseSupportOnly, parsePracticeAllocation, type HumanSupportPlan, type SupportPreferences } from "@signal/decision/core";
+import { buildHumanSupportPlan, DEFAULT_SUPPORT_PREFERENCES, describeMeaningfulMoment, shouldUseSupportOnly, parsePracticeAllocation, type HumanSupportPlan, type SupportPreferences } from "@/lib/lumina-human-support";
 import { LuminaSupportControls, LuminaSupportExplanation } from "./lumina-support";
 
 type Drawer = "ideas" | "goals" | "thoughts" | "inbox" | "privacy" | null;

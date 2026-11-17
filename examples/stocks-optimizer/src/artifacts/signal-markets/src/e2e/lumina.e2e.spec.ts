@@ -14,8 +14,8 @@ test("a new visitor can explore, save, return and forget without a brokerage", a
   await slider.fill("40");
   await expect(page.getByText("40%", { exact: true }).first()).toBeVisible();
   await page.getByRole("button", { name: "Save this Practice choice" }).click();
-  await expect(page.getByText("nothing was purchased.", { exact: false })).toBeVisible();
-  await expect(page.getByText("Saved in this browser tab only.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("nothing was purchased.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("Saved in this browser tab only.", { exact: false })).toBeVisible();
   await page.reload();
   await expect(page.getByText("A Practice idea you saved")).toBeVisible();
   await expect(page.getByText("No market outcomes have been tracked for this choice.")).toBeVisible();
@@ -53,7 +53,7 @@ test("account goals persist, isolate owners, support API updates and user-contro
   await page.getByLabel("When (optional)").fill("2027-12-01");
   await page.getByRole("button", { name: "Save goal", exact: true }).click();
   await expect(page.getByText("A safe reserve", { exact: true })).toBeVisible();
-  await expect(page.getByText("does not mean the goal has been achieved.", { exact: false })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("does not mean the goal has been achieved.", { exact: false })).toBeVisible();
   await page.reload();
   await expect(page.getByRole("button", { name: "Account", exact: true })).toBeVisible();
   await page.getByRole("button", { name: "Your goals", exact: true }).click();
@@ -96,7 +96,7 @@ test("account goals persist, isolate owners, support API updates and user-contro
   expect((await (await page.request.get("/api/lumina/goals")).json()).goals).toHaveLength(1);
   await page.getByRole("button", { name: "Delete my saved L\u00famina data", exact: true }).click();
   await page.getByRole("button", { name: "Confirm deletion", exact: true }).click();
-  await expect(page.getByText("Your saved L\u00famina application data was deleted. Your sign-in account remains.", { exact: true })).toBeVisible();
+  await expect(page.getByRole("region", { name: "Notifications (F8)" }).getByText("Your saved L\u00famina application data was deleted. Your sign-in account remains.", { exact: true })).toBeVisible();
   expect((await (await page.request.get("/api/lumina/goals")).json()).goals).toHaveLength(0);
   expect((await page.request.get("/api/lumina/me")).ok()).toBe(true);
   await page.getByRole("button", { name: "Account", exact: true }).click();

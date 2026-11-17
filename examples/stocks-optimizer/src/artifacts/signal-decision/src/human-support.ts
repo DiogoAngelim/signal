@@ -21,6 +21,11 @@ export interface SupportPreferences {
   locale: SupportLocale;
   adaptToExplicitCues: boolean;
 }
+/** Trusted, domain-owned observations; wire input never supplies these rules. */
+export interface SupportCuePatterns {
+  pressure?: readonly RegExp[];
+  celebration?: readonly RegExp[];
+}
 export interface HumanSupportPlan {
   version: typeof HUMAN_SUPPORT_VERSION;
   cue: SupportCue;
@@ -35,7 +40,7 @@ export interface HumanSupportPlan {
   modelGuidance: string;
   maxQuestions: 0 | 1;
   actionPermission: "none";
-  changesFinancialPolicy: false;
+  changesDecisionPolicy: false;
   retainDerivedContext: false;
 }
 export const DEFAULT_SUPPORT_PREFERENCES: Readonly<SupportPreferences> =
@@ -77,7 +82,10 @@ function normalizeText(value: unknown): string {
 }
 
 /** Conservative EN/PT-BR phrase support, not a general emotion classifier. */
-export function observeExplicitSupportCue(value: unknown): SupportCue {
+export function observeExplicitSupportCue(
+  value: unknown,
+  rules: SupportCuePatterns = {},
+): SupportCue {
   const text = normalizeText(value);
   if (!text) return "none";
   const plain = text
@@ -126,13 +134,16 @@ export function observeExplicitSupportCue(value: unknown): SupportCue {
     return "immediate-safety";
   if (
     asserts(
-      /\b(?:i (?:lost|have lost|regret)|i'm regretting|eu perdi|perdi (?:dinheiro|minhas economias)|me arrependo)\b/,
+      /\b(?:i (?:lost|have lost|regret)|i'm regretting|eu perdi|perdi|me arrependo)\b/,
     )
   )
     return "loss";
   if (
     asserts(
-      /\b(?:i (?:need|have|must|want) to (?:win|make|earn|get) (?:it|everything|my money) back|i (?:(?:need|have) to|must) (?:act|buy|invest) (?:now|today|immediately)|i(?:'m| am) (?:afraid of missing out|feeling pressured)|preciso (?:recuperar|investir agora)|tenho que recuperar|estou (?:pressionad[oa]|com medo de ficar de fora))\b/,
+      /\b(?:i (?:need|have|must|want) to (?:win|make|get) (?:it|everything) back|i (?:(?:need|have) to|must) (?:act|decide|commit) (?:now|today|immediately)|i(?:'m| am) (?:afraid of missing out|feeling pressured)|preciso (?:recuperar|decidir agora)|tenho que recuperar|estou (?:pressionad[oa]|com medo de ficar de fora))\b/,
+    ) ||
+    (rules.pressure ?? []).some((pattern) =>
+      asserts(new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, ""))),
     )
   )
     return "pressure";
@@ -150,7 +161,10 @@ export function observeExplicitSupportCue(value: unknown): SupportCue {
     return "uncertainty";
   if (
     asserts(
-      /\b(?:i (?:reached|achieved|completed) my goal|i finally (?:saved|finished|paid off)|i(?:'m| am) proud of|alcancei (?:minha|meu)|consegui (?:guardar|quitar)|estou orgulhos[oa])\b/,
+      /\b(?:i (?:reached|achieved|completed) my goal|i finally (?:saved|finished)|i(?:'m| am) proud of|alcancei (?:minha|meu)|consegui guardar|estou orgulhos[oa])\b/,
+    ) ||
+    (rules.celebration ?? []).some((pattern) =>
+      asserts(new RegExp(pattern.source, pattern.flags.replace(/[gy]/g, ""))),
     )
   )
     return "celebration";
@@ -185,10 +199,10 @@ const COPY: Record<
     ],
     celebration: [
       "That sounds meaningful to you.",
-      "You described a milestone. It is your achievement; I haven't independently verified a financial outcome.",
+      "You described a milestone. It is your achievement; I haven't independently verified its outcome.",
     ],
     "immediate-safety": [
-      "Your immediate safety matters more than any money decision.",
+      "Your immediate safety comes first.",
       "Please contact local emergency services if you may act on this now, and reach out to someone you trust who can stay with you. This app is not emergency or clinical care.",
     ],
   },
@@ -219,10 +233,10 @@ const COPY: Record<
     ],
     celebration: [
       "Isso parece ter significado para voc\u00ea.",
-      "Voc\u00ea descreveu uma conquista. Ela \u00e9 sua; n\u00e3o verifiquei um resultado financeiro de forma independente.",
+      "Voc\u00ea descreveu uma conquista. Ela \u00e9 sua; n\u00e3o verifiquei o resultado de forma independente.",
     ],
     "immediate-safety": [
-      "Sua seguran\u00e7a imediata importa mais que qualquer decis\u00e3o financeira.",
+      "Sua seguran\u00e7a imediata vem primeiro.",
       "Procure o servi\u00e7o de emerg\u00eancia local se houver risco de agir agora e algu\u00e9m de confian\u00e7a que possa ficar com voc\u00ea. Este aplicativo n\u00e3o presta atendimento de emerg\u00eancia ou cl\u00ednico.",
     ],
   },
@@ -231,9 +245,10 @@ const COPY: Record<
 /** No raw message, inferred profile, confidence score or permission is emitted. */
 export function buildHumanSupportPlan(
   input: { message?: unknown; preferences?: unknown } = {},
+  rules: SupportCuePatterns = {},
 ): HumanSupportPlan {
   const preferences = normalizeSupportPreferences(input.preferences);
-  const observed = observeExplicitSupportCue(input.message);
+  const observed = observeExplicitSupportCue(input.message, rules);
   const unconditional =
     observed === "pause" ||
     observed === "correction" ||
@@ -248,8 +263,8 @@ export function buildHumanSupportPlan(
   const response = [acknowledgement, nextStep].filter(Boolean).join(" ");
   const explanation =
     preferences.locale === "pt-BR"
-      ? "Apoio limitado ao texto desta mensagem e \u00e0s suas prefer\u00eancias. N\u00e3o \u00e9 diagn\u00f3stico, perfil ou recomenda\u00e7\u00e3o financeira."
-      : "Support is limited to this message and your controls. It is not a diagnosis, profile or financial recommendation.";
+      ? "Apoio limitado ao texto desta mensagem e \u00e0s suas prefer\u00eancias. N\u00e3o \u00e9 diagn\u00f3stico, perfil ou autoridade para decidir."
+      : "Support is limited to this message and your controls. It is not a diagnosis, profile or decision authority.";
   return {
     version: HUMAN_SUPPORT_VERSION,
     cue,
@@ -264,7 +279,7 @@ export function buildHumanSupportPlan(
     modelGuidance: [
       "Preserve the user's agency, facts, uncertainty, risk disclosures and right to stop.",
       "Never infer a diagnosis, personality, emotional dependency or sensitive trait.",
-      "Never use fear, guilt, flattery, urgency, attachment or praise to encourage a transaction.",
+      "Never use fear, guilt, flattery, urgency, attachment or praise to encourage an action.",
       "Never claim affection, lived feelings, guaranteed recovery, monitoring or an unverified achievement.",
       preferences.mode === "direct"
         ? "Use factual, direct language without emotional interpretation."
@@ -281,42 +296,9 @@ export function buildHumanSupportPlan(
     ].join(" "),
     maxQuestions: cue === "pause" || cue === "immediate-safety" ? 0 : 1,
     actionPermission: "none",
-    changesFinancialPolicy: false,
+    changesDecisionPolicy: false,
     retainDerivedContext: false,
   };
-}
-
-export type MeaningfulMoment =
-  | "goal-saved"
-  | "practice-saved"
-  | "choice-revisited";
-/** The caller must invoke only after the corresponding operation succeeds. */
-export function describeMeaningfulMoment(
-  moment: MeaningfulMoment,
-  preferences?: unknown,
-): string {
-  const p = normalizeSupportPreferences(preferences);
-  const direct = p.mode === "direct";
-  if (p.locale === "pt-BR") {
-    if (moment === "goal-saved")
-      return direct
-        ? "Objetivo salvo. Ainda n\u00e3o foi alcan\u00e7ado."
-        : "Seu objetivo agora tem um lugar. Salv\u00e1-lo preserva sua inten\u00e7\u00e3o, n\u00e3o significa que ele foi alcan\u00e7ado.";
-    if (moment === "practice-saved")
-      return direct
-        ? "Ideia ilustrativa salva. Nenhuma compra foi feita."
-        : "Voc\u00ea deu forma a uma possibilidade. A ideia foi salva como ilustra\u00e7\u00e3o; nenhuma compra foi feita.";
-    return "Esta \u00e9 a ideia que voc\u00ea salvou, n\u00e3o uma posi\u00e7\u00e3o verificada. Nenhum resultado de mercado foi acompanhado.";
-  }
-  if (moment === "goal-saved")
-    return direct
-      ? "Goal saved. It has not been achieved."
-      : "Your goal now has a place. Saving it preserves your intention; it does not mean the goal has been achieved.";
-  if (moment === "practice-saved")
-    return direct
-      ? "Illustrative idea saved. Nothing was purchased."
-      : "You gave a possibility some shape. The idea is saved as an illustration; nothing was purchased.";
-  return "This is the idea you saved, not a verified position. No market outcome has been tracked.";
 }
 
 /** Reject pressure/dependency/false execution phrasing; not a semantic safety proof. */
@@ -343,7 +325,7 @@ export function inspectSupportResponse(value: unknown): {
   )
     return { acceptable: false, reason: "dependency" };
   if (
-    /\b(?:i (?:bought|sold|placed (?:the|an|your) order)|guaranteed (?:profit|recovery|return)|you (?:will|can) (?:definitely|certainly) recover|lucro garantido)\b/.test(
+    /\b(?:i (?:executed|completed|carried out) (?:the|an|your) action|guaranteed (?:success|recovery|outcome)|you (?:will|can) (?:definitely|certainly) recover|sucesso garantido)\b/.test(
       text,
     )
   )
@@ -367,28 +349,4 @@ export function shouldUseSupportOnly(
       text,
     );
   return !hasTask;
-}
-
-/** Only an explicit allocation command may change an illustration. Never infer intent from an arbitrary percent. */
-export function parsePracticeAllocation(message: unknown): number | null {
-  const text = normalizeText(message).replace(/[.!]$/, "").trim();
-  const short = text.match(
-    /^(\d{1,3})\s*%\s*(market|market-exposed|exposure|accessible|cash|reserve)$/,
-  );
-  const action = text.match(
-    /^(?:set|keep|make)\s+(\d{1,3})\s*%\s*(market|market-exposed|exposure|accessible|cash|reserve)$/,
-  );
-  const long = text.match(
-    /^set (?:the )?(market|market-exposed|exposure|accessible|cash|reserve)(?: portion)? to (\d{1,3})\s*%$/,
-  );
-  const match = short ?? action;
-  const value = match ? Number(match[1]) : long ? Number(long[2]) : Number.NaN;
-  const category = match ? match[2] : long?.[1];
-  if (!Number.isFinite(value) || value < 0 || value > 100 || value % 5 !== 0)
-    return null;
-  return category === "accessible" ||
-    category === "cash" ||
-    category === "reserve"
-    ? 100 - value
-    : value;
 }

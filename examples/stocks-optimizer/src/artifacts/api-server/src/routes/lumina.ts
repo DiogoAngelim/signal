@@ -1,4 +1,4 @@
-import { buildHumanSupportPlan, shouldUseSupportOnly } from "@signal/decision/core";
+import { buildHumanSupportPlan, shouldUseSupportOnly } from "../lib/lumina-human-support.js";
 import type { NextFunction, Request, Response } from "express";
 import { Router } from "express";
 import { fromNodeHeaders } from "better-auth/node";

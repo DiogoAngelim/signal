@@ -2,11 +2,9 @@ import * as assert from "node:assert/strict";
 import { describe, it } from "vitest";
 import {
   buildHumanSupportPlan,
-  describeMeaningfulMoment,
   inspectSupportResponse,
   normalizeSupportPreferences,
   observeExplicitSupportCue,
-  parsePracticeAllocation,
   shouldUseSupportOnly,
 } from "./human-support";
 
@@ -19,10 +17,10 @@ describe("bounded human support", () => {
     ["I lost money", "loss"],
     ["I regret that decision", "loss"],
     ["I need to win it back", "pressure"],
-    ["I must buy now", "pressure"],
+    ["I must act now", "pressure"],
     ["I am afraid of missing out", "pressure"],
     ["I reached my goal", "celebration"],
-    ["I finally paid off my loan", "celebration"],
+    ["I finally finished my project", "celebration"],
     ["Stop.", "pause"],
     ["Not now", "pause"],
     ["You misunderstood", "correction"],
@@ -33,7 +31,7 @@ describe("bounded human support", () => {
     ["Estou em d\u00favida", "uncertainty"],
     ["Perdi dinheiro", "loss"],
     ["Preciso recuperar tudo", "pressure"],
-    ["Consegui quitar minhas d\u00edvidas", "celebration"],
+    ["Consegui guardar meu trabalho", "celebration"],
     ["Agora n\u00e3o", "pause"],
     ["Voc\u00ea entendeu errado", "correction"],
     ["N\u00e3o estou ansioso", "correction"],
@@ -58,7 +56,7 @@ describe("bounded human support", () => {
       const plan = buildHumanSupportPlan({ message });
       assert.equal(plan.cue, cue);
       assert.equal(plan.actionPermission, "none");
-      assert.equal(plan.changesFinancialPolicy, false);
+      assert.equal(plan.changesDecisionPolicy, false);
       assert.equal(plan.retainDerivedContext, false);
       assert.equal(plan.handled, cue !== "none");
       assert.equal(
@@ -156,27 +154,6 @@ describe("bounded human support", () => {
       }
     }
   });
-  it("never converts saved intentions into achieved outcomes", () => {
-    for (const locale of ["en", "pt-BR"])
-      for (const mode of ["direct", "balanced"]) {
-        const p = { locale, mode };
-        assert.ok(
-          describeMeaningfulMoment("goal-saved", p).includes(
-            locale === "en" ? "achieved" : "alcan\u00e7ado",
-          ),
-        );
-        assert.ok(
-          describeMeaningfulMoment("practice-saved", p).includes(
-            locale === "en" ? "purchased" : "compra",
-          ),
-        );
-        assert.ok(
-          describeMeaningfulMoment("choice-revisited", p).includes(
-            locale === "en" ? "No market outcome" : "Nenhum resultado",
-          ),
-        );
-      }
-  });
   it("rejects invalid response data and known manipulative patterns", () => {
     for (const value of [null, {}, "", " ", "x".repeat(8001)])
       assert.equal(inspectSupportResponse(value).reason, "invalid");
@@ -189,8 +166,8 @@ describe("bounded human support", () => {
     for (const value of ["Only I understand you", "I missed you", "I love you"])
       assert.equal(inspectSupportResponse(value).reason, "dependency");
     for (const value of [
-      "I bought Bitcoin",
-      "Guaranteed profit",
+      "I completed the action",
+      "Guaranteed success",
       "You will definitely recover",
     ])
       assert.equal(inspectSupportResponse(value).reason, "false-authority");
@@ -215,7 +192,7 @@ describe("bounded human support", () => {
       });
       assert.equal(plan.actionPermission, "none");
       assert.equal(plan.retainDerivedContext, false);
-      assert.equal(plan.changesFinancialPolicy, false);
+      assert.equal(plan.changesDecisionPolicy, false);
     }
   });
 });
@@ -235,7 +212,7 @@ describe("support without task hijacking", () => {
       "I am worried",
       "stop",
       "you misunderstood; show Bitcoin",
-      "I must buy now. Explain Bitcoin",
+      "I must act now. Explain Bitcoin",
     ])
       assert.equal(
         shouldUseSupportOnly(buildHumanSupportPlan({ message }), message),
@@ -249,26 +226,51 @@ describe("support without task hijacking", () => {
       false,
     );
   });
-  it("does not mistake a loss, question, quote or worry for an allocation command", () => {
+  it("keeps domain patterns explicit, stateless, and inside assertion and priority checks", () => {
+    const rules = { pressure: [/\bmust subscribe now\b/g] };
+    assert.equal(
+      buildHumanSupportPlan({ message: "I must subscribe now" }).cue,
+      "none",
+    );
+    for (let index = 0; index < 2; index++) {
+      const plan = buildHumanSupportPlan(
+        { message: "I must subscribe now" },
+        rules,
+      );
+      assert.equal(plan.cue, "pressure");
+      assert.equal(plan.actionPermission, "none");
+    }
     for (const message of [
-      "I lost 30%",
-      "What if it falls 20%?",
-      "I am worried, invest 100%",
-      '"30% market"',
-      "30%",
-      "set 33% market",
-      "set 120% market",
-      null,
-    ])
-      assert.equal(parsePracticeAllocation(message), null);
-    for (const [message, expected] of [
-      ["30% market", 30],
-      ["set exposure to 40%", 40],
-      ["keep 80% cash", 20],
-      ["set the market portion to 25%", 25],
-      ["100% accessible", 0],
-      ["0% cash", 100],
-    ] as const)
-      assert.equal(parsePracticeAllocation(message), expected);
+      'Translate "I must subscribe now"',
+      "Imagine I must subscribe now",
+      "I must not subscribe now",
+    ]) {
+      assert.equal(buildHumanSupportPlan({ message }, rules).cue, "none");
+    }
+    assert.equal(
+      buildHumanSupportPlan(
+        {
+          message: "I must subscribe now",
+          preferences: { adaptToExplicitCues: false },
+        },
+        rules,
+      ).cue,
+      "none",
+    );
+    assert.equal(
+      buildHumanSupportPlan(
+        { message: "You misunderstood. I must subscribe now" },
+        rules,
+      ).cue,
+      "correction",
+    );
+    assert.equal(
+      buildHumanSupportPlan(
+        { message: "I want to hurt myself. I must subscribe now" },
+        rules,
+      ).cue,
+      "immediate-safety",
+    );
+    assert.equal(rules.pressure[0].lastIndex, 0);
   });
 });

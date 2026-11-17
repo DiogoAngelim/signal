@@ -1,5 +1,5 @@
 import assert from "node:assert/strict";
-import { execFileSync } from "node:child_process";
+import { execFileSync, spawnSync } from "node:child_process";
 import { mkdtempSync, mkdirSync, readFileSync, rmSync, writeFileSync } from "node:fs";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
@@ -31,4 +31,15 @@ test("evidence binds checked bytes to HEAD and rejects drift or a different sour
     rmSync(join(root, "src/policy.ts"));
     assert.equal(collectSourceEvidence(options).passed, false);
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+
+
+test("capturing gate output cannot turn a failed command into a pass", () => {
+  const result = spawnSync("bash", ["--noprofile", "--norc", "-e", "-o", "pipefail", "-c", "node -e 'console.error(\"intentional failure\"); process.exit(23)' 2>&1 | tee /dev/null"], { encoding: "utf8" });
+  assert.equal(result.status, 23);
+  assert.match(result.stdout, /intentional failure/);
+  for (const workflow of ["human-support-contract.yml", "lumina-app.yml", "signal-library-release.yml"]) {
+    const text = readFileSync(new URL(`../.github/workflows/${workflow}`, import.meta.url), "utf8");
+    assert.match(text, /defaults:\s*\n\s+run:\s*\n\s+shell: bash\s*\n/, `${workflow} must use the explicit fail-fast runner shell`);
+  }
 });

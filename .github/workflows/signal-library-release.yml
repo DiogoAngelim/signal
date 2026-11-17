@@ -37,6 +37,9 @@ jobs:
   validate:
     name: Build, test, pack, and clean-install library
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash
     env:
       EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
@@ -126,6 +129,7 @@ jobs:
         with:
           name: library-checked-${{ github.event.pull_request.head.sha || github.sha }}
           retention-days: 7
+          include-hidden-files: true
           path: ${{ runner.temp }}/library-checked/
           if-no-files-found: error
 

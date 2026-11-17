@@ -74,10 +74,20 @@ try {
   assertStatus(first, 201, "save private goal");
   const goalId = first.json.goal.id;
   assert.ok(goalId);
+  assert.equal(first.json.goal.targetDate, "2030-12-01", "create preserves the civil date");
 
   const aGoals = await request("/api/lumina/goals", { cookie: alice });
   assertStatus(aGoals, 200, "read own goals");
   assert.equal(aGoals.json.goals.some((item: any) => item.id === goalId), true);
+  assert.equal(aGoals.json.goals.find((item: any) => item.id === goalId).targetDate, "2030-12-01");
+  const updated = await request("/api/lumina/goals/" + goalId, {
+    method: "PUT", cookie: alice,
+    body: { title: "Buy a home", targetAmount: 100000, targetDate: "2031-03-30" },
+  });
+  assertStatus(updated, 200, "update private goal");
+  assert.equal(updated.json.goal.targetDate, "2031-03-30", "update preserves the civil date");
+  const restoredGoals = await request("/api/lumina/goals", { cookie: alice });
+  assert.equal(restoredGoals.json.goals.find((item: any) => item.id === goalId).targetDate, "2031-03-30");
   const bGoals = await request("/api/lumina/goals", { cookie: bob });
   assertStatus(bGoals, 200, "read other user's goals");
   assert.equal(bGoals.json.goals.some((item: any) => item.id === goalId), false);
