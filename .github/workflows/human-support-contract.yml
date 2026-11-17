@@ -5,6 +5,7 @@ on:
       - 'packages/decision/**'
       - 'examples/stocks-optimizer/src/artifacts/signal-decision/**'
       - 'scripts/check-human-support-mirror.mjs'
+      - 'scripts/verify-source-evidence*'
       - '.github/workflows/human-support-contract.yml'
   push:
     branches: [main]
@@ -12,13 +13,16 @@ on:
       - 'packages/decision/**'
       - 'examples/stocks-optimizer/src/artifacts/signal-decision/**'
       - 'scripts/check-human-support-mirror.mjs'
+      - 'scripts/verify-source-evidence*'
       - '.github/workflows/human-support-contract.yml'
 permissions:
   contents: read
 jobs:
   contract:
     runs-on: ubuntu-latest
-    timeout-minutes: 15
+    timeout-minutes: 20
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
         with:
@@ -26,6 +30,10 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '24'
+      - name: Verify source-integrity guard
+        run: node --test scripts/verify-source-evidence.test.mjs
+      - name: Bind checkout bytes before package initialization
+        run: node scripts/verify-source-evidence.mjs checkout "$RUNNER_TEMP/human-support-checked"
       - name: Install pinned tools and initialize package configuration
         run: |
           corepack enable
@@ -51,8 +59,25 @@ jobs:
         run: node scripts/check-human-support-mirror.mjs
       - name: Build workspace exports before package typechecking
         run: pnpm run build:library
+      - name: Bind checked files after building dependencies
+        run: node scripts/verify-source-evidence.mjs after-build "$RUNNER_TEMP/human-support-checked"
+      - name: Typecheck policy package
+        run: pnpm --filter @signal/decision typecheck 2>&1 | tee "$RUNNER_TEMP/human-support-checked/typecheck.log"
       - name: Run Signal policy regression suite
+        run: pnpm --filter @signal/decision test 2>&1 | tee "$RUNNER_TEMP/human-support-checked/tests.log"
+      - name: Check actual policy files with the installed formatter
         run: |
-          pnpm --filter @signal/decision typecheck
-          pnpm --filter @signal/decision test
-          (cd packages/decision && pnpm exec biome check src/human-support.ts src/human-support.test.ts)
+          pnpm --version | tee "$RUNNER_TEMP/human-support-checked/pnpm-version.txt"
+          pnpm --dir packages/decision exec biome --version | tee "$RUNNER_TEMP/human-support-checked/biome-version.txt"
+          (cd packages/decision && pnpm exec biome check src/human-support.ts src/human-support.test.ts) 2>&1 | tee "$RUNNER_TEMP/human-support-checked/formatter.log"
+      - name: Reject source drift after verification
+        if: always()
+        run: node scripts/verify-source-evidence.mjs final "$RUNNER_TEMP/human-support-checked"
+      - name: Retain checked bytes and raw gate output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: human-support-checked-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          path: ${{ runner.temp }}/human-support-checked/
+          if-no-files-found: error

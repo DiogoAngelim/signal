@@ -11,6 +11,7 @@ on:
       - "package.json"
       - "scripts/verify-package-entrypoints.mjs"
       - "scripts/verify-packed-decision-package.mjs"
+      - "scripts/verify-source-evidence*"
       - ".github/workflows/signal-library-release.yml"
   workflow_dispatch:
     inputs:
@@ -36,8 +37,14 @@ jobs:
   validate:
     name: Build, test, pack, and clean-install library
     runs-on: ubuntu-latest
+    env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind exact library source before initialization
+        run: node scripts/verify-source-evidence.mjs checkout "$RUNNER_TEMP/library-checked"
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -49,8 +56,10 @@ jobs:
         run: pnpm install --frozen-lockfile
       - name: Build Signal library packages before validating entrypoints
         run: pnpm run build:library
+      - name: Bind library inputs after building
+        run: node scripts/verify-source-evidence.mjs after-build "$RUNNER_TEMP/library-checked"
       - name: Test, typecheck, lint, and verify publishable library
-        run: pnpm run release:library
+        run: pnpm run release:library 2>&1 | tee "$RUNNER_TEMP/library-checked/release.log"
       - name: Verify Signal library package entrypoints
         run: pnpm run verify:exports -- --library
       - name: Pack all API and library packages
@@ -77,7 +86,7 @@ jobs:
           npm install --no-save "$DECISION_TARBALL" typescript@5.7.3
           node -e "const api = require('@signal/decision'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS export missing'); const result = api.assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('Smoke test failed'); console.log('Decision package clean-install passed')"
           node -e "const api = require('@signal/decision/core'); if (typeof api.assessDecisionEvidence !== 'function') throw new Error('CommonJS core export missing'); console.log('Decision package CommonJS core subpath passed')"
-          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision/core'; const result = assessDecisionEvidence({ evidence: [] }); if (!result || !result.evidenceQuality) throw new Error('ESM core smoke test failed'); console.log('Decision package ESM core subpath passed')"
+          node --input-type=module -e "import { assessDecisionEvidence } from '@signal/decision/core'; const result = assessDecisionEvidence({ evidence: [] }); if (!result.evidenceQuality) throw new Error('ESM core smoke test failed'); console.log('Decision package ESM core subpath passed')"
           cat > consumer.ts <<'EOF'
           import { assessDecisionEvidence } from "@signal/decision";
           import { assessDecisionEvidence as assessDecisionEvidenceCore } from "@signal/decision/core";
@@ -107,6 +116,18 @@ jobs:
           path: ${{ runner.temp }}/signal-tarballs/*
           if-no-files-found: error
           retention-days: 30
+
+      - name: Reject source drift after library verification
+        if: always()
+        run: node scripts/verify-source-evidence.mjs final "$RUNNER_TEMP/library-checked"
+      - name: Retain source-bound library evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: library-checked-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          path: ${{ runner.temp }}/library-checked/
+          if-no-files-found: error
 
   github-release:
     name: Attach library artifacts to GitHub Release
