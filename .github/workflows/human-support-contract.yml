@@ -1,0 +1,35 @@
+name: Human support contract
+on:
+  pull_request:
+    paths:
+      - 'packages/decision/**'
+      - 'examples/stocks-optimizer/src/artifacts/signal-decision/**'
+      - 'scripts/check-human-support-mirror.mjs'
+      - '.github/workflows/human-support-contract.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'packages/decision/**'
+      - 'examples/stocks-optimizer/src/artifacts/signal-decision/**'
+      - 'scripts/check-human-support-mirror.mjs'
+      - '.github/workflows/human-support-contract.yml'
+permissions:
+  contents: read
+jobs:
+  contract:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Verify canonical and standalone public policy
+        run: node scripts/check-human-support-mirror.mjs
+      - name: Run Signal policy regression suite
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          pnpm install --frozen-lockfile
+          pnpm --filter @signal/decision typecheck
+          pnpm --filter @signal/decision test

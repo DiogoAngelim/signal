@@ -1,0 +1,50 @@
+name: Reconcile human support workspace
+on:
+  push:
+    branches: [feat/emotional-maturity-20261117]
+    paths: ['.github/workflows/human-support-integrate.yml']
+permissions:
+  contents: read
+jobs:
+  integrate:
+    if: github.repository == 'DiogoAngelim/signal' && github.ref == 'refs/heads/feat/emotional-maturity-20261117'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Install pinned workspace tools
+        run: |
+          corepack enable
+          corepack prepare pnpm@10.12.4 --activate
+          pnpm install --frozen-lockfile
+      - name: Format canonical source and reconcile standalone mirror
+        run: |
+          pnpm exec biome format --write packages/decision/src/human-support.ts packages/decision/src/human-support.test.ts
+          python3 - <<'PY'
+          from pathlib import Path
+          canonical = Path('packages/decision/src/human-support.ts')
+          target = Path('examples/stocks-optimizer/src/artifacts/signal-decision/src/human-support.ts')
+          target.write_bytes(canonical.read_bytes())
+          core = target.with_name('core.ts')
+          text = core.read_text()
+          assert './human-support' not in text
+          text += '\nexport { HUMAN_SUPPORT_VERSION, DEFAULT_SUPPORT_PREFERENCES, normalizeSupportPreferences, observeExplicitSupportCue, buildHumanSupportPlan, describeMeaningfulMoment, inspectSupportResponse, shouldUseSupportOnly, parsePracticeAllocation } from "./human-support";\nexport type { SupportMode, SupportLocale, SupportCue, SupportPreferences, HumanSupportPlan } from "./human-support";\n'
+          core.write_text(text)
+          Path('.github/workflows/human-support-integrate.yml').unlink()
+          PY
+          node scripts/check-human-support-mirror.mjs
+          git diff --check
+      - name: Commit only the isolated reviewed feature branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add packages/decision/src/human-support.ts packages/decision/src/human-support.test.ts examples/stocks-optimizer/src/artifacts/signal-decision/src/human-support.ts examples/stocks-optimizer/src/artifacts/signal-decision/src/core.ts .github/workflows/human-support-integrate.yml
+          git commit -m 'fix: reconcile canonical human support with standalone Lumina package'
+          git push origin HEAD:feat/emotional-maturity-20261117
