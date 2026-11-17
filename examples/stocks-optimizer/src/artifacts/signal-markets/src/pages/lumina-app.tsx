@@ -164,10 +164,14 @@ export default function LuminaApp() {
   const [supportPreferences, setSupportPreferences] = useState<SupportPreferences>({ ...DEFAULT_SUPPORT_PREFERENCES });
   const [support, setSupport] = useState<{ plan: HumanSupportPlan; standalone: boolean } | null>(null);
   const thoughtRevision = useRef(0);
+  // Account reads must not restore private snapshots after sign-out or erasure.
+  const accountRevision = useRef(0);
   useEffect(() => {
+    accountRevision.current += 1;
     thoughtRevision.current += 1;
     setSupport(null);
     setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
+    return () => { accountRevision.current += 1; };
   }, [user?.id]);
   const visibleChoices = user ? choices : guestChoices;
   const hasThread = thread.length > 0;
@@ -185,10 +189,12 @@ export default function LuminaApp() {
 
   const reloadAccount = useCallback(async () => {
     if (!user) return;
+    const revision = accountRevision.current;
     const results = await Promise.allSettled([
       luminaApi.goals(), luminaApi.practice(), luminaApi.conversations(),
       luminaApi.inbox(), luminaApi.watches(),
     ]);
+    if (accountRevision.current !== revision) return;
     if (results[0].status === "fulfilled") setGoals(results[0].value.goals);
     if (results[1].status === "fulfilled") setChoices(results[1].value.choices);
     if (results[2].status === "fulfilled") setConversations(results[2].value.conversations);
@@ -434,13 +440,18 @@ export default function LuminaApp() {
 
   async function refreshInbox() {
     if (!user) return;
+    const revision = accountRevision.current;
     try {
       const result = await luminaApi.inbox(true);
-      setEvents(result.events);
+      if (accountRevision.current !== revision) return;
       const saved = await luminaApi.watches();
+      if (accountRevision.current !== revision) return;
+      setEvents(result.events);
       setWatches(saved.watches);
       setNotice("Watches checked against available fresh public quotes. This is not background monitoring.");
-    } catch (error) { setNotice(error instanceof Error ? error.message : "Couldn't verify watch levels."); }
+    } catch (error) {
+      if (accountRevision.current === revision) setNotice(error instanceof Error ? error.message : "Couldn't verify watch levels.");
+    }
   }
   const unread = events.filter((item) => !item.seenAt && !item.resolvedAt).length;
   const latestChoice = visibleChoices[0] ?? null;
@@ -703,6 +714,7 @@ export default function LuminaApp() {
                   <p>Saved goals, Practice records, conversations, and inbox events are tied to your account. Trade execution and verified brokerage holdings are not available here.</p>
                   {user ? <>
                     <button className="l-secondary" onClick={() => void luminaApi.signOut().then(() => {
+                      accountRevision.current += 1;
                       thoughtRevision.current += 1; setBusy(false); setSupport(null); setDraft(""); setNotice("");
                       setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
                       setUser(null); setAiOptIn(false); setGoals([]); setChoices([]); setConversations([]); setThread([]);
@@ -714,6 +726,7 @@ export default function LuminaApp() {
                       </button> : <div>
                         <p>This deletes saved goals, practice ideas, conversations, watches and inbox events. Your authentication account and required security records remain.</p>
                         <button type="button" className="l-destructive" onClick={() => void luminaApi.erasePersonalData().then(() => {
+                          accountRevision.current += 1;
                           thoughtRevision.current += 1; setBusy(false); setSupport(null); setDraft("");
                           setSupportPreferences({ ...DEFAULT_SUPPORT_PREFERENCES });
                           setGoals([]); setChoices([]); setConversations([]); setThread([]); setEvents([]);

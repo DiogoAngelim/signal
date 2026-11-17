@@ -25,6 +25,7 @@ const SOURCE_PATHS = [
   "examples/stocks-optimizer/src/artifacts/signal-markets/playwright.config.ts",
   "examples/stocks-optimizer/src/artifacts/signal-markets/vite.config.ts",
   "examples/stocks-optimizer/src/artifacts/signal-markets/src/pages/lumina-app.tsx",
+  "examples/stocks-optimizer/src/artifacts/signal-markets/src/pages/lumina-app.test.tsx",
   "examples/stocks-optimizer/src/artifacts/signal-markets/src/pages/lumina-account.tsx",
   "examples/stocks-optimizer/src/artifacts/signal-markets/src/pages/lumina-support.tsx",
   "examples/stocks-optimizer/src/artifacts/signal-markets/src/e2e/lumina.e2e.spec.ts",
