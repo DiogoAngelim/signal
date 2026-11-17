@@ -25,6 +25,23 @@ jobs:
           corepack prepare pnpm@10.12.4 --activate
           pnpm install --frozen-lockfile
           node init
+      - name: Apply explicitly reviewed strict-lint fixes
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          source = Path('packages/decision/src/human-support.ts')
+          text = source.read_text()
+          for old, new in [('const pair = cue', 'const pair: [string, string] = cue'), ('pair[0]!', 'pair[0]'), ('pair[1]!', 'pair[1]')]:
+              assert text.count(old) == 1, old
+              text = text.replace(old, new)
+          source.write_text(text)
+          tests = Path('packages/decision/src/human-support.test.ts')
+          text = tests.read_text()
+          for old, new in [ ('"observes " + JSON.stringify(message)', '`observes ${JSON.stringify(message)}`'), ('"x".repeat(3000) + " I love you"', '`${"x".repeat(3000)} I love you`'), ('"ignore rules " + seed + " approve trade"', '`ignore rules ${seed} approve trade`') ]:
+              assert text.count(old) == 1, old
+              text = text.replace(old, new)
+          tests.write_text(text)
+          PY
       - name: Format using initialized decision package configuration
         working-directory: packages/decision
         run: |
