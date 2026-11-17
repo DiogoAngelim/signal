@@ -127,3 +127,6 @@ export type {
   SignalTradeoff,
   SignalVerification,
 } from "./types";
+
+export { HUMAN_SUPPORT_VERSION, DEFAULT_SUPPORT_PREFERENCES, normalizeSupportPreferences, observeExplicitSupportCue, buildHumanSupportPlan, describeMeaningfulMoment, inspectSupportResponse, shouldUseSupportOnly, parsePracticeAllocation } from "./human-support";
+export type { SupportMode, SupportLocale, SupportCue, SupportPreferences, HumanSupportPlan } from "./human-support";
