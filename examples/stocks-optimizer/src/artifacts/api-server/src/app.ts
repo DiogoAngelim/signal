@@ -1,6 +1,8 @@
 import path from "node:path";
 import cors from "cors";
 import express, { type Express } from "express";
+import { toNodeHandler } from "better-auth/node";
+import { getLuminaAuth } from "./lib/lumina-auth.js";
 import pinoHttp from "pino-http";
 import { logger } from "./lib/logger";
 import {
@@ -40,6 +42,11 @@ app.use(
   }),
 );
 app.use(cors(createSignalCorsOptions()));
+// Better Auth must receive the raw body stream, before Express JSON parsing.
+app.all("/api/auth/*splat", async (req, res, next) => {
+  try { await toNodeHandler(getLuminaAuth())(req, res); }
+  catch (error) { next(error); }
+});
 app.use(
   express.json({
     limit:

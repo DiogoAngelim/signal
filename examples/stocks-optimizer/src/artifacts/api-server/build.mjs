@@ -24,6 +24,10 @@ const externalizeNpmButBundleWorkspace = {
   },
 };
 
+// CJS output from workspace packages may require external Node modules. The ESM
+// bundle needs a proper Node require shim when executed as app.mjs on Vercel.
+const esmBanner = { js: 'import { createRequire } from "node:module"; const require = createRequire(import.meta.url);' };
+
 const common = {
   bundle: true,
   platform: "node",
@@ -35,6 +39,7 @@ const common = {
 await build({
   ...common,
   format: "esm",
+  banner: esmBanner,
   entryPoints: ["src/index.ts"],
   outfile: "dist/index.mjs",
 });
@@ -49,6 +54,15 @@ await build({
 await build({
   ...common,
   format: "esm",
+  banner: esmBanner,
+  entryPoints: ["src/app.ts"],
+  outfile: "dist/app.mjs",
+});
+
+await build({
+  ...common,
+  format: "esm",
+  banner: esmBanner,
   entryPoints: ["src/workers/signal-queue-worker.ts"],
   outfile: "dist/signal-queue-worker.mjs",
 });

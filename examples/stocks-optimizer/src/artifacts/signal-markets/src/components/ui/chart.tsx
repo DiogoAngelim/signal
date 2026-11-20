@@ -103,6 +103,9 @@ const ChartTooltipContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
     React.ComponentProps<"div"> & {
+      // Recharts supplies these only to the rendered content callback.
+      payload?: any[];
+      label?: string | number;
       hideLabel?: boolean;
       hideIndicator?: boolean;
       indicator?: "line" | "dot" | "dashed";
@@ -260,7 +263,11 @@ const ChartLegend = RechartsPrimitive.Legend;
 const ChartLegendContent = React.forwardRef<
   HTMLDivElement,
   React.ComponentProps<"div"> &
-    Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
+    {
+      // Recharts injects legend items into custom content at render time.
+      payload?: Array<{ value?: string | number; dataKey?: string | number; type?: string; color?: string }>;
+      verticalAlign?: "top" | "middle" | "bottom";
+    } & {
       hideIcon?: boolean;
       nameKey?: string;
     }

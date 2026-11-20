@@ -1,0 +1,65 @@
+name: Lúmina integrated application
+
+on:
+  pull_request:
+    paths:
+      - "examples/stocks-optimizer/**"
+      - ".github/workflows/lumina-app.yml"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  integration:
+    name: authenticated user story
+    runs-on: ubuntu-latest
+    timeout-minutes: 28
+    env:
+      NODE_ENV: test
+      DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lumina_ci
+      BETTER_AUTH_SECRET: ci-only-never-use-outside-ci-rotate-in-prod-2026
+      LUMINA_REQUIRE_EMAIL_VERIFICATION: "false"
+      OPENAI_API_KEY: ""
+      BETTER_AUTH_URL: http://127.0.0.1:5173
+      LUMINA_AUTH_TRUSTED_ORIGINS: http://127.0.0.1:5173
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: lumina_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d lumina_ci"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    defaults:
+      run:
+        working-directory: examples/stocks-optimizer
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+        with:
+          version: 10.12.4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: examples/stocks-optimizer/pnpm-lock.yaml
+      - run: node ../../scripts/check-obfuscated-payloads.mjs
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm --filter @workspace/api-server db:migrate:validate
+      - run: pnpm --filter @workspace/api-server db:migrate
+      - run: pnpm --filter @workspace/api-server db:auth:migrate
+      - run: pnpm --filter @workspace/api-server typecheck
+      - run: pnpm --filter @workspace/api-server exec tsx src/tests/lumina-http.integration.ts
+      - run: pnpm --filter @workspace/signal-markets typecheck
+      - run: pnpm --filter @workspace/signal-markets test
+      - run: pnpm --filter @workspace/api-server build
+      - run: pnpm --filter @workspace/signal-markets build
+      - run: pnpm --filter @workspace/signal-markets exec playwright install --with-deps chromium
+      - run: pnpm --filter @workspace/signal-markets test:browser

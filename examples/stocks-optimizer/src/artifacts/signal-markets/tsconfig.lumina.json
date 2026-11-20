@@ -1,0 +1,20 @@
+{
+  "extends": "./tsconfig.json",
+  "include": [
+    "src/vite-env.d.ts",
+    "src/lib/lumina-journey.ts",
+    "src/lib/lumina-journey.test.ts",
+    "src/pages/lumina-preview.tsx",
+    "src/pages/lumina-preview.test.tsx",
+    "src/pages/lumina-preview.interaction.test.tsx",
+    "src/lib/lumina-returning.test.ts",
+    "src/lib/lumina-practice-session.test.ts",
+    "src/lib/lumina-practice-session.ts",
+    "src/pages/lumina-app.test.tsx",
+    "src/lib/lumina-api.ts",
+    "src/pages/lumina-app.tsx",
+    "src/pages/lumina-account.tsx",
+    "src/pages/lumina-market.tsx"
+  ],
+  "exclude": []
+}

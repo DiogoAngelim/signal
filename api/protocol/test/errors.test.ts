@@ -83,12 +83,13 @@ describe("errors module full coverage", () => {
       expect(signalErrorHttpStatus(env)).toBe(codeToStatus[code]);
     }
 
+    // Deliberately exercise the runtime fallback with an unrecognized external code.
     expect(
-      signalErrorHttpStatus({ code: "UNKNOWN", category: "capability" }),
+      signalErrorHttpStatus({ code: "UNKNOWN" as SignalErrorCode, category: "capability" }),
     ).toBe(404);
 
     expect(
-      signalErrorHttpStatus({ code: "UNKNOWN", category: "runtime" }),
+      signalErrorHttpStatus({ code: "UNKNOWN" as SignalErrorCode, category: "runtime" }),
     ).toBe(500);
   });
 });

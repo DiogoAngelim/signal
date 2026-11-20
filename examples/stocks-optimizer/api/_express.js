@@ -1,12 +1,15 @@
-let cachedHandler;
+let cachedHandlerPromise;
 
+// Load the native ESM app without converting ESM-only auth libraries to CJS.
 function getExpressHandler() {
-  if (!cachedHandler) {
-    const mod = require("../src/artifacts/api-server/dist/app.cjs");
-    cachedHandler = mod.default || mod;
+  if (!cachedHandlerPromise) {
+    cachedHandlerPromise = import("../src/artifacts/api-server/dist/app.mjs")
+      .then((mod) => mod.default || mod).catch((error) => {
+        cachedHandlerPromise = null;
+        throw error;
+      });
   }
-
-  return cachedHandler;
+  return cachedHandlerPromise;
 }
 
 function createRouteHandler(expressPath) {
@@ -23,7 +26,9 @@ function createRouteHandler(expressPath) {
     }
     req.originalUrl = req.url;
 
-    return getExpressHandler()(req, res);
+    return getExpressHandler().then((app) => app(req, res)).catch(() => {
+      if (!res.headersSent) res.status(503).json({ error: { code: "backend_unavailable" } });
+    });
   };
 }
 
