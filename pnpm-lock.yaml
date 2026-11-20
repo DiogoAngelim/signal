@@ -647,6 +647,25 @@ importers:
         specifier: ^5.7.3
         version: 5.7.3
 
+  server/workbench-host:
+    dependencies:
+      '@signal/sdk-node':
+        specifier: workspace:*
+        version: link:../../api/sdk-node
+      '@signal/workbench-connector':
+        specifier: workspace:*
+        version: link:../../api/workbench-connector
+      zod:
+        specifier: ^4.6.6
+        version: 4.6.7
+    devDependencies:
+      '@types/node':
+        specifier: ^20.17.16
+        version: 20.19.43
+      typescript:
+        specifier: ^5.7.3
+        version: 5.7.3
+
 packages:
 
   '@ampproject/remapping@2.3.0':

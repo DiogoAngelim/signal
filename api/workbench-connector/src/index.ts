@@ -121,6 +121,10 @@ export interface WorkbenchOutcomeSink {
 }
 
 export class WorkbenchConnectorError extends Error {
+  // Preserve retryability when passing through SignalRuntime.toSignalFailure.
+  // Without a protocol error code, the runtime falls back to INTERNAL_ERROR
+  // and mistakenly marks permanent downstream 4xx rejections retryable.
+  readonly code = "TRANSPORT_ERROR" as const;
   readonly status: number | null;
   readonly retryable: boolean;
   readonly responseBody: string | null;
