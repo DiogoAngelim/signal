@@ -1,0 +1,27 @@
+{
+  "owner": "local-investor",
+  "mode": "paper",
+  "ledgerFile": "/absolute/private/verified-investing/ledger.sqlite",
+  "data": { "url": "https://your-reviewed-data-service.example/api/verified-data", "streaming": true },
+  "apiKeys": {},
+  "permissions": {
+    "enabled": false,
+    "killSwitch": true,
+    "securityReviewCleared": false,
+    "liveAcknowledged": false,
+    "expiresAt": 0,
+    "allowedSymbols": ["BTCUSDT"],
+    "maxBatchNotional": 100,
+    "maxDailyNotional": 500,
+    "feeBps": 20,
+    "flowAdjustedPeakEquity": 1000,
+    "cashFlowReconciliationAt": 0
+  },
+  "autonomy": { "enabled": false, "expiresAt": 0, "strategies": [], "intervalMs": 60000 },
+  "paper": {
+    "account": { "quoteCurrency": "USDT", "availableCash": "1000", "holdings": [], "flowAdjustedPeakEquity": 1000 },
+    "filters": {
+      "BTCUSDT": { "quoteCurrency": "USDT", "lotStep": "0.00001", "priceTick": "0.01", "minQuantity": "0.00001", "minNotional": "5", "feeBps": 20, "liquidityCapWeight": 0.25 }
+    }
+  }
+}

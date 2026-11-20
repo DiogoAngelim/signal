@@ -1,0 +1,72 @@
+import { createSignalEnvelope, createSignalError } from "@signal/protocol";
+import {
+  createExecutionSuccessMeta,
+  isZodError,
+  throwIfExecutionBlocked,
+  toEnvelopeContext,
+  toEnvelopeDelivery,
+  toSignalFailure,
+} from "./execution";
+import type { SignalRegistry } from "./registry";
+import type { SignalExecutionContext, SignalExecutionResult } from "./types";
+
+export async function executeQuery<TInput, TResult>(
+  registry: SignalRegistry,
+  name: string,
+  input: TInput,
+  context: SignalExecutionContext,
+): Promise<SignalExecutionResult<TResult>> {
+  try {
+    throwIfExecutionBlocked(context.request);
+
+    const definition = registry.getQuery(name);
+    const validatedInput = definition.inputSchema.parse(input);
+    const envelope = createSignalEnvelope({
+      kind: "query",
+      name,
+      payload: validatedInput,
+      context: toEnvelopeContext(context.request),
+      delivery: toEnvelopeDelivery(context.request),
+      source: context.request.source,
+      auth: context.request.auth,
+    });
+    if (definition.authorize) {
+      await definition.authorize(validatedInput, { ...context, envelope });
+    }
+    const result = await definition.handler(validatedInput, {
+      ...context,
+      envelope,
+    });
+    const validatedResult = definition.resultSchema.parse(result);
+
+    return {
+      ok: true,
+      result: validatedResult,
+      meta: createExecutionSuccessMeta({
+        outcome: "completed",
+        envelope,
+        request: context.request,
+        startedAt: context.startedAt,
+        idempotency: {
+          status: "not-applicable",
+        },
+      }),
+      envelope,
+    } as SignalExecutionResult<TResult>;
+  } catch (error) {
+    if (isZodError(error)) {
+      return {
+        ok: false,
+        error: createSignalError("VALIDATION_ERROR", error.message, {
+          retryable: false,
+          details: { issues: error.issues },
+        }),
+      } as SignalExecutionResult<TResult>;
+    }
+
+    return {
+      ok: false,
+      error: toSignalFailure(error, "INTERNAL_ERROR", "Query failed"),
+    } as SignalExecutionResult<TResult>;
+  }
+}

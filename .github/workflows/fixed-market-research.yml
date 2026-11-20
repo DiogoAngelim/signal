@@ -1,0 +1,42 @@
+name: Fixed public-market research batch
+on:
+  pull_request:
+    paths:
+      - '.github/workflows/fixed-market-research.yml'
+      - 'examples/stocks-optimizer/src/artifacts/verified-investing/scripts/fixed-market-batch.mjs'
+      - 'examples/stocks-optimizer/src/artifacts/verified-investing/evidence/fixed-market-batch.protocol.json'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: fixed-research-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  evaluate-fixed-family:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    env:
+      VERIFIED_ROOT: examples/stocks-optimizer/src/artifacts/verified-investing
+    steps:
+      - uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: 22
+      - run: node "$VERIFIED_ROOT/scripts/security-scan.mjs"
+      - name: Install isolated reviewed build tools without lifecycle scripts
+        run: npm install --ignore-scripts --no-audit --no-fund --prefix "$RUNNER_TEMP/verified-tools" esbuild@0.25.12 zod@4.1.12
+      - name: Build the actual pinned runtime and calibration library
+        run: VERIFIED_TOOLING_DIR="$RUNNER_TEMP/verified-tools" node "$VERIFIED_ROOT/scripts/build.mjs"
+      - name: Evaluate the preregistered asset family and preserve failed strategy outcomes
+        run: node "$VERIFIED_ROOT/scripts/fixed-market-batch.mjs"
+      - name: Record evidence without treating job success as strategy success
+        if: always()
+        run: |
+          if test -f fixed-market-batch-evidence.json; then
+            echo '### Fixed market batch: completed calculation is NOT strategy qualification' >> "$GITHUB_STEP_SUMMARY"
+            echo '```json' >> "$GITHUB_STEP_SUMMARY"
+            cat fixed-market-batch-evidence.json >> "$GITHUB_STEP_SUMMARY"
+            echo '```' >> "$GITHUB_STEP_SUMMARY"
+          fi

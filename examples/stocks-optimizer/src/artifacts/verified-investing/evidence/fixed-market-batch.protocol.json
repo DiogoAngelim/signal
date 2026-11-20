@@ -1,0 +1,21 @@
+{
+  "protocolVersion": "fixed-market-batch.v1",
+  "registeredBeforeRetrieval": true,
+  "symbols": ["ETHUSDT", "BNBUSDT", "XRPUSDT", "ADAUSDT"],
+  "interval": "1d",
+  "closedBefore": "2026-11-15T00:00:00.000Z",
+  "barsPerAsset": 2500,
+  "maximumRequests": 12,
+  "maximumWeight": 24,
+  "modelSourceCommit": "be310b481a7958a8582ade675cdab783b46a152f",
+  "candidatePolicy": "Unchanged twelve candidateConfigs; select only on chronological selection partitions, not final outcomes.",
+  "costs": {"feeBps": 20, "spreadBps": 4, "slippageBps": 5},
+  "exposure": 0.25,
+  "additionalFamilyConfidence": 0.9875,
+  "bootstrapDraws": 10000,
+  "blockLength": 5,
+  "reportEveryAsset": true,
+  "stopAfterThisBatchRegardlessOfOutcome": true,
+  "previouslyInspectedBTCFinalWindowExcludedFromNewClaims": true,
+  "limits": "The asset universe is selected now, not point-in-time survivorship-free. Markets share regimes and are correlated. This is an additional bounded historical research experiment, not independent confirmation of all prior research, prospective evidence, full personal-policy validation or permission to trade. The family-size-adjusted bootstrap check is an estimate, not a finite-sample error-control theorem."
+}
