@@ -129,3 +129,9 @@ required. Source-only changes cannot truthfully certify those controls.
 ## Certification rule
 
 CI passing means the tested source revision passed the configured automated checks. It does not imply that production infrastructure, operational controls, real-world data quality, or service-level objectives have been validated. Each release must attach dated evidence for the relevant gates above and explicitly record any accepted residual risk.
+## Consolidated 2026-11-14 readiness and empirical evidence checkpoint
+
+The [dated production-readiness evidence register](./validation/production-readiness-evidence-register-2026-11-14.md) consolidates previous validation work (including null and unfavorable real-world studies), fresh read-only Vercel build and Neon schema findings, current GitHub CI status, and the explicit remaining release gates. In particular, three Vercel project surfaces were identified; the workbench runtime's configured `server/workbench-host` root directory does not exist in the inspected Signal repository, and two reference-lab builds failed because the preinstall obfuscated-payload scanner assumed `.git` was present even though Vercel source archives omit it. A reviewed scanner fallback is proposed in an isolated branch, but **successful deployment build and full operational readiness are not yet verified**.
+
+This register does **not** change the incomplete checkboxes in this file. The new offline empirical analyses have not demonstrated incremental **causal Signal-software net profit**; that effectiveness claim is distinct from deployability. CI and documentation changes are not authorization to deploy, migrate, contact partners or enroll a trial.
+

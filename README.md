@@ -1,5 +1,8 @@
 # Signal
 
+**Production and empirical validation checkpoint (2026-11-14):** [Consolidated verification register](docs/validation/production-readiness-evidence-register-2026-11-14.md) documents historical findings, current Vercel build blockers, read-only Neon inspections, outstanding release gates, and why incremental Signal causal net profit is **not proven**. Passing source CI is not production certification; no deployment or real-world trial was authorized.
+
+
 Signal is a reusable decision-processing platform for events, evidence,
 assessment, decisions, learning, memory, replay, and audit.
 

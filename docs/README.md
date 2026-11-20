@@ -1,5 +1,8 @@
 # Signal Developer Documentation
 
+**Latest readiness/evidence register:** [2026-11-14 production-readiness audit and historical validation](./validation/production-readiness-evidence-register-2026-11-14.md). Code-level assurance is not an operational certification, and statistically credible incremental Signal software net profit is not yet demonstrated.
+
+
 Signal is a reusable decision-processing platform for events, evidence,
 assessment, decisions, learning, memory, replay, and audit.
 

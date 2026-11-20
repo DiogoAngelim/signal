@@ -7,10 +7,7 @@ coverage
 .tmp
 *.log
 .DS_Store
-.env
-.env.*
 !.env.example
-.env.local
 !.env.example
 .next
 out
