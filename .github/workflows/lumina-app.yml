@@ -5,10 +5,15 @@ on:
     paths:
       - "examples/stocks-optimizer/**"
       - ".github/workflows/lumina-app.yml"
+      - "scripts/verify-source-evidence*"
   workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: lumina-application-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
   integration:
@@ -16,6 +21,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 28
     env:
+      EXPECTED_SOURCE_SHA: ${{ github.event.pull_request.head.sha || github.sha }}
       NODE_ENV: test
       DATABASE_URL: postgresql://postgres:postgres@127.0.0.1:5432/lumina_ci
       BETTER_AUTH_SECRET: ci-only-never-use-outside-ci-rotate-in-prod-2026
@@ -39,9 +45,25 @@ jobs:
           --health-retries 10
     defaults:
       run:
+        shell: bash
         working-directory: examples/stocks-optimizer
     steps:
       - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+      - name: Bind checkout bytes before package initialization
+        run: node ../../scripts/verify-source-evidence.mjs checkout "$RUNNER_TEMP/lumina-checked"
+      - name: Record exact source
+        run: |
+          mkdir -p evidence
+          git rev-parse HEAD > evidence/source-sha.txt
+          git archive --format=tar.gz --output=evidence/source.tar.gz HEAD
+      - name: Retain exact source snapshot
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumina-source-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          path: examples/stocks-optimizer/evidence/
       - uses: pnpm/action-setup@v4
         with:
           version: 10.12.4
@@ -57,9 +79,37 @@ jobs:
       - run: pnpm --filter @workspace/api-server db:auth:migrate
       - run: pnpm --filter @workspace/api-server typecheck
       - run: pnpm --filter @workspace/api-server exec tsx src/tests/lumina-http.integration.ts
+      - run: pnpm --filter @workspace/api-server exec tsx --test src/tests/lumina-support-provider.test.ts src/tests/lumina-human-support.test.ts
       - run: pnpm --filter @workspace/signal-markets typecheck
       - run: pnpm --filter @workspace/signal-markets test
       - run: pnpm --filter @workspace/api-server build
       - run: pnpm --filter @workspace/signal-markets build
       - run: pnpm --filter @workspace/signal-markets exec playwright install --with-deps chromium
-      - run: pnpm --filter @workspace/signal-markets test:browser
+      - name: Bind actual browser inputs after building
+        run: node ../../scripts/verify-source-evidence.mjs before-browser "$RUNNER_TEMP/lumina-checked"
+      - name: Verify the first browser boundary
+        run: pnpm --filter @workspace/signal-markets exec playwright test lumina-startup.e2e.spec.ts --project=mobile-320 --retries=0 --max-failures=1
+      - name: Verify complete user journeys
+        run: pnpm --filter @workspace/signal-markets test:browser 2>&1 | tee "$RUNNER_TEMP/lumina-checked/browser.log"
+      - name: Reject source drift after browser verification
+        if: always()
+        run: node ../../scripts/verify-source-evidence.mjs final "$RUNNER_TEMP/lumina-checked"
+      - name: Retain source-bound browser inputs and output
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumina-checked-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          include-hidden-files: true
+          path: ${{ runner.temp }}/lumina-checked/
+          if-no-files-found: error
+      - name: Retain exact-head browser evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: lumina-acceptance-${{ github.event.pull_request.head.sha || github.sha }}
+          retention-days: 7
+          path: |
+            examples/stocks-optimizer/evidence/source-sha.txt
+            examples/stocks-optimizer/src/artifacts/signal-markets/test-results/
+            examples/stocks-optimizer/src/artifacts/signal-markets/playwright-report/

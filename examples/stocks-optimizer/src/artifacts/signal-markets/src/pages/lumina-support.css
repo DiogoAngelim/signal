@@ -1,0 +1,21 @@
+/* The approved Lumina palette remains authoritative. No affect-driven color, motion or urgency. */
+.lumina-app .l-support-settings { color: var(--l-ink); margin: 18px 0 8px; font-size: 13px; }
+.lumina-app .l-support-settings summary, .lumina-app .l-support-explanation summary { cursor: pointer; min-height: 44px; padding: 11px 0; width: fit-content; max-width: 100%; }
+.lumina-app .l-support-options { display: grid; gap: 16px; padding: 18px; border: 1px solid currentColor; border-radius: 16px; background: var(--l-bg); }
+.lumina-app .l-support-options fieldset { margin: 0; border: 0; padding: 0; min-width: 0; }
+.lumina-app .l-support-options legend { font-weight: 600; margin-bottom: 8px; }
+.lumina-app .l-support-modes { display: flex; flex-wrap: wrap; gap: 8px 18px; }
+.lumina-app .l-support-modes label, .lumina-app .l-support-toggle { display: inline-flex; align-items: center; gap: 9px; min-height: 44px; cursor: pointer; }
+.lumina-app .l-support-options input { flex: none; width: 18px; height: 18px; accent-color: var(--l-sage-deep); }
+.lumina-app .l-support-language { display: grid; gap: 6px; max-width: 320px; }
+.lumina-app .l-support-language select { width: 100%; min-height: 44px; border: 1px solid currentColor; border-radius: 10px; padding: 8px 12px; font: inherit; background: var(--l-bg); color: var(--l-ink); }
+.lumina-app .l-support-options p, .lumina-app .l-support-explanation p { font-size: 13px; line-height: 1.65; max-width: 65ch; overflow-wrap: anywhere; }
+.lumina-app .l-support-explanation { margin: 16px 0; color: var(--l-ink); }
+.lumina-app .l-support-explanation button { min-height: 44px; padding: 10px 12px; margin-top: 10px; border: 1px solid currentColor; border-radius: 10px; color: inherit; background: transparent; text-align: start; white-space: normal; }
+.lumina-app .l-support-settings :focus-visible, .lumina-app .l-support-explanation :focus-visible { outline: 3px solid currentColor; outline-offset: 4px; }
+@media (prefers-reduced-motion: reduce) {
+  .lumina-app .l-support-settings *, .lumina-app .l-support-explanation * { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (forced-colors: active) {
+  .lumina-app .l-support-options, .lumina-app .l-support-language select { background: Canvas; color: CanvasText; }
+}

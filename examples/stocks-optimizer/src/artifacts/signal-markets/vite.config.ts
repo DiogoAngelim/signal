@@ -9,6 +9,11 @@ const isVitest = process.env.VITEST === "true";
 
 export default defineConfig({
   plugins: [react(), tailwindcss()],
+  // The linked workspace package publishes CommonJS. Vite otherwise serves it
+  // as source, so its named exports fail before the lazy Lumina route can mount.
+  optimizeDeps: {
+    include: ["@signal/decision/core"],
+  },
   resolve: {
     dedupe: ["react", "react-dom"],
     alias: {

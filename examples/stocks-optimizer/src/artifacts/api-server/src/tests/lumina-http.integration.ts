@@ -74,10 +74,20 @@ try {
   assertStatus(first, 201, "save private goal");
   const goalId = first.json.goal.id;
   assert.ok(goalId);
+  assert.equal(first.json.goal.targetDate, "2030-12-01", "create preserves the civil date");
 
   const aGoals = await request("/api/lumina/goals", { cookie: alice });
   assertStatus(aGoals, 200, "read own goals");
   assert.equal(aGoals.json.goals.some((item: any) => item.id === goalId), true);
+  assert.equal(aGoals.json.goals.find((item: any) => item.id === goalId).targetDate, "2030-12-01");
+  const updated = await request("/api/lumina/goals/" + goalId, {
+    method: "PUT", cookie: alice,
+    body: { title: "Buy a home", targetAmount: 100000, targetDate: "2031-03-30" },
+  });
+  assertStatus(updated, 200, "update private goal");
+  assert.equal(updated.json.goal.targetDate, "2031-03-30", "update preserves the civil date");
+  const restoredGoals = await request("/api/lumina/goals", { cookie: alice });
+  assert.equal(restoredGoals.json.goals.find((item: any) => item.id === goalId).targetDate, "2031-03-30");
   const bGoals = await request("/api/lumina/goals", { cookie: bob });
   assertStatus(bGoals, 200, "read other user's goals");
   assert.equal(bGoals.json.goals.some((item: any) => item.id === goalId), false);
@@ -130,6 +140,29 @@ try {
   );
   assert.equal(history.json.messages.length, 2);
 
+  const supportReply = await request("/api/lumina/conversations/" + conversationId + "/reply", {
+    method: "POST", cookie: alice, body: { message: "Estou confuso", useAi: true,
+      supportPreferences: { mode: "step-by-step", locale: "pt-BR", adaptToExplicitCues: true } },
+  });
+  assertStatus(supportReply, 200, "deterministic support without a configured provider");
+  assert.equal(supportReply.json.ai, false);
+  assert.match(supportReply.json.messages[1].content, /Podemos separar/);
+  assert.equal(Object.hasOwn(supportReply.json, "emotionalProfile"), false);
+  const malformedSupport = await request("/api/lumina/conversations/" + conversationId + "/reply", {
+    method: "POST", cookie: alice, body: { message: "hello", supportPreferences: {
+      mode: "direct", locale: "en", adaptToExplicitCues: true, diagnosis: "fabricated" } },
+  });
+  assertStatus(malformedSupport, 400, "unrecognized profile fields are rejected");
+  const otherOwner = await request("/api/lumina/conversations/" + conversationId + "/reply", {
+    method: "POST", cookie: bob, body: { message: "I am worried" },
+  });
+  assertStatus(otherOwner, 404, "support cannot cross conversation ownership");
+  const disabled = await request("/api/lumina/conversations/" + conversationId + "/reply", {
+    method: "POST", cookie: alice, body: { message: "I am worried", supportPreferences: {
+      mode: "direct", locale: "en", adaptToExplicitCues: false } },
+  });
+  assertStatus(disabled, 200, "direct opt-out survives the API boundary");
+  assert.match(disabled.json.messages[1].content, /AI conversation isn't configured/);
   const erase = await request("/api/lumina/my-data", { method: "DELETE", cookie: alice });
   assertStatus(erase, 200, "erase personal app data");
   const erased = await request("/api/lumina/practice", { cookie: alice });
